@@ -540,8 +540,8 @@ const EXERCISES = [
   accumulated: ""
 },
 {
-  tag:"Grundstruktur", title:"Vollständige HTML-Grundstruktur",
-  desc:`Jetzt kannst du alles zusammensetzen! Schreibe eine vollständige minimale HTML-Seite: DOCTYPE, &lt;html lang="de"&gt;, &lt;head&gt; mit charset und title "Test", &lt;body&gt; mit einem Absatz "Hallo Welt".`,
+  tag:"Grundstruktur", title:"Vollständige HTML-Grundstruktur und P-Element",
+  desc:`Jetzt kannst du alles zusammensetzen! Schreibe eine vollständige minimale HTML-Seite: DOCTYPE, &lt;html lang="de"&gt;, &lt;head&gt; mit charset und title "Test", &lt;body&gt; mit einem Absatz (&lt;p&rt; "Hallo Welt".`,
   hint:`Beginne mit <code>&lt;!DOCTYPE html&gt;</code> und baue alles darunter auf.`,
   placeholder:`<!DOCTYPE html>\n<html lang="de">\n<head>\n  <meta charset="UTF-8">\n  <title>Test</title>\n</head>\n<body>\n  <p>Hallo Welt</p>\n</body>\n</html>`,
   check(v){ const ok=v.includes("<!DOCTYPE html>")&&v.includes('lang="de"')&&v.includes("<title>Test</title>")&&v.includes("<p>Hallo Welt</p>"); return {ok,msg:ok?"Ausgezeichnet! Du hast eine vollständige HTML-Seite erstellt!":"Überprüfe: DOCTYPE, html lang=de, meta charset, title=Test, p=Hallo Welt sind alle enthalten?"}; },
