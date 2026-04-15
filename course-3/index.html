@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Creation – 50 Übungen</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a35;
+    --accent: #ff6b35;
+    --accent2: #ffd93d;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --muted: #7a7a95;
+    --radius: 10px;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+  #app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  #app-header h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  #app-header span { color: var(--muted); font-size: 0.85rem; font-family: var(--mono); }
+  #progress-bar-wrap { flex: 1; max-width: 280px; margin: 0 24px; background: var(--border); height: 6px; border-radius: 99px; overflow: hidden; }
+  #progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s ease; border-radius: 99px; }
+
+  #main-layout { display: grid; grid-template-columns: 260px 1fr 320px; min-height: calc(100vh - 65px); }
+
+  #sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; overflow-y: auto; max-height: calc(100vh - 65px); position: sticky; top: 65px; }
+  .chapter-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 12px 10px 6px; font-family: var(--mono); }
+  .sb-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: var(--muted); transition: background 0.15s, color 0.15s; font-family: var(--mono); }
+  .sb-item.active { background: rgba(255,107,53,0.12); color: var(--accent); }
+  .sb-item.done { color: var(--green); }
+  .sb-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .sb-item:hover:not(.locked) { background: var(--surface2); color: var(--text); }
+  .sb-num { font-size: 0.65rem; min-width: 20px; color: inherit; opacity: 0.6; }
+  .sb-check { font-size: 0.75rem; }
+
+  #exercise-area { padding: 40px 48px; overflow-y: auto; max-height: calc(100vh - 65px); }
+
+  .ex-header { margin-bottom: 32px; }
+  .ex-tag { display: inline-block; font-family: var(--mono); font-size: 0.7rem; background: rgba(255,107,53,0.15); color: var(--accent); padding: 3px 10px; border-radius: 99px; margin-bottom: 12px; letter-spacing: 0.06em; }
+  .ex-title { font-size: 1.7rem; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+  .ex-desc { color: #b0b0c8; font-family: var(--mono); font-size: 0.82rem; line-height: 1.7; }
+  .ex-desc code { background: var(--border); padding: 1px 6px; border-radius: 4px; color: var(--accent2); font-size: 0.78rem; }
+  .ex-hint { background: rgba(255,107,53,0.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; font-size: 0.8rem; font-family: var(--mono); color: #ffb89a; line-height: 1.6; }
+  .ex-hint code { background: rgba(255,107,53,0.2); padding: 1px 5px; border-radius: 3px; color: #ffd0b8; }
+
+  .code-context-wrap { background: #0a0a0e; border: 1px solid #352a1a; border-radius: var(--radius); overflow: hidden; margin: 16px 0 4px; }
+  .code-context-header { background: #1a1206; border-bottom: 1px solid #352a1a; padding: 7px 14px; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+  .code-context-badge { background: rgba(255,107,53,0.15); color: var(--accent); padding: 2px 10px; border-radius: 99px; font-size: 0.65rem; }
+  .code-context-pre { font-family: var(--mono); font-size: 0.75rem; padding: 14px 16px; margin: 0; white-space: pre-wrap; word-break: break-all; max-height: 220px; overflow-y: auto; line-height: 1.65; }
+  .code-context-done { color: #5a7a5a; }
+  .code-context-cursor { display: block; color: var(--accent); background: rgba(255,107,53,0.07); border-left: 3px solid var(--accent); padding-left: 8px; margin-top: 2px; animation: blink 1.2s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .editor-wrap { background: #0a0a0e; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
+  .editor-toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; }
+  .editor-toolbar span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .btn-check { background: var(--accent); color: #0d0d0f; border: none; padding: 6px 18px; border-radius: 6px; font-family: var(--sans); font-size: 0.8rem; font-weight: 800; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+  .btn-check:hover { opacity: 0.85; transform: translateY(-1px); }
+  textarea.code-input { width: 100%; min-height: 130px; background: transparent; border: none; color: #d0d0e8; font-family: var(--mono); font-size: 0.82rem; padding: 16px; resize: vertical; outline: none; line-height: 1.7; tab-size: 2; }
+
+  .feedback { display: none; padding: 12px 16px; border-radius: var(--radius); font-family: var(--mono); font-size: 0.82rem; margin: 8px 0; line-height: 1.5; }
+  .feedback.show { display: block; }
+  .feedback.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .feedback.err { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--red); }
+  .feedback.ok::before { content: "✓ "; }
+  .feedback.err::before { content: "✗ "; }
+
+  .ex-nav { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-nav { padding: 10px 22px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: var(--sans); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+  .btn-nav:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .btn-nav.primary { background: var(--accent); border-color: var(--accent); color: #0d0d0f; }
+  .btn-nav.primary:hover { opacity: 0.85; }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  #preview-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+  #preview-panel h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--border); font-family: var(--mono); }
+  #result-preview { flex: 1; background: #111; width: 100%; border: none; min-height: 300px; }
+  #accumulated-code-display { padding: 14px; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); border-top: 1px solid var(--border); overflow-y: auto; max-height: 260px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
+
+  #finish-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+  #finish-screen.show { display: flex; }
+  #finish-screen h2 { font-size: 3rem; font-weight: 800; color: var(--accent); margin-bottom: 12px; }
+  #finish-screen p { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+  .btn-show-result { background: var(--accent); color: #0d0d0f; border: none; padding: 14px 36px; border-radius: 10px; font-size: 1rem; font-weight: 800; font-family: var(--sans); cursor: pointer; transition: opacity 0.2s; }
+  .btn-show-result:hover { opacity: 0.85; }
+  .locked-overlay { text-align: center; padding: 60px 40px; color: var(--muted); font-family: var(--mono); font-size: 0.85rem; }
+  .locked-overlay .lock-icon { font-size: 3rem; margin-bottom: 16px; }
+
+  @media (max-width: 1100px) { #main-layout { grid-template-columns: 200px 1fr 260px; } }
+  @media (max-width: 800px) { #main-layout { grid-template-columns: 1fr 220px; } #sidebar { display: none; } #exercise-area { padding: 24px 16px; } }
+  @media (max-width: 560px) { #main-layout { grid-template-columns: 1fr; } #preview-panel { display: none; } }
+</style>
+</head>
+<body>
+
+<header id="app-header">
+  <h1>🎮 Game Creation Kurs</h1>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <span id="progress-label">0 / 50 gelöst</span>
+</header>
+
+<div id="main-layout">
+  <nav id="sidebar" aria-label="Übungen"></nav>
+  <main id="exercise-area"></main>
+  <aside id="preview-panel">
+    <h3>🎮 Dein Spiel bisher</h3>
+    <iframe id="result-preview" title="Spielvorschau" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div id="accumulated-code-display"></div>
+  </aside>
+</div>
+
+<div id="finish-screen">
+  <div style="font-size:5rem;margin-bottom:16px">🏆</div>
+  <h2>Spiel fertig!</h2>
+  <p>Herzlichen Glückwunsch! Du hast alle 50 Game-Übungen abgeschlossen und ein vollständiges Browser-Spiel mit Canvas, Physik und Score-System gebaut!</p>
+  <div style="margin-bottom:28px;">
+    <label style="display:block;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">Dein Name für das Zertifikat</label>
+    <input id="cert-name-input" type="text" placeholder="Deinen Namen eingeben …" maxlength="60"
+      style="font-size:1.5rem;font-family:Georgia,serif;text-align:center;background:var(--surface2);border:2px solid var(--accent);border-radius:8px;color:var(--text);padding:10px 24px;width:100%;max-width:400px;outline:none;" />
+  </div>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn-show-result" onclick="printCertificate()">🏆 Game-Zertifikat</button>
+    <button class="btn-show-result" style="background:var(--accent2);color:#0d0d0f;" onclick="downloadGame()">⬇️ Spiel herunterladen</button>
+  </div>
+</div>
+
+<script>
+const CHAPTERS = [
+  { title: "Kapitel 1 – Canvas Grundlagen", range: [0, 8] },
+  { title: "Kapitel 2 – Bewegung & Physik", range: [9, 17] },
+  { title: "Kapitel 3 – Spieler & Steuerung", range: [18, 26] },
+  { title: "Kapitel 4 – Gegner & Kollision", range: [27, 35] },
+  { title: "Kapitel 5 – Score, Leben & Game Loop", range: [36, 44] },
+  { title: "Kapitel 6 – Spiel fertigstellen", range: [45, 49] },
+];
+
+const EXERCISES = [
+
+// ── KAP 1: Canvas Grundlagen ─────────────────────────────────────────
+{
+  tag:"Canvas", title:"Canvas-Element erstellen",
+  desc:`Das HTML5 <code>&lt;canvas&gt;</code>-Element ist die Zeichenfläche für Browser-Spiele. Schreibe ein canvas-Tag mit id <code>"spielfeld"</code>, width <code>600</code> und height <code>400</code>.`,
+  hint:`<code>&lt;canvas id="spielfeld" width="600" height="400"&gt;&lt;/canvas&gt;</code>`,
+  placeholder:`<canvas id="spielfeld" width="600" height="400"></canvas>`,
+  check(v){ const ok=v.includes('<canvas')&&v.includes('id="spielfeld"')&&v.includes('width="600"')&&v.includes('height="400"'); return {ok,msg:ok?"Perfekt! Das Canvas ist deine Spielfläche.":"canvas mit id=spielfeld, width=600, height=400."}; },
+  accumulated:`<canvas id="spielfeld" width="600" height="400" style="display:block;margin:0 auto;background:#111;border:2px solid #ff6b35;"></canvas>\n`
+},
+{
+  tag:"Canvas", title:"2D-Rendering-Kontext holen",
+  desc:`Für 2D-Spiele braucht man den 2D-Context des Canvas. Hole den Canvas per <code>getElementById</code> und rufe <code>getContext("2d")</code> auf. Speichere beides in Variablen <code>canvas</code> und <code>ctx</code>.`,
+  hint:`<code>const canvas = document.getElementById("spielfeld"); const ctx = canvas.getContext("2d");</code>`,
+  placeholder:`const canvas = document.getElementById("spielfeld");\nconst ctx = canvas.getContext("2d");`,
+  check(v){ const ok=v.includes('getElementById("spielfeld")')&&v.includes('getContext("2d")')&&v.includes("ctx"); return {ok,msg:ok?"Super! ctx ist dein Zeichenwerkzeug für alle Grafiken.":"getElementById + getContext(\"2d\") in Variablen speichern."}; },
+  accumulated:`<script>\nconst canvas = document.getElementById("spielfeld");\nconst ctx = canvas.getContext("2d");\n`
+},
+{
+  tag:"Canvas", title:"Hintergrund füllen",
+  desc:`<code>ctx.fillStyle</code> setzt die Füllfarbe, <code>ctx.fillRect(x, y, w, h)</code> zeichnet ein gefülltes Rechteck. Male den gesamten Hintergrund schwarz: fillStyle <code>"#1a1a2e"</code>, fillRect für das ganze Canvas (0,0,600,400).`,
+  hint:`<code>ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0, 0, 600, 400);</code>`,
+  placeholder:`ctx.fillStyle = "#1a1a2e";\nctx.fillRect(0, 0, 600, 400);`,
+  check(v){ const ok=v.includes("fillStyle")&&v.includes("fillRect(0")&&v.includes("600")&&v.includes("400"); return {ok,msg:ok?"Richtig! fillRect(0,0, canvas.width, canvas.height) deckt alles ab.":"fillStyle setzen, dann fillRect(0, 0, 600, 400)."}; },
+  accumulated:`ctx.fillStyle = "#1a1a2e";\nctx.fillRect(0, 0, canvas.width, canvas.height);\n`
+},
+{
+  tag:"Canvas", title:"Rechteck zeichnen",
+  desc:`Zeichne einen orangefarbenen Block: fillStyle <code>"#ff6b35"</code>, fillRect an Position <code>(50, 50)</code> mit Größe <code>60×60</code>.`,
+  hint:`<code>ctx.fillStyle = "#ff6b35"; ctx.fillRect(50, 50, 60, 60);</code>`,
+  placeholder:`ctx.fillStyle = "#ff6b35";\nctx.fillRect(50, 50, 60, 60);`,
+  check(v){ const ok=v.includes("fillStyle")&&v.includes("fillRect(50, 50, 60, 60)"); return {ok,msg:ok?"Super! Du hast dein erstes Spielelement gezeichnet.":"fillRect(50, 50, 60, 60) nach dem fillStyle."}; },
+  accumulated:`ctx.fillStyle = "#ff6b35";\nctx.fillRect(50, 50, 60, 60);\n`
+},
+{
+  tag:"Canvas", title:"Kreis zeichnen (arc)",
+  desc:`Kreise werden mit <code>ctx.arc(x, y, radius, 0, Math.PI * 2)</code> gezeichnet. Zeichne danach mit <code>fill()</code>. Male einen gelben Kreis bei <code>(300, 200)</code> mit Radius <code>30</code>.`,
+  hint:`<code>ctx.beginPath(); ctx.arc(300, 200, 30, 0, Math.PI * 2); ctx.fillStyle="#ffd93d"; ctx.fill();</code>`,
+  placeholder:`ctx.beginPath();\nctx.arc(300, 200, 30, 0, Math.PI * 2);\nctx.fillStyle = "#ffd93d";\nctx.fill();`,
+  check(v){ const ok=v.includes("beginPath()")&&v.includes("arc(300, 200, 30")&&v.includes("Math.PI * 2")&&v.includes("fill()"); return {ok,msg:ok?"Perfekt! beginPath() → arc() → fill() ist das Kreis-Muster.":"beginPath, arc(300, 200, 30, 0, Math.PI*2), fillStyle, fill()."}; },
+  accumulated:`ctx.beginPath();\nctx.arc(300, 200, 30, 0, Math.PI * 2);\nctx.fillStyle = "#ffd93d";\nctx.fill();\n`
+},
+{
+  tag:"Canvas", title:"Text auf Canvas schreiben",
+  desc:`Mit <code>ctx.font</code> und <code>ctx.fillText(text, x, y)</code> wird Text gezeichnet. Schreibe "SCORE: 0" in Weiß, Schrift <code>"bold 20px monospace"</code>, an Position <code>(10, 30)</code>.`,
+  hint:`<code>ctx.font = "bold 20px monospace"; ctx.fillStyle = "white"; ctx.fillText("SCORE: 0", 10, 30);</code>`,
+  placeholder:`ctx.font = "bold 20px monospace";\nctx.fillStyle = "white";\nctx.fillText("SCORE: 0", 10, 30);`,
+  check(v){ const ok=v.includes("ctx.font")&&v.includes("fillText")&&v.includes("SCORE: 0"); return {ok,msg:ok?"Korrekt! fillText zeichnet Text wie jede andere Form.":"ctx.font setzen, fillStyle, dann fillText(\"SCORE: 0\", 10, 30)."}; },
+  accumulated:`ctx.font = "bold 20px monospace";\nctx.fillStyle = "white";\nctx.fillText("SCORE: 0", 10, 30);\n`
+},
+{
+  tag:"Canvas", title:"Linie zeichnen",
+  desc:`Linien brauchen <code>beginPath()</code>, <code>moveTo(x1,y1)</code>, <code>lineTo(x2,y2)</code> und <code>stroke()</code>. Zeichne eine Linie vom Punkt (0, 380) bis (600, 380) – das wird unser Boden. Farbe: <code>"#ff6b35"</code>, lineWidth: <code>3</code>.`,
+  hint:`beginPath → moveTo(0,380) → lineTo(600,380) → strokeStyle → lineWidth → stroke()`,
+  placeholder:`ctx.beginPath();\nctx.moveTo(0, 380);\nctx.lineTo(600, 380);\nctx.strokeStyle = "#ff6b35";\nctx.lineWidth = 3;\nctx.stroke();`,
+  check(v){ const ok=v.includes("moveTo(0, 380)")&&v.includes("lineTo(600, 380)")&&v.includes("stroke()"); return {ok,msg:ok?"Super! Das ist der Boden deines Spiels.":"moveTo(0,380) → lineTo(600,380) → stroke()"}; },
+  accumulated:`ctx.beginPath();\nctx.moveTo(0, 380);\nctx.lineTo(600, 380);\nctx.strokeStyle = "#ff6b35";\nctx.lineWidth = 3;\nctx.stroke();\n`
+},
+{
+  tag:"Canvas", title:"Canvas löschen (clearRect)",
+  desc:`Vor jedem Frame muss das Canvas gelöscht werden. <code>ctx.clearRect(x, y, w, h)</code> löscht einen Bereich. Lösche dann das ganze Canvas und zeichne danach erneut den Hintergrund.`,
+  hint:`<code>ctx.clearRect(0, 0, canvas.width, canvas.height);</code>`,
+  placeholder:`ctx.clearRect(0, 0, canvas.width, canvas.height);\nctx.fillStyle = "#1a1a2e";\nctx.fillRect(0, 0, canvas.width, canvas.height);`,
+  check(v){ const ok=v.includes("clearRect(0, 0")&&v.includes("canvas.width"); return {ok,msg:ok?"Richtig! clearRect → fillRect ist das Muster für jeden Spielframe.":"clearRect(0, 0, canvas.width, canvas.height) dann Hintergrund neu malen."}; },
+  accumulated:`function hintergrundZeichnen() {\n  ctx.clearRect(0, 0, canvas.width, canvas.height);\n  ctx.fillStyle = "#1a1a2e";\n  ctx.fillRect(0, 0, canvas.width, canvas.height);\n  ctx.beginPath();\n  ctx.moveTo(0, 360);\n  ctx.lineTo(600, 360);\n  ctx.strokeStyle = "#ff6b3566";\n  ctx.lineWidth = 2;\n  ctx.stroke();\n}\n`
+},
+{
+  tag:"Canvas", title:"requestAnimationFrame – Die Game-Loop",
+  desc:`<code>requestAnimationFrame(callback)</code> ruft eine Funktion vor dem nächsten Bildschirm-Update auf – das ist die Grundlage jeder Game-Loop. Schreibe eine Funktion <code>loop()</code>, die sich selbst mit requestAnimationFrame aufruft, und starte sie.`,
+  hint:`<code>function loop() { /* zeichnen */ requestAnimationFrame(loop); } requestAnimationFrame(loop);</code>`,
+  placeholder:`function loop() {\n  hintergrundZeichnen();\n  requestAnimationFrame(loop);\n}\nrequestAnimationFrame(loop);`,
+  check(v){ const ok=v.includes("requestAnimationFrame(loop)")&&v.includes("function loop"); return {ok,msg:ok?"Exzellent! Das ist das Herz jedes Browser-Spiels.":"function loop() { requestAnimationFrame(loop); } aufrufen."}; },
+  accumulated:`function loop() {\n  hintergrundZeichnen();\n  spielerZeichnen();\n  requestAnimationFrame(loop);\n}\nrequestAnimationFrame(loop);\n`
+},
+
+// ── KAP 2: Bewegung & Physik ─────────────────────────────────────────
+{
+  tag:"Physik", title:"Objekt-Position als Variablen",
+  desc:`In Spielen speichert man Position und Geschwindigkeit als Variablen. Erstelle ein Objekt <code>ball</code> mit Eigenschaften: <code>x: 300</code>, <code>y: 200</code>, <code>radius: 15</code>, <code>dx: 3</code> (Geschwindigkeit X), <code>dy: 2</code> (Geschwindigkeit Y) und <code>farbe: "#ffd93d"</code>.`,
+  hint:`<code>const ball = { x: 300, y: 200, radius: 15, dx: 3, dy: 2, farbe: "#ffd93d" };</code>`,
+  placeholder:`const ball = {\n  x: 300,\n  y: 200,\n  radius: 15,\n  dx: 3,\n  dy: 2,\n  farbe: "#ffd93d"\n};`,
+  check(v){ const ok=v.includes("const ball")&&v.includes("dx:")&&v.includes("dy:")&&v.includes("radius:"); return {ok,msg:ok?"Perfekt! dx/dy sind die Geschwindigkeitsvektoren.":"ball-Objekt mit x, y, radius, dx, dy, farbe."}; },
+  accumulated:`const ball = { x: 100, y: 300, radius: 12, dx: 0, dy: 0, farbe: "#ffd93d" };\n`
+},
+{
+  tag:"Physik", title:"Ball zeichnen",
+  desc:`Schreibe eine Funktion <code>ballZeichnen()</code>, die den Ball als Kreis auf dem Canvas zeichnet – nutze die Eigenschaften von <code>ball</code> (x, y, radius, farbe).`,
+  hint:`beginPath → arc(ball.x, ball.y, ball.radius, 0, Math.PI*2) → fillStyle=ball.farbe → fill()`,
+  placeholder:`function ballZeichnen() {\n  ctx.beginPath();\n  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);\n  ctx.fillStyle = ball.farbe;\n  ctx.fill();\n}`,
+  check(v){ const ok=v.includes("function ballZeichnen")&&v.includes("arc(ball.x, ball.y, ball.radius")&&v.includes("ball.farbe"); return {ok,msg:ok?"Super! ballZeichnen nutzt die Objekt-Eigenschaften.":"arc(ball.x, ball.y, ball.radius, ...) + fillStyle=ball.farbe + fill()"}; },
+  accumulated:`function ballZeichnen() {\n  ctx.beginPath();\n  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);\n  ctx.fillStyle = ball.farbe;\n  ctx.fill();\n  ctx.strokeStyle = "#fff3";\n  ctx.lineWidth = 2;\n  ctx.stroke();\n}\n`
+},
+{
+  tag:"Physik", title:"Ball bewegen",
+  desc:`Bewegung = Position + Geschwindigkeit pro Frame. Schreibe eine Funktion <code>ballBewegen()</code>: Addiere <code>ball.dx</code> zu <code>ball.x</code> und <code>ball.dy</code> zu <code>ball.y</code>.`,
+  hint:`<code>function ballBewegen() { ball.x += ball.dx; ball.y += ball.dy; }</code>`,
+  placeholder:`function ballBewegen() {\n  ball.x += ball.dx;\n  ball.y += ball.dy;\n}`,
+  check(v){ const ok=v.includes("ball.x += ball.dx")&&v.includes("ball.y += ball.dy"); return {ok,msg:ok?"Richtig! Jeder Frame versetzt den Ball um dx/dy Pixel.":"ball.x += ball.dx; ball.y += ball.dy;"}; },
+  accumulated:`function ballBewegen() {\n  ball.x += ball.dx;\n  ball.y += ball.dy;\n}\n`
+},
+{
+  tag:"Physik", title:"Wand-Kollision (rechts/links)",
+  desc:`Wenn der Ball den Rand erreicht, soll er abprallen: dx kehrt sich um. Ergänze <code>ballBewegen()</code>: Wenn <code>ball.x + ball.radius >= canvas.width</code> oder <code>ball.x - ball.radius <= 0</code>, dann <code>ball.dx *= -1</code>.`,
+  hint:`<code>if (ball.x + ball.radius >= canvas.width || ball.x - ball.radius <= 0) ball.dx *= -1;</code>`,
+  placeholder:`function ballBewegen() {\n  ball.x += ball.dx;\n  ball.y += ball.dy;\n  if (ball.x + ball.radius >= canvas.width || ball.x - ball.radius <= 0) {\n    ball.dx *= -1;\n  }\n}`,
+  check(v){ const ok=v.includes("ball.dx *= -1")&&v.includes("canvas.width"); return {ok,msg:ok?"Perfekt! *= -1 kehrt die Richtung um – klassisches Abprallen.":"ball.dx *= -1 wenn Rand links oder rechts erreicht."}; },
+  accumulated:`function wandKollision() {\n  if (ball.x + ball.radius >= canvas.width || ball.x - ball.radius <= 0) ball.dx *= -1;\n  if (ball.y - ball.radius <= 0) ball.dy *= -1;\n}\n`
+},
+{
+  tag:"Physik", title:"Schwerkraft simulieren",
+  desc:`Schwerkraft bedeutet: dy wächst jeden Frame um einen kleinen Wert (z.B. 0.4). Schreibe eine Funktion <code>schwerkraft()</code>: Addiere <code>0.4</code> zu <code>ball.dy</code>. Begrenze dy auf maximal 12 (<code>Math.min</code>).`,
+  hint:`<code>function schwerkraft() { ball.dy = Math.min(ball.dy + 0.4, 12); }</code>`,
+  placeholder:`function schwerkraft() {\n  ball.dy = Math.min(ball.dy + 0.4, 12);\n}`,
+  check(v){ const ok=v.includes("ball.dy")&&v.includes("0.4")&&(v.includes("Math.min")||v.includes("12")); return {ok,msg:ok?"Exzellent! Schwerkraft beschleunigt nach unten, Math.min begrenzt die Maximalgeschwindigkeit.":"ball.dy += 0.4 + Math.min Begrenzung."}; },
+  accumulated:`function schwerkraft() {\n  ball.dy = Math.min(ball.dy + 0.4, 12);\n}\n`
+},
+{
+  tag:"Physik", title:"Boden-Kollision mit Abprallen",
+  desc:`Wenn der Ball den Boden (y >= 355) berührt, soll er zurückprallen. Schreibe eine Funktion <code>bodenKollision()</code>: Wenn <code>ball.y + ball.radius >= 360</code>, setze <code>ball.y = 360 - ball.radius</code> und <code>ball.dy *= -0.7</code> (Dämpfung).`,
+  hint:`<code>if (ball.y + ball.radius >= 360) { ball.y = 360 - ball.radius; ball.dy *= -0.7; }</code>`,
+  placeholder:`function bodenKollision() {\n  if (ball.y + ball.radius >= 360) {\n    ball.y = 360 - ball.radius;\n    ball.dy *= -0.7;\n    ball.dx *= 0.98;\n  }\n}`,
+  check(v){ const ok=v.includes("ball.dy *= -")&&v.includes("360")&&v.includes("ball.radius"); return {ok,msg:ok?"Perfekt! -0.7 dämpft den Aufprall – realistisches Verhalten!":"ball.dy *= -0.7 wenn ball.y + radius >= 360."}; },
+  accumulated:`function bodenKollision() {\n  if (ball.y + ball.radius >= 360) {\n    ball.y = 360 - ball.radius;\n    ball.dy *= -0.7;\n    ball.dx *= 0.98;\n  }\n}\n`
+},
+{
+  tag:"Physik", title:"deltaTime für frame-unabhängige Bewegung",
+  desc:`Spiele sollen auf schnellen und langsamen Rechnern gleich schnell laufen. Nutze <code>performance.now()</code> für einen Zeitstempel. Schreibe: <code>let letzteZeit = 0</code>. In der Loop: <code>const jetzt = performance.now(); const dt = (jetzt - letzteZeit) / 1000; letzteZeit = jetzt;</code>`,
+  hint:`dt ist die Sekunden die seit dem letzten Frame vergangen sind (ca. 0.016 bei 60fps).`,
+  placeholder:`let letzteZeit = 0;\nfunction loop(zeitstempel) {\n  const dt = (zeitstempel - letzteZeit) / 1000;\n  letzteZeit = zeitstempel;\n  hintergrundZeichnen();\n  requestAnimationFrame(loop);\n}\nrequestAnimationFrame(loop);`,
+  check(v){ const ok=v.includes("performance.now()")||v.includes("zeitstempel"); return {ok,msg:ok&&v.includes("dt")?"Profi! deltaTime macht Spiele frame-rate-unabhängig.":"letzteZeit + dt berechnen mit performance.now() oder Zeitstempel."}; },
+  accumulated:`let letzteZeit = 0;\n`
+},
+{
+  tag:"Physik", title:"Reibung simulieren",
+  desc:`Reibung verlangsamt horizontale Bewegung. Schreibe eine Funktion <code>reibung()</code>: Multipliziere <code>ball.dx</code> mit <code>0.99</code> (fast keine Reibung). Wenn <code>Math.abs(ball.dx) < 0.1</code>, setze <code>ball.dx = 0</code>.`,
+  hint:`<code>ball.dx *= 0.99; if (Math.abs(ball.dx) < 0.1) ball.dx = 0;</code>`,
+  placeholder:`function reibung() {\n  ball.dx *= 0.99;\n  if (Math.abs(ball.dx) < 0.1) ball.dx = 0;\n}`,
+  check(v){ const ok=v.includes("ball.dx *= 0.99")&&v.includes("Math.abs(ball.dx)"); return {ok,msg:ok?"Super! Math.abs verhindert ewiges Gleiten.":"ball.dx *= 0.99 + Math.abs Check für den Stillstand."}; },
+  accumulated:`function reibung() {\n  ball.dx *= 0.99;\n  if (Math.abs(ball.dx) < 0.1) ball.dx = 0;\n}\n`
+},
+{
+  tag:"Physik", title:"Alle Physik-Funktionen in der Loop verbinden",
+  desc:`Verbinde alle bisherigen Physik-Funktionen in der Game-Loop. Schreibe die Loop-Funktion, die in dieser Reihenfolge aufruft: <code>hintergrundZeichnen()</code>, <code>schwerkraft()</code>, <code>reibung()</code>, <code>ballBewegen()</code>, <code>wandKollision()</code>, <code>bodenKollision()</code>, <code>ballZeichnen()</code>.`,
+  hint:`Reihenfolge: Hintergrund → Physik → Zeichnen → requestAnimationFrame.`,
+  placeholder:`function loop() {\n  hintergrundZeichnen();\n  schwerkraft();\n  reibung();\n  ballBewegen();\n  wandKollision();\n  bodenKollision();\n  ballZeichnen();\n  requestAnimationFrame(loop);\n}\nrequestAnimationFrame(loop);`,
+  check(v){ const ok=v.includes("hintergrundZeichnen()")&&v.includes("schwerkraft()")&&v.includes("ballZeichnen()")&&v.includes("requestAnimationFrame(loop)"); return {ok,msg:ok?"Die Physik-Loop läuft! Das ist der Kern jedes Jump-Spiels.":"Alle 7 Funktionen in der richtigen Reihenfolge aufrufen."}; },
+  accumulated:`// Alle Physikfunktionen sind definiert und bereit\n`
+},
+
+// ── KAP 3: Spieler & Steuerung ───────────────────────────────────────
+{
+  tag:"Steuerung", title:"Spieler-Objekt erstellen",
+  desc:`Erstelle ein Spieler-Objekt <code>spieler</code> mit: <code>x: 50</code>, <code>y: 300</code>, <code>breite: 40</code>, <code>hoehe: 50</code>, <code>dx: 0</code>, <code>dy: 0</code>, <code>amBoden: false</code>, <code>farbe: "#ff6b35"</code>.`,
+  hint:`const spieler = { x: 50, y: 300, breite: 40, hoehe: 50, dx: 0, dy: 0, amBoden: false, farbe: "#ff6b35" };`,
+  placeholder:`const spieler = {\n  x: 50,\n  y: 300,\n  breite: 40,\n  hoehe: 50,\n  dx: 0,\n  dy: 0,\n  amBoden: false,\n  farbe: "#ff6b35"\n};`,
+  check(v){ const ok=v.includes("const spieler")&&v.includes("breite:")&&v.includes("hoehe:")&&v.includes("amBoden:"); return {ok,msg:ok?"Perfekt! amBoden wird für den Sprung benötigt.":"spieler mit x, y, breite, hoehe, dx, dy, amBoden, farbe."}; },
+  accumulated:`const spieler = { x: 50, y: 300, breite: 40, hoehe: 50, dx: 0, dy: 0, amBoden: false, farbe: "#ff6b35", leben: 3 };\n`
+},
+{
+  tag:"Steuerung", title:"Spieler zeichnen",
+  desc:`Schreibe eine Funktion <code>spielerZeichnen()</code>: Zeichne den Spieler als Rechteck (fillRect mit spieler.x, spieler.y, spieler.breite, spieler.hoehe). Füge dann ein Gesicht hinzu: 2 kleine weiße Kreise als Augen.`,
+  hint:`fillRect für den Körper, zwei arc() für die Augen.`,
+  placeholder:`function spielerZeichnen() {\n  ctx.fillStyle = spieler.farbe;\n  ctx.fillRect(spieler.x, spieler.y, spieler.breite, spieler.hoehe);\n  // Augen\n  ctx.fillStyle = "white";\n  ctx.beginPath();\n  ctx.arc(spieler.x + 12, spieler.y + 15, 5, 0, Math.PI * 2);\n  ctx.arc(spieler.x + 28, spieler.y + 15, 5, 0, Math.PI * 2);\n  ctx.fill();\n}`,
+  check(v){ const ok=v.includes("function spielerZeichnen")&&v.includes("fillRect(spieler.x"); return {ok,msg:ok?"Super! Der Spieler hat ein Gesicht.":"fillRect(spieler.x, spieler.y, spieler.breite, spieler.hoehe) + Augen."}; },
+  accumulated:`function spielerZeichnen() {\n  // Körper\n  ctx.fillStyle = spieler.farbe;\n  ctx.fillRect(spieler.x, spieler.y, spieler.breite, spieler.hoehe);\n  // Gesicht\n  ctx.fillStyle = "white";\n  ctx.beginPath();\n  ctx.arc(spieler.x + 12, spieler.y + 15, 5, 0, Math.PI * 2);\n  ctx.arc(spieler.x + 28, spieler.y + 15, 5, 0, Math.PI * 2);\n  ctx.fill();\n  ctx.fillStyle = "#333";\n  ctx.beginPath();\n  ctx.arc(spieler.x + 12, spieler.y + 16, 2, 0, Math.PI * 2);\n  ctx.arc(spieler.x + 28, spieler.y + 16, 2, 0, Math.PI * 2);\n  ctx.fill();\n}\n`
+},
+{
+  tag:"Steuerung", title:"Tastatur-Input erfassen",
+  desc:`Tastatureingaben werden mit <code>keydown</code> und <code>keyup</code> erfasst. Schreibe ein Objekt <code>tasten = {}</code> und zwei Listener: Bei keydown setze <code>tasten[e.code] = true</code>, bei keyup <code>false</code>.`,
+  hint:`<code>const tasten = {}; window.addEventListener("keydown", e => tasten[e.code] = true); window.addEventListener("keyup", e => tasten[e.code] = false);</code>`,
+  placeholder:`const tasten = {};\nwindow.addEventListener("keydown", e => { tasten[e.code] = true; e.preventDefault(); });\nwindow.addEventListener("keyup", e => { tasten[e.code] = false; });`,
+  check(v){ const ok=v.includes("const tasten = {}")&&v.includes("keydown")&&v.includes("keyup")&&v.includes("e.code"); return {ok,msg:ok?"Richtig! Das tasten-Objekt speichert alle gedrückten Tasten.":"keydown setzt true, keyup setzt false – auf e.code."}; },
+  accumulated:`const tasten = {};\nwindow.addEventListener("keydown", e => { tasten[e.code] = true; e.preventDefault(); });\nwindow.addEventListener("keyup", e => { tasten[e.code] = false; });\n`
+},
+{
+  tag:"Steuerung", title:"Spieler-Bewegung (links/rechts)",
+  desc:`Schreibe eine Funktion <code>spielerBewegen()</code>: Wenn <code>tasten.ArrowLeft</code> oder <code>tasten.KeyA</code>, setze <code>spieler.dx = -4</code>. Wenn <code>tasten.ArrowRight</code> oder <code>tasten.KeyD</code>, setze <code>spieler.dx = 4</code>. Sonst <code>spieler.dx *= 0.8</code> (Bremseffekt). Dann <code>spieler.x += spieler.dx</code>.`,
+  hint:`if ArrowLeft: dx=-4, elif ArrowRight: dx=4, else: dx*=0.8. Dann x+=dx.`,
+  placeholder:`function spielerBewegen() {\n  if (tasten.ArrowLeft || tasten.KeyA) spieler.dx = -4;\n  else if (tasten.ArrowRight || tasten.KeyD) spieler.dx = 4;\n  else spieler.dx *= 0.8;\n  spieler.x += spieler.dx;\n}`,
+  check(v){ const ok=v.includes("ArrowLeft")&&v.includes("ArrowRight")&&v.includes("spieler.dx")&&v.includes("spieler.x += spieler.dx"); return {ok,msg:ok?"Perfekt! Links/Rechts mit Bremseffekt – sehr flüssig.":"ArrowLeft/KeyA: dx=-4, ArrowRight/KeyD: dx=4, sonst dx*=0.8."}; },
+  accumulated:`function spielerBewegen() {\n  if (tasten.ArrowLeft || tasten.KeyA) spieler.dx = -4;\n  else if (tasten.ArrowRight || tasten.KeyD) spieler.dx = 4;\n  else spieler.dx *= 0.8;\n  spieler.x += spieler.dx;\n  // Begrenzung\n  if (spieler.x < 0) spieler.x = 0;\n  if (spieler.x + spieler.breite > canvas.width) spieler.x = canvas.width - spieler.breite;\n}\n`
+},
+{
+  tag:"Steuerung", title:"Sprung implementieren",
+  desc:`Sprung: Wenn <code>tasten.ArrowUp</code>, <code>tasten.KeyW</code> oder <code>tasten.Space</code> gedrückt wird UND <code>spieler.amBoden === true</code>, setze <code>spieler.dy = -12</code> und <code>spieler.amBoden = false</code>.`,
+  hint:`<code>if ((tasten.ArrowUp || tasten.Space) && spieler.amBoden) { spieler.dy = -12; spieler.amBoden = false; }</code>`,
+  placeholder:`function sprung() {\n  if ((tasten.ArrowUp || tasten.KeyW || tasten.Space) && spieler.amBoden) {\n    spieler.dy = -12;\n    spieler.amBoden = false;\n  }\n}`,
+  check(v){ const ok=v.includes("spieler.amBoden")&&v.includes("spieler.dy = -12"); return {ok,msg:ok?"Exzellent! amBoden verhindert Doppelsprünge.":"spieler.dy = -12 + amBoden = false – nur wenn amBoden true."}; },
+  accumulated:`function sprung() {\n  if ((tasten.ArrowUp || tasten.KeyW || tasten.Space) && spieler.amBoden) {\n    spieler.dy = -12;\n    spieler.amBoden = false;\n  }\n}\n`
+},
+{
+  tag:"Steuerung", title:"Spieler-Schwerkraft und Boden",
+  desc:`Der Spieler braucht auch Schwerkraft. Schreibe eine Funktion <code>spielerPhysik()</code>: Addiere <code>0.5</code> zu <code>spieler.dy</code>. Addiere <code>spieler.dy</code> zu <code>spieler.y</code>. Wenn <code>spieler.y + spieler.hoehe >= 360</code>, setze <code>spieler.y = 360 - spieler.hoehe</code>, <code>spieler.dy = 0</code> und <code>spieler.amBoden = true</code>.`,
+  hint:`Schwerkraft + Bewegung + Boden-Clamp + amBoden = true.`,
+  placeholder:`function spielerPhysik() {\n  spieler.dy += 0.5;\n  spieler.y += spieler.dy;\n  if (spieler.y + spieler.hoehe >= 360) {\n    spieler.y = 360 - spieler.hoehe;\n    spieler.dy = 0;\n    spieler.amBoden = true;\n  } else {\n    spieler.amBoden = false;\n  }\n}`,
+  check(v){ const ok=v.includes("spieler.dy += 0.5")&&v.includes("spieler.y += spieler.dy")&&v.includes("spieler.amBoden = true"); return {ok,msg:ok?"Perfekt! Der Spieler springt und landet korrekt.":"dy += 0.5, y += dy, Boden-Check mit amBoden = true."}; },
+  accumulated:`function spielerPhysik() {\n  spieler.dy += 0.5;\n  spieler.y += spieler.dy;\n  if (spieler.y + spieler.hoehe >= 360) {\n    spieler.y = 360 - spieler.hoehe;\n    spieler.dy = 0;\n    spieler.amBoden = true;\n  } else {\n    spieler.amBoden = false;\n  }\n}\n`
+},
+{
+  tag:"Steuerung", title:"Spieler in den Canvas-Grenzen halten",
+  desc:`Verhindere, dass der Spieler links oder rechts aus dem Bild läuft. Schreibe eine Funktion <code>spielerGrenzen()</code>: Wenn <code>spieler.x < 0</code>, setze <code>spieler.x = 0</code>. Wenn <code>spieler.x + spieler.breite > canvas.width</code>, setze es entsprechend.`,
+  hint:`<code>if (spieler.x < 0) spieler.x = 0; if (spieler.x + spieler.breite > canvas.width) spieler.x = canvas.width - spieler.breite;</code>`,
+  placeholder:`function spielerGrenzen() {\n  if (spieler.x < 0) spieler.x = 0;\n  if (spieler.x + spieler.breite > canvas.width) {\n    spieler.x = canvas.width - spieler.breite;\n  }\n}`,
+  check(v){ const ok=v.includes("spieler.x < 0")&&v.includes("canvas.width - spieler.breite"); return {ok,msg:ok?"Richtig! Der Spieler bleibt immer sichtbar.":"x < 0 → x = 0; x + breite > width → x = width - breite."}; },
+  accumulated:`function spielerGrenzen() {\n  if (spieler.x < 0) spieler.x = 0;\n  if (spieler.x + spieler.breite > canvas.width) spieler.x = canvas.width - spieler.breite;\n}\n`
+},
+{
+  tag:"Steuerung", title:"Touch-Steuerung (Mobile)",
+  desc:`Für Mobilgeräte braucht man Touch-Events. Schreibe einen <code>touchstart</code>-Listener auf dem Canvas: Wenn die Touch-X-Position < canvas.width/2 ist, simuliere Linkstaste (<code>tasten.ArrowLeft = true</code>), sonst Rechtstaste. Beim <code>touchend</code>: beide zurücksetzen.`,
+  hint:`canvas.addEventListener("touchstart", e => { const x = e.touches[0].clientX; tasten.ArrowLeft = x < canvas.width/2; });`,
+  placeholder:`canvas.addEventListener("touchstart", e => {\n  e.preventDefault();\n  const x = e.touches[0].clientX - canvas.getBoundingClientRect().left;\n  if (x < canvas.width / 2) { tasten.ArrowLeft = true; tasten.ArrowRight = false; }\n  else { tasten.ArrowRight = true; tasten.ArrowLeft = false; }\n});\ncanvas.addEventListener("touchend", () => {\n  tasten.ArrowLeft = false;\n  tasten.ArrowRight = false;\n});`,
+  check(v){ const ok=v.includes("touchstart")&&v.includes("touchend")&&v.includes("touches[0]"); return {ok,msg:ok?"Klasse! Dein Spiel ist jetzt auch auf Mobilgeräten spielbar.":"touchstart mit touches[0].clientX, touchend zum Zurücksetzen."}; },
+  accumulated:`canvas.addEventListener("touchstart", e => {\n  e.preventDefault();\n  const x = e.touches[0].clientX - canvas.getBoundingClientRect().left;\n  if (x < canvas.width / 2) { tasten.ArrowLeft = true; tasten.ArrowRight = false; }\n  else { tasten.ArrowRight = true; tasten.ArrowLeft = false; }\n  tasten.Space = true;\n  setTimeout(() => tasten.Space = false, 100);\n}, { passive: false });\ncanvas.addEventListener("touchend", () => { tasten.ArrowLeft = false; tasten.ArrowRight = false; });\n`
+},
+
+// ── KAP 4: Gegner & Kollision ─────────────────────────────────────────
+{
+  tag:"Gegner", title:"Gegner-Array erstellen",
+  desc:`Gegner werden in einem Array verwaltet. Erstelle eine Funktion <code>gegnerErstellen()</code> die ein Objekt mit <code>x: canvas.width</code>, <code>y: 310</code>, <code>breite: 40</code>, <code>hoehe: 50</code>, <code>dx: -3</code>, <code>farbe: "#a78bfa"</code> zurückgibt. Erstelle auch ein Array <code>let gegner = []</code>.`,
+  hint:`<code>let gegner = []; function gegnerErstellen() { return { x: canvas.width, y: 310, breite: 40, hoehe: 50, dx: -3, farbe: "#a78bfa" }; }</code>`,
+  placeholder:`let gegner = [];\nfunction gegnerErstellen() {\n  return {\n    x: canvas.width,\n    y: 310,\n    breite: 40,\n    hoehe: 50,\n    dx: -(2 + Math.random() * 3),\n    farbe: "#a78bfa"\n  };\n}`,
+  check(v){ const ok=v.includes("let gegner = []")&&v.includes("function gegnerErstellen")&&v.includes("canvas.width"); return {ok,msg:ok?"Super! Gegner starten rechts und bewegen sich nach links.":"gegner-Array + gegnerErstellen() die ein Objekt zurückgibt."}; },
+  accumulated:`let gegner = [];\nfunction gegnerErstellen() {\n  return { x: canvas.width + 10, y: 310, breite: 40, hoehe: 50, dx: -(2.5 + Math.random() * 2.5), farbe: ["#a78bfa","#f87171","#34d399"][Math.floor(Math.random()*3)] };\n}\n`
+},
+{
+  tag:"Gegner", title:"Gegner in Intervallen spawnen",
+  desc:`Nutze <code>setInterval</code>, um alle 2000ms einen neuen Gegner zum Array hinzuzufügen: <code>gegner.push(gegnerErstellen())</code>. Speichere das Intervall in einer Variable (für späteres Stoppen).`,
+  hint:`<code>const spawnIntervall = setInterval(() => gegner.push(gegnerErstellen()), 2000);</code>`,
+  placeholder:`const spawnIntervall = setInterval(() => {\n  gegner.push(gegnerErstellen());\n}, 2000);`,
+  check(v){ const ok=v.includes("setInterval")&&v.includes("gegner.push(gegnerErstellen())"); return {ok,msg:ok?"Perfekt! setInterval spawnt regelmäßig neue Gegner.":"setInterval + gegner.push(gegnerErstellen()) + 2000ms."}; },
+  accumulated:`let spawnIntervall = setInterval(() => { gegner.push(gegnerErstellen()); }, 1800);\n`
+},
+{
+  tag:"Gegner", title:"Gegner zeichnen und bewegen",
+  desc:`Schreibe eine Funktion <code>gegnerUpdate()</code>: Iteriere <code>gegner</code> mit <code>forEach</code>. Bewege jeden Gegner (<code>g.x += g.dx</code>). Zeichne ihn als Rechteck. Filtere danach alle Gegner heraus, die <code>x + breite < 0</code> (links raus).`,
+  hint:`forEach zum Zeichnen + filter zum Entfernen.`,
+  placeholder:`function gegnerUpdate() {\n  gegner.forEach(g => {\n    g.x += g.dx;\n    ctx.fillStyle = g.farbe;\n    ctx.fillRect(g.x, g.y, g.breite, g.hoehe);\n  });\n  gegner = gegner.filter(g => g.x + g.breite > 0);\n}`,
+  check(v){ const ok=v.includes("g.x += g.dx")&&v.includes("ctx.fillRect(g.x")&&v.includes("gegner.filter"); return {ok,msg:ok?"Exzellent! filter entfernt unsichtbare Gegner und spart Speicher.":"forEach für Bewegung+Zeichnen, filter für Entfernung."}; },
+  accumulated:`function gegnerUpdate() {\n  gegner.forEach(g => {\n    g.x += g.dx;\n    // Körper\n    ctx.fillStyle = g.farbe;\n    ctx.fillRect(g.x, g.y, g.breite, g.hoehe);\n    // Augen\n    ctx.fillStyle = "#fff";\n    ctx.fillRect(g.x + 8, g.y + 10, 8, 8);\n    ctx.fillRect(g.x + 24, g.y + 10, 8, 8);\n    ctx.fillStyle = "#000";\n    ctx.fillRect(g.x + 11, g.y + 12, 4, 4);\n    ctx.fillRect(g.x + 27, g.y + 12, 4, 4);\n  });\n  gegner = gegner.filter(g => g.x + g.breite > 0);\n}\n`
+},
+{
+  tag:"Gegner", title:"AABB-Kollisionserkennung",
+  desc:`Die einfachste Kollisionserkennung prüft ob sich zwei Rechtecke überschneiden (Axis-Aligned Bounding Box). Schreibe eine Funktion <code>kollision(a, b)</code>: Gibt <code>true</code> zurück wenn <code>a.x < b.x + b.breite && a.x + a.breite > b.x && a.y < b.y + b.hoehe && a.y + a.hoehe > b.y</code>.`,
+  hint:`<code>function kollision(a, b) { return a.x < b.x+b.breite && a.x+a.breite > b.x && a.y < b.y+b.hoehe && a.y+a.hoehe > b.y; }</code>`,
+  placeholder:`function kollision(a, b) {\n  return (\n    a.x < b.x + b.breite &&\n    a.x + a.breite > b.x &&\n    a.y < b.y + b.hoehe &&\n    a.y + a.hoehe > b.y\n  );\n}`,
+  check(v){ const ok=v.includes("function kollision(a, b)")&&v.includes("a.x < b.x + b.breite")&&v.includes("a.y < b.y + b.hoehe"); return {ok,msg:ok?"Perfekt! AABB ist die Standard-Kollision für rechteckige Spiele.":"Alle 4 Bedingungen: x-Überlappung und y-Überlappung prüfen."}; },
+  accumulated:`function kollision(a, b) {\n  return (a.x < b.x + b.breite && a.x + a.breite > b.x && a.y < b.y + b.hoehe && a.y + a.hoehe > b.y);\n}\n`
+},
+{
+  tag:"Gegner", title:"Kollision reagieren – Treffer",
+  desc:`Schreibe eine Funktion <code>kollisionPruefen()</code>: Iteriere alle Gegner. Wenn <code>kollision(spieler, g)</code> wahr ist: Entferne den Gegner (<code>filter</code>), reduziere <code>spieler.leben</code> um 1 und rufe <code>treffer()</code> auf (noch zu schreiben).`,
+  hint:`gegner.filter nach Kollision – nutze some() oder forEach mit flag.`,
+  placeholder:`function kollisionPruefen() {\n  gegner.forEach(g => {\n    if (kollision(spieler, g)) {\n      spieler.leben--;\n      g.entfernen = true;\n    }\n  });\n  gegner = gegner.filter(g => !g.entfernen);\n}`,
+  check(v){ const ok=v.includes("kollision(spieler")&&v.includes("spieler.leben--"); return {ok,msg:ok?"Richtig! Treffer reduzieren das Leben und der Gegner verschwindet.":"kollision(spieler, g) → spieler.leben-- → Gegner entfernen."}; },
+  accumulated:`function kollisionPruefen() {\n  gegner.forEach(g => { if (kollision(spieler, g)) { spieler.leben = Math.max(0, spieler.leben - 1); g.entfernen = true; } });\n  gegner = gegner.filter(g => !g.entfernen);\n}\n`
+},
+{
+  tag:"Gegner", title:"Partikel-Effekt bei Treffer",
+  desc:`Partikel machen Treffer visuell interessant. Erstelle ein Array <code>partikel = []</code>. Schreibe eine Funktion <code>partikelErstellen(x, y)</code>: Füge 8 Partikel zum Array hinzu – jeder mit zufälligem <code>dx</code> und <code>dy</code> (zwischen -4 und 4), <code>x, y</code>, <code>leben: 30</code> und <code>farbe: "#ff6b35"</code>.`,
+  hint:`for-Schleife 8× push({ x, y, dx: (Math.random()-0.5)*8, dy: (Math.random()-0.5)*8, leben: 30 })`,
+  placeholder:`let partikel = [];\nfunction partikelErstellen(x, y) {\n  for (let i = 0; i < 8; i++) {\n    partikel.push({\n      x, y,\n      dx: (Math.random() - 0.5) * 8,\n      dy: (Math.random() - 0.5) * 8,\n      leben: 30,\n      farbe: "#ff6b35"\n    });\n  }\n}`,
+  check(v){ const ok=v.includes("partikel.push(")&&v.includes("Math.random()")&&v.includes("leben:"); return {ok,msg:ok?"Brilliant! Partikel machen Kollisionen spektakulär.":"8× partikel.push mit zufälligem dx/dy und leben: 30."}; },
+  accumulated:`let partikel = [];\nfunction partikelErstellen(x, y) {\n  for (let i = 0; i < 12; i++) {\n    partikel.push({ x, y, dx: (Math.random()-0.5)*10, dy: (Math.random()-0.5)*10, leben: 40, farbe: ["#ff6b35","#ffd93d","#f87171"][i%3] });\n  }\n}\nfunction partikelUpdate() {\n  partikel.forEach(p => {\n    p.x += p.dx; p.y += p.dy; p.dy += 0.2; p.leben--;\n    ctx.globalAlpha = p.leben / 40;\n    ctx.fillStyle = p.farbe;\n    ctx.fillRect(p.x, p.y, 5, 5);\n    ctx.globalAlpha = 1;\n  });\n  partikel = partikel.filter(p => p.leben > 0);\n}\n`
+},
+{
+  tag:"Gegner", title:"Münzen / Collectibles",
+  desc:`Erstelle ein System für sammelbare Münzen. <code>let muenzen = []</code>. Funktion <code>muenzeErstellen()</code>: Gibt Objekt mit zufälligem <code>x</code> (50 bis 550), <code>y: 200</code>, <code>radius: 10</code> zurück. Spawne alle 3000ms eine neue Münze.`,
+  hint:`Math.floor(Math.random() * 500) + 50 für x.`,
+  placeholder:`let muenzen = [];\nfunction muenzeErstellen() {\n  return {\n    x: Math.floor(Math.random() * 500) + 50,\n    y: 200,\n    radius: 10,\n    farbe: "#ffd93d"\n  };\n}\nsetInterval(() => muenzen.push(muenzeErstellen()), 3000);`,
+  check(v){ const ok=v.includes("muenzen = []")&&v.includes("Math.random()")&&v.includes("muenzeErstellen"); return {ok,msg:ok?"Super! Sammelbare Items machen Spiele interessanter.":"muenzen-Array + muenzeErstellen() + setInterval Spawn."}; },
+  accumulated:`let muenzen = [];\nfunction muenzeErstellen() { return { x: Math.floor(Math.random()*500)+50, y: 100+Math.random()*200, radius: 10, farbe: "#ffd93d", animation: 0 }; }\nsetInterval(() => muenzen.push(muenzeErstellen()), 2500);\nfunction muenzenUpdate() {\n  muenzen.forEach(m => {\n    m.animation = (m.animation || 0) + 0.05;\n    ctx.beginPath();\n    ctx.arc(m.x, m.y + Math.sin(m.animation)*5, m.radius, 0, Math.PI*2);\n    ctx.fillStyle = m.farbe;\n    ctx.fill();\n    ctx.strokeStyle = "#fff9";\n    ctx.lineWidth = 2;\n    ctx.stroke();\n  });\n}\n`
+},
+{
+  tag:"Gegner", title:"Münz-Kollision und Score",
+  desc:`Schreibe eine Funktion <code>muenzenPruefen()</code>: Prüfe für jede Münze, ob der Abstand zum Spielermittelpunkt kleiner als <code>m.radius + 25</code> ist (Kreis-Rechteck-Näherung mit <code>Math.hypot</code>). Wenn ja: <code>score += 10</code> und Münze entfernen.`,
+  hint:`<code>Math.hypot(m.x - (spieler.x + spieler.breite/2), m.y - (spieler.y + spieler.hoehe/2)) < m.radius + 25</code>`,
+  placeholder:`let score = 0;\nfunction muenzenPruefen() {\n  muenzen.forEach(m => {\n    const dist = Math.hypot(\n      m.x - (spieler.x + spieler.breite / 2),\n      m.y - (spieler.y + spieler.hoehe / 2)\n    );\n    if (dist < m.radius + 25) {\n      score += 10;\n      m.gesammelt = true;\n    }\n  });\n  muenzen = muenzen.filter(m => !m.gesammelt);\n}`,
+  check(v){ const ok=v.includes("Math.hypot")&&v.includes("score += 10")&&v.includes("muenzen.filter"); return {ok,msg:ok?"Exzellent! Math.hypot berechnet den Abstand zwischen zwei Punkten.":"Math.hypot für Abstand, score += 10, filter für Entfernung."}; },
+  accumulated:`let score = 0;\nfunction muenzenPruefen() {\n  muenzen.forEach(m => {\n    if (Math.hypot(m.x-(spieler.x+spieler.breite/2), m.y-(spieler.y+spieler.hoehe/2)) < m.radius+25) { score += 10; m.gesammelt = true; partikelErstellen(m.x, m.y); }\n  });\n  muenzen = muenzen.filter(m => !m.gesammelt);\n}\n`
+},
+
+// ── KAP 5: Score, Leben & Game Loop ──────────────────────────────────
+{
+  tag:"HUD", title:"Score und Leben anzeigen (HUD)",
+  desc:`HUD = Heads-Up-Display. Schreibe eine Funktion <code>hudZeichnen()</code>: Zeige oben links Score (<code>"SCORE: " + score</code>) und oben rechts Leben als Herzen (<code>"❤️".repeat(spieler.leben)</code>) in weißer Schrift, Größe <code>"bold 18px monospace"</code>.`,
+  hint:`ctx.fillText links und rechts ausrichten – für rechts ctx.textAlign = "right".`,
+  placeholder:`function hudZeichnen() {\n  ctx.fillStyle = "white";\n  ctx.font = "bold 18px monospace";\n  ctx.textAlign = "left";\n  ctx.fillText("SCORE: " + score, 10, 30);\n  ctx.textAlign = "right";\n  ctx.fillText("❤️".repeat(Math.max(0, spieler.leben)), canvas.width - 10, 30);\n  ctx.textAlign = "left";\n}`,
+  check(v){ const ok=v.includes("function hudZeichnen")&&v.includes('"SCORE: " + score')&&v.includes("spieler.leben"); return {ok,msg:ok?"Perfekt! Das HUD zeigt immer den aktuellen Spielstand.":"fillText für Score links und Herzen rechts mit textAlign."}; },
+  accumulated:`function hudZeichnen() {\n  ctx.fillStyle = "white";\n  ctx.font = "bold 18px monospace";\n  ctx.textAlign = "left";\n  ctx.fillText("SCORE: " + score, 10, 30);\n  ctx.textAlign = "right";\n  ctx.fillText("❤️".repeat(Math.max(0, spieler.leben)), canvas.width - 10, 30);\n  ctx.textAlign = "center";\n  ctx.fillStyle = "#ffffff44";\n  ctx.font = "12px monospace";\n  ctx.fillText("← → Bewegen | SPACE Springen", canvas.width/2, canvas.height - 10);\n  ctx.textAlign = "left";\n}\n`
+},
+{
+  tag:"HUD", title:"Game Over – Zustand und Anzeige",
+  desc:`Schreibe eine Variable <code>let spielLaeuft = true</code>. Schreibe eine Funktion <code>gameOver()</code>: Setze <code>spielLaeuft = false</code>, stoppe den Spawn-Intervall mit <code>clearInterval</code>. Zeige mittig auf dem Canvas in großer Schrift "GAME OVER" und den Score.`,
+  hint:`ctx.textAlign = "center"; ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);`,
+  placeholder:`let spielLaeuft = true;\nfunction gameOver() {\n  spielLaeuft = false;\n  clearInterval(spawnIntervall);\n  ctx.fillStyle = "rgba(0,0,0,0.7)";\n  ctx.fillRect(0, 0, canvas.width, canvas.height);\n  ctx.fillStyle = "#ff6b35";\n  ctx.font = "bold 56px monospace";\n  ctx.textAlign = "center";\n  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 20);\n  ctx.fillStyle = "white";\n  ctx.font = "24px monospace";\n  ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 30);\n}`,
+  check(v){ const ok=v.includes("spielLaeuft = false")&&v.includes("clearInterval")&&v.includes("GAME OVER"); return {ok,msg:ok?"Richtig! Game Over stoppt den Spawn und zeigt das Ergebnis.":"spielLaeuft=false + clearInterval + fillText GAME OVER."}; },
+  accumulated:`let spielLaeuft = true;\nfunction gameOver() {\n  spielLaeuft = false;\n  clearInterval(spawnIntervall);\n  ctx.fillStyle = "rgba(0,0,0,0.8)";\n  ctx.fillRect(0, 0, canvas.width, canvas.height);\n  ctx.fillStyle = "#ff6b35";\n  ctx.font = "bold 56px 'Space Mono', monospace";\n  ctx.textAlign = "center";\n  ctx.fillText("GAME OVER", canvas.width/2, 160);\n  ctx.fillStyle = "white";\n  ctx.font = "24px monospace";\n  ctx.fillText("Score: " + score, canvas.width/2, 220);\n  ctx.font = "16px monospace";\n  ctx.fillStyle = "#9a9488";\n  ctx.fillText("Drücke R zum Neustart", canvas.width/2, 270);\n  ctx.textAlign = "left";\n}\n`
+},
+{
+  tag:"HUD", title:"Neustart-Funktion",
+  desc:`Schreibe eine Funktion <code>neustart()</code>: Setze Spieler-Position zurück (x:50, y:300), life auf 3, score auf 0, spielLaeuft auf true, gegner und muenzen auf leere Arrays. Starte den Spawn-Intervall neu und rufe loop() auf.`,
+  hint:`Alle Variablen zurücksetzen + spawnIntervall neu starten + loop().`,
+  placeholder:`function neustart() {\n  spieler.x = 50; spieler.y = 300;\n  spieler.dx = 0; spieler.dy = 0;\n  spieler.leben = 3;\n  score = 0;\n  gegner = [];\n  muenzen = [];\n  spielLaeuft = true;\n  spawnIntervall = setInterval(() => gegner.push(gegnerErstellen()), 1800);\n  requestAnimationFrame(loop);\n}`,
+  check(v){ const ok=v.includes("function neustart")&&v.includes("spieler.leben = 3")&&v.includes("score = 0")&&v.includes("spielLaeuft = true"); return {ok,msg:ok?"Super! Neustart setzt alles zurück und beginnt von vorne.":"spieler.leben=3, score=0, spielLaeuft=true, Arrays leeren."}; },
+  accumulated:`function neustart() {\n  spieler.x = 50; spieler.y = 300; spieler.dx = 0; spieler.dy = 0; spieler.amBoden = false; spieler.leben = 3;\n  score = 0; gegner = []; muenzen = []; partikel = []; spielLaeuft = true;\n  clearInterval(spawnIntervall);\n  spawnIntervall = setInterval(() => gegner.push(gegnerErstellen()), 1800);\n  requestAnimationFrame(loop);\n}\nwindow.addEventListener("keydown", e => { if (e.code === "KeyR" && !spielLaeuft) neustart(); });\n`
+},
+{
+  tag:"HUD", title:"Score automatisch erhöhen",
+  desc:`Der Score soll mit der Zeit wachsen. Schreibe einen Intervall, der alle 100ms <code>score += 1</code> aufruft – aber nur wenn <code>spielLaeuft === true</code>. Stoppe diesen Intervall im gameOver().`,
+  hint:`<code>let scoreIntervall = setInterval(() => { if (spielLaeuft) score++; }, 100);</code>`,
+  placeholder:`let scoreIntervall = setInterval(() => {\n  if (spielLaeuft) score += 1;\n}, 100);`,
+  check(v){ const ok=v.includes("setInterval")&&v.includes("spielLaeuft")&&v.includes("score += 1")||v.includes("score++"); return {ok,msg:ok?"Perfekt! Der Score steigt automatisch mit der Überlebenszeit.":"setInterval mit spielLaeuft-Check und score++."}; },
+  accumulated:`let scoreIntervall = setInterval(() => { if (spielLaeuft) score += 1; }, 100);\n`
+},
+{
+  tag:"HUD", title:"Highscore mit localStorage",
+  desc:`Speichere den Highscore dauerhaft. Schreibe eine Variable <code>let highscore = parseInt(localStorage.getItem("game_highscore") || 0)</code>. In <code>gameOver()</code>: Wenn score > highscore, aktualisiere highscore und speichere mit <code>localStorage.setItem</code>. Zeige ihn im HUD an.`,
+  hint:`localStorage.getItem + parseInt + setItem in gameOver.`,
+  placeholder:`let highscore = parseInt(localStorage.getItem("game_highscore") || 0);\n// In gameOver() hinzufügen:\nif (score > highscore) {\n  highscore = score;\n  localStorage.setItem("game_highscore", highscore);\n}`,
+  check(v){ const ok=v.includes("localStorage.getItem(\"game_highscore\")")&&v.includes("localStorage.setItem")&&v.includes("highscore"); return {ok,msg:ok?"Exzellent! Der Highscore überdauert auch Browser-Neustarts.":"getItem beim Laden, setItem in gameOver wenn score > highscore."}; },
+  accumulated:`let highscore = parseInt(localStorage.getItem("game_highscore") || 0);\nfunction highscoreUpdate() { if (score > highscore) { highscore = score; localStorage.setItem("game_highscore", highscore); } }\n`
+},
+{
+  tag:"HUD", title:"Plattformen zeichnen",
+  desc:`Plattformen sind stationäre Rechtecke. Definiere ein Array <code>plattformen</code> mit 3 Objekten: <code>{ x: 100, y: 280, breite: 120, hoehe: 15, farbe: "#3ecf8e" }</code>, eine bei x:300 y:220 breite:120, und eine bei x:450 y:260 breite:100. Schreibe eine Funktion <code>plattformenZeichnen()</code>.`,
+  hint:`Array von 3 Plattform-Objekten + forEach mit fillRect.`,
+  placeholder:`const plattformen = [\n  { x: 100, y: 280, breite: 120, hoehe: 15, farbe: "#3ecf8e" },\n  { x: 300, y: 220, breite: 120, hoehe: 15, farbe: "#3ecf8e" },\n  { x: 450, y: 260, breite: 100, hoehe: 15, farbe: "#3ecf8e" }\n];\nfunction plattformenZeichnen() {\n  plattformen.forEach(p => {\n    ctx.fillStyle = p.farbe;\n    ctx.fillRect(p.x, p.y, p.breite, p.hoehe);\n  });\n}`,
+  check(v){ const ok=v.includes("const plattformen")&&(v.match(/\{/g)||[]).length>=3&&v.includes("plattformenZeichnen"); return {ok,msg:ok?"Super! Plattformen geben dem Spiel Tiefe und Strategie.":"Array mit 3 Plattform-Objekten + Zeichen-Funktion."}; },
+  accumulated:`const plattformen = [\n  { x: 80, y: 290, breite: 120, hoehe: 15, farbe: "#3ecf8e" },\n  { x: 280, y: 230, breite: 130, hoehe: 15, farbe: "#3ecf8e" },\n  { x: 440, y: 270, breite: 110, hoehe: 15, farbe: "#3ecf8e" }\n];\nfunction plattformenZeichnen() { plattformen.forEach(p => { ctx.fillStyle = p.farbe; ctx.fillRect(p.x, p.y, p.breite, p.hoehe); ctx.fillStyle = "#3ecf8e44"; ctx.fillRect(p.x, p.y+p.hoehe, p.breite, 4); }); }\n`
+},
+{
+  tag:"HUD", title:"Plattform-Kollision mit Spieler",
+  desc:`Schreibe eine Funktion <code>plattformKollision()</code>: Prüfe für jede Plattform, ob der Spieler von oben draufsteht (spieler fällt nach unten: <code>spieler.dy > 0</code>, spieler.y + hoehe war über p.y, jetzt ist er drauf). Wenn ja: setze spieler.y, spieler.dy = 0, amBoden = true.`,
+  hint:`Plattform-Kollision: dy > 0, spieler.y + hoehe >= p.y, spieler.y + hoehe <= p.y + 15 und x-Überlappung.`,
+  placeholder:`function plattformKollision() {\n  plattformen.forEach(p => {\n    if (spieler.dy >= 0 &&\n        spieler.y + spieler.hoehe >= p.y &&\n        spieler.y + spieler.hoehe <= p.y + 20 &&\n        spieler.x + spieler.breite > p.x &&\n        spieler.x < p.x + p.breite) {\n      spieler.y = p.y - spieler.hoehe;\n      spieler.dy = 0;\n      spieler.amBoden = true;\n    }\n  });\n}`,
+  check(v){ const ok=v.includes("plattformKollision")&&v.includes("spieler.amBoden = true")&&v.includes("plattformen.forEach"); return {ok,msg:ok?"Perfekt! Plattform-Kollision von oben ist der Klassiker in Jump'n'Runs.":"forEach + dy>=0 + y-Check + x-Überlappung → amBoden=true."}; },
+  accumulated:`function plattformKollision() {\n  plattformen.forEach(p => {\n    if (spieler.dy >= 0 && spieler.y+spieler.hoehe >= p.y && spieler.y+spieler.hoehe <= p.y+20 && spieler.x+spieler.breite > p.x && spieler.x < p.x+p.breite) {\n      spieler.y = p.y - spieler.hoehe; spieler.dy = 0; spieler.amBoden = true;\n    }\n  });\n}\n`
+},
+
+// ── KAP 6: Spiel fertigstellen ────────────────────────────────────────
+{
+  tag:"Finalisierung", title:"Vollständige Game-Loop zusammenbauen",
+  desc:`Schreibe die finale Game-Loop, die alle Funktionen in der richtigen Reihenfolge aufruft: Hintergrund → Plattformen → Spieler-Physik & Bewegung & Grenzen & Plattform-Kollision → Spieler zeichnen → Gegner → Münzen → Partikel → Kollisionen → HUD → Game-Over-Check.`,
+  hint:`Reihenfolge: clear → zeichnen → physik → kollision → HUD → requestAnimationFrame.`,
+  placeholder:`function loop() {\n  if (!spielLaeuft) return;\n  hintergrundZeichnen();\n  plattformenZeichnen();\n  spielerPhysik();\n  sprung();\n  spielerBewegen();\n  spielerGrenzen();\n  plattformKollision();\n  spielerZeichnen();\n  gegnerUpdate();\n  muenzenUpdate();\n  partikelUpdate();\n  kollisionPruefen();\n  muenzenPruefen();\n  hudZeichnen();\n  if (spieler.leben <= 0) gameOver();\n  else requestAnimationFrame(loop);\n}\nrequestAnimationFrame(loop);`,
+  check(v){ const ok=v.includes("function loop()")&&v.includes("!spielLaeuft")&&v.includes("hintergrundZeichnen()")&&v.includes("requestAnimationFrame(loop)"); return {ok,msg:ok?"Das Spiel läuft! Die komplette Loop ist zusammengebaut.":"Alle Funktionen in loop(), spielLaeuft-Check, requestAnimationFrame."}; },
+  accumulated:`function loop() {\n  if (!spielLaeuft) return;\n  hintergrundZeichnen();\n  plattformenZeichnen();\n  spielerPhysik();\n  sprung();\n  spielerBewegen();\n  spielerGrenzen();\n  plattformKollision();\n  spielerZeichnen();\n  gegnerUpdate();\n  muenzenUpdate && muenzenUpdate();\n  partikelUpdate();\n  kollisionPruefen();\n  muenzenPruefen && muenzenPruefen();\n  highscoreUpdate && highscoreUpdate();\n  hudZeichnen();\n  if (spieler.leben <= 0) { gameOver(); return; }\n  requestAnimationFrame(loop);\n}\n`
+},
+{
+  tag:"Finalisierung", title:"Hintergrund-Sterne animieren",
+  desc:`Erstelle ein Array von 50 Sternen: Jeder Stern hat zufälliges <code>x, y, r (0.5–2), geschwindigkeit (0.1–0.5)</code>. Zeichne sie in der Background-Funktion und bewege sie langsam nach links. Wenn ein Stern links rausgeht, setze ihn rechts wieder ein.`,
+  hint:`Array von 50 Objekten, forEach in hintergrundZeichnen, x -= geschwindigkeit, reset wenn x < 0.`,
+  placeholder:`const sterne = Array.from({length:50}, () => ({\n  x: Math.random() * 600,\n  y: Math.random() * 360,\n  r: 0.5 + Math.random() * 1.5,\n  geschwindigkeit: 0.1 + Math.random() * 0.4\n}));\n// In hintergrundZeichnen() hinzufügen:\nsterne.forEach(s => {\n  s.x -= s.geschwindigkeit;\n  if (s.x < 0) { s.x = 600; s.y = Math.random() * 360; }\n  ctx.beginPath();\n  ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);\n  ctx.fillStyle = "white";\n  ctx.fill();\n});`,
+  check(v){ const ok=v.includes("sterne")&&v.includes("Array.from")||v.includes("new Array"); return {ok,msg:ok&&v.includes("geschwindigkeit")?"Wunderschön! Parallax-Sterne geben dem Spiel Tiefe.":"Array von 50 Sternen + forEach in hintergrundZeichnen."}; },
+  accumulated:`const sterne = Array.from({length:60}, () => ({ x: Math.random()*600, y: Math.random()*360, r: 0.3+Math.random()*2, g: 0.05+Math.random()*0.3 }));\n`
+},
+{
+  tag:"Finalisierung", title:"Sound-Effekte mit Web Audio API",
+  desc:`Die Web Audio API ermöglicht Töne ohne externe Dateien. Schreibe eine Funktion <code>piepton(frequenz, dauer)</code>: Erstelle <code>new AudioContext()</code>, einen <code>OscillatorNode</code>, verbinde ihn mit <code>destination</code>, setze <code>oscillator.frequency.value = frequenz</code>, starte und stoppe nach <code>dauer</code> Sekunden.`,
+  hint:`<code>const ac = new AudioContext(); const osc = ac.createOscillator(); osc.connect(ac.destination); osc.frequency.value = freq; osc.start(); osc.stop(ac.currentTime + dauer);</code>`,
+  placeholder:`function piepton(frequenz, dauer) {\n  try {\n    const ac = new AudioContext();\n    const osc = ac.createOscillator();\n    const gain = ac.createGain();\n    osc.connect(gain);\n    gain.connect(ac.destination);\n    osc.frequency.value = frequenz;\n    gain.gain.setValueAtTime(0.1, ac.currentTime);\n    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dauer);\n    osc.start();\n    osc.stop(ac.currentTime + dauer);\n  } catch(e) {}\n}`,
+  check(v){ const ok=v.includes("AudioContext")&&v.includes("createOscillator")&&v.includes("osc.stop"); return {ok,msg:ok?"Exzellent! Web Audio API erzeugt Töne ohne externe Dateien.":"AudioContext + createOscillator + connect + start + stop."}; },
+  accumulated:`function piepton(f, d) { try { const ac=new(window.AudioContext||window.webkitAudioContext)(); const o=ac.createOscillator(); const g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value=f; g.gain.setValueAtTime(0.08,ac.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d); o.start(); o.stop(ac.currentTime+d); } catch(e){} }\n`
+},
+{
+  tag:"Finalisierung", title:"Level-System – Schwierigkeit steigern",
+  desc:`Das Spiel soll schwieriger werden. Definiere <code>let level = 1</code>. Schreibe eine Funktion <code>levelUpdate()</code>: Wenn <code>score > level * 200</code>, erhöhe level, zeige "LEVEL " + level mittig auf dem Canvas für 1 Sekunde, und reduziere das Spawn-Intervall (Gegner spawnen schneller).`,
+  hint:`if (score > level * 200) { level++; clearInterval; setInterval mit kürzerer Zeit; }`,
+  placeholder:`let level = 1;\nfunction levelUpdate() {\n  if (score > level * 200) {\n    level++;\n    clearInterval(spawnIntervall);\n    spawnIntervall = setInterval(() => gegner.push(gegnerErstellen()), Math.max(500, 1800 - level * 150));\n  }\n}`,
+  check(v){ const ok=v.includes("let level = 1")&&v.includes("level++")&&v.includes("score > level"); return {ok,msg:ok?"Perfekt! Das Spiel wird mit steigendem Score härter.":"level++, clearInterval + neues setInterval mit kürzerer Zeit."}; },
+  accumulated:`let level = 1;\nfunction levelUpdate() { if (spielLaeuft && score > level * 200) { level++; clearInterval(spawnIntervall); spawnIntervall = setInterval(() => gegner.push(gegnerErstellen()), Math.max(600, 1800-level*150)); piepton(660, 0.3); } }\n`
+},
+{
+  tag:"Finalisierung", title:"Spiel komplett – Start-Screen",
+  desc:`Schreibe einen Startbildschirm: Variable <code>let spielGestartet = false</code>. Zeichne vor Spielstart einen Overlay mit Titel "JUMP GAME", Anleitung "SPACE zum Starten" und warte auf Space-Taste um <code>spielGestartet = true</code> zu setzen und die Loop zu starten.`,
+  hint:`spielGestartet verhindert loop()-Start bis SPACE gedrückt wird.`,
+  placeholder:`let spielGestartet = false;\nfunction startScreen() {\n  ctx.fillStyle = "#1a1a2e";\n  ctx.fillRect(0, 0, canvas.width, canvas.height);\n  ctx.fillStyle = "#ff6b35";\n  ctx.font = "bold 64px monospace";\n  ctx.textAlign = "center";\n  ctx.fillText("JUMP GAME", canvas.width/2, 160);\n  ctx.fillStyle = "white";\n  ctx.font = "20px monospace";\n  ctx.fillText("← → Bewegen | SPACE Springen", canvas.width/2, 240);\n  ctx.fillStyle = "#ffd93d";\n  ctx.fillText("SPACE zum Starten", canvas.width/2, 290);\n  ctx.textAlign = "left";\n}\nstartScreen();\nwindow.addEventListener("keydown", function start(e) {\n  if (e.code === "Space" && !spielGestartet) {\n    spielGestartet = true;\n    window.removeEventListener("keydown", start);\n    requestAnimationFrame(loop);\n  }\n});\n<\/script>`,
+  check(v){ const ok=v.includes("spielGestartet")&&v.includes("startScreen")&&v.includes("JUMP GAME"); return {ok,msg:ok?"🎮 Herzlichen Glückwunsch! Dein Browser-Spiel ist komplett!":"startScreen() + spielGestartet-Flag + Space-Listener."}; },
+  accumulated:`function startScreen() {\n  ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0,0,600,400);\n  ctx.fillStyle = "#ff6b35"; ctx.font = "bold 64px monospace"; ctx.textAlign = "center";\n  ctx.fillText("JUMP GAME", 300, 150);\n  ctx.fillStyle = "#ffd93d"; ctx.font = "16px monospace";\n  ctx.fillText("← → Bewegen  |  SPACE Springen", 300, 210);\n  ctx.fillStyle = "white"; ctx.font = "22px monospace";\n  ctx.fillText("▶ SPACE zum Starten", 300, 270);\n  ctx.fillStyle = "#9a9488"; ctx.font = "14px monospace";\n  ctx.fillText("Highscore: " + highscore, 300, 320);\n  ctx.textAlign = "left";\n}\nstartScreen();\nwindow.addEventListener("keydown", function einmalStart(e) {\n  if (e.code === "Space") { window.removeEventListener("keydown", einmalStart); requestAnimationFrame(loop); }\n});\n<\/script>\n</body>\n</html>`
+}
+];
+
+// =====================================================================
+// STATE & ENGINE
+// =====================================================================
+const TOTAL = 50;
+let state = { current: 0, solved: new Array(TOTAL).fill(false) };
+try {
+  const saved = JSON.parse(localStorage.getItem("game_kurs_state")||"null");
+  if (saved && saved.solved && saved.solved.length===TOTAL) state = saved;
+} catch(e){}
+
+function saveState() { try { localStorage.setItem("game_kurs_state", JSON.stringify(state)); } catch(e){} }
+
+function buildSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = "";
+  CHAPTERS.forEach(ch => {
+    const h = document.createElement("div");
+    h.className = "chapter-title";
+    h.textContent = ch.title;
+    sb.appendChild(h);
+    for (let i = ch.range[0]; i <= ch.range[1]; i++) {
+      const ex = EXERCISES[i];
+      const div = document.createElement("div");
+      const isLocked = !isUnlocked(i);
+      const isDone = state.solved[i];
+      div.className = "sb-item"+(i===state.current?" active":"")+(isDone?" done":"")+(isLocked?" locked":"");
+      div.innerHTML = `<span class="sb-num">${String(i+1).padStart(2,"0")}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ex.title}</span><span class="sb-check">${isDone?"✓":isLocked?"🔒":""}</span>`;
+      if (!isLocked) div.onclick = () => goTo(i);
+      sb.appendChild(div);
+    }
+  });
+}
+
+function isUnlocked(i) { return i===0 || state.solved[i-1]; }
+
+function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function getAccumulatedSoFar(upToIndex) {
+  return EXERCISES.slice(0, upToIndex).filter(e=>e.accumulated).map(e=>e.accumulated).join('');
+}
+
+function buildExercise(i) {
+  const ex = EXERCISES[i];
+  const area = document.getElementById("exercise-area");
+  if (!isUnlocked(i)) {
+    area.innerHTML = `<div class="locked-overlay"><div class="lock-icon">🔒</div><p>Löse erst Übung ${i} um weiterzumachen.</p></div>`;
+    return;
+  }
+  const totalEx = EXERCISES.length;
+  const prevD = i===0?"disabled":"";
+  const nextD = (!state.solved[i]||i===totalEx-1)?"disabled":"";
+  const acc = getAccumulatedSoFar(i);
+  const hasAcc = acc.trim().length > 0;
+  const ctxHtml = hasAcc ? `
+    <div class="code-context-wrap">
+      <div class="code-context-header">
+        <span>📄 Dein Spiel-Code bisher</span>
+        <span class="code-context-badge">✏️ dein Code kommt hier unten</span>
+      </div>
+      <pre class="code-context-pre"><span class="code-context-done">${escapeHtml(acc)}</span><span class="code-context-cursor">▌ // ✏️ Übung ${i+1}</span></pre>
+    </div>` : '';
+
+  area.innerHTML = `
+    <div class="ex-header">
+      <div class="ex-tag">Übung ${i+1} / ${totalEx} – ${escapeHtml(ex.tag)}</div>
+      <div class="ex-title" id="ex-title-${i}"></div>
+      <div class="ex-desc">${ex.desc}</div>
+    </div>
+    <div class="ex-hint">${ex.hint}</div>
+    ${ctxHtml}
+    <div class="editor-wrap">
+      <div class="editor-toolbar">
+        <span>game.js</span>
+        <button class="btn-check" onclick="checkAnswer(${i})">▶ Prüfen</button>
+      </div>
+      <textarea class="code-input" id="code-input-${i}" spellcheck="false"></textarea>
+    </div>
+    <div class="feedback" id="feedback-${i}"></div>
+    <div class="ex-nav">
+      <button class="btn-nav" onclick="goTo(${i-1})" ${prevD}>← Zurück</button>
+      <button class="btn-nav primary" id="next-btn-${i}" onclick="goTo(${i+1})" ${nextD}>Weiter →</button>
+    </div>`;
+  document.getElementById(`ex-title-${i}`).textContent = ex.title;
+  const ta = document.getElementById(`code-input-${i}`);
+  if (ta) { ta.placeholder = ex.placeholder; ta.value = state.solved[i] ? ex.placeholder : ""; }
+  if (state.solved[i]) { showFeedback(i, true, "Bereits gelöst ✓"); document.getElementById(`next-btn-${i}`).disabled = false; }
+}
+
+function checkAnswer(i) {
+  const ta = document.getElementById(`code-input-${i}`);
+  if (!ta) return;
+  const result = EXERCISES[i].check(ta.value);
+  showFeedback(i, result.ok, result.msg);
+  if (result.ok && !state.solved[i]) {
+    state.solved[i] = true; saveState(); updateProgress(); buildSidebar();
+    const nb = document.getElementById(`next-btn-${i}`);
+    if (nb) nb.disabled = false;
+    updatePreview();
+    if (i===EXERCISES.length-1) setTimeout(()=>document.getElementById("finish-screen").classList.add("show"), 800);
+  }
+}
+
+function showFeedback(i, ok, msg) {
+  const fb = document.getElementById(`feedback-${i}`);
+  if (!fb) return;
+  fb.className = "feedback show "+(ok?"ok":"err");
+  fb.textContent = msg;
+}
+
+function goTo(i) {
+  if (i<0||i>=EXERCISES.length||!isUnlocked(i)) return;
+  state.current = i; saveState(); buildSidebar(); buildExercise(i); updateProgress();
+  document.getElementById("exercise-area").scrollTop = 0;
+}
+
+function updateProgress() {
+  const count = state.solved.filter(Boolean).length;
+  document.getElementById("progress-bar").style.width = (count/TOTAL*100)+"%";
+  document.getElementById("progress-label").textContent = `${count} / ${TOTAL} gelöst`;
+}
+
+function buildFinalGame() {
+  return EXERCISES.filter((e,i)=>state.solved[i]&&e.accumulated).map(e=>e.accumulated).join('');
+}
+
+function updatePreview() {
+  const code = buildFinalGame();
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;background:#0d0d0f;display:flex;justify-content:center;padding-top:10px;}</style></head><body>${code}</body></html>`;
+  try { document.getElementById("result-preview").srcdoc = html; } catch(e){}
+  document.getElementById("accumulated-code-display").textContent = code.slice(0,500)+(code.length>500?"…":"");
+}
+
+function downloadGame() {
+  const code = buildFinalGame();
+  const html = `<!DOCTYPE html>\n<html lang="de">\n<head><meta charset="UTF-8"><title>Mein Jump Game</title><style>body{margin:0;background:#0d0d0f;display:flex;justify-content:center;align-items:center;min-height:100vh;}</style></head>\n<body>\n${code}\n</body>\n</html>`;
+  const a = Object.assign(document.createElement("a"), {href: URL.createObjectURL(new Blob([html],{type:"text/html"})), download: "mein-jump-game.html"});
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+
+function printCertificate() {
+  const name = document.getElementById("cert-name-input").value.trim() || "–";
+  const date = "Nordhorn, " + new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"long",year:"numeric"});
+  const w = window.open("","_blank");
+  w.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Game-Zertifikat</title><style>@page{size:A4 landscape;margin:0}*{box-sizing:border-box;margin:0;padding:0}body{background:#0a0a14;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Georgia,serif}.cert{width:90vw;max-width:900px;padding:60px 80px;text-align:center;border:10px solid #ff6b35;box-shadow:inset 0 0 0 4px #0a0a14,inset 0 0 0 8px #ff6b35;color:#f0ece4;background:#12100e}.emoji{font-size:4rem;margin-bottom:10px}.top{font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:#9a9488;margin-bottom:6px;font-family:monospace}.title{font-size:2.8rem;font-weight:bold;color:#ff6b35;margin-bottom:4px}.sub{font-size:.85rem;color:#9a9488;margin-bottom:32px;font-family:monospace}.label{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:#9a9488;margin-bottom:6px;font-family:monospace}.name{font-size:3rem;color:#f0ece4;border-bottom:2px solid #ff6b35;display:inline-block;padding:4px 24px 8px;min-width:300px;margin-bottom:28px}.txt{font-size:.9rem;color:#b0a898;line-height:1.9;margin-bottom:8px;font-family:monospace}.badge{font-size:1rem;font-weight:bold;color:#ffd93d;letter-spacing:.05em;margin-bottom:28px}hr{border:none;border-top:1px solid #ff6b3544;margin:24px 0}.date{font-size:.75rem;color:#9a9488;font-family:monospace}</style></head><body><div class="cert"><div class="emoji">🎮</div><div class="top">Game-Zertifikat</div><div class="title">Game Creation</div><div class="sub">Browser-Game Kurs · 50 Übungen</div><div class="label">Ausgestellt für</div><div class="name">${name}</div><div class="txt">hat den kompletten Game-Creation-Kurs absolviert<br>und dabei Canvas-Rendering, Physik, Kollisionserkennung,<br>Spieler-Steuerung und ein vollständiges Jump&amp;Run-Spiel gebaut.</div><div class="badge">✦ 50 / 50 Game-Übungen gelöst ✦</div><hr><div class="date">${date}</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+buildSidebar(); buildExercise(state.current); updateProgress(); updatePreview();
+</script>
+</body>
+</html>
