@@ -146,7 +146,7 @@ const CHAPTERS = [
   { title: "Kapitel 3 – Spieler & Steuerung", range: [18, 26] },
   { title: "Kapitel 4 – Gegner & Kollision", range: [27, 35] },
   { title: "Kapitel 5 – Score, Leben & Game Loop", range: [36, 44] },
-  { title: "Kapitel 6 – Spiel fertigstellen", range: [45, 49] },
+  { title: "Kapitel 6 – Spiel fertigstellen", range: [45, 45] },
 ];
 
 const EXERCISES = [
@@ -535,7 +535,7 @@ const EXERCISES = [
 // =====================================================================
 // STATE & ENGINE
 // =====================================================================
-const TOTAL = 50;
+const TOTAL = 46;
 let state = { current: 0, solved: new Array(TOTAL).fill(false) };
 try {
   const saved = JSON.parse(localStorage.getItem("game_kurs_state")||"null");
