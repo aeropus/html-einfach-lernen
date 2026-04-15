@@ -701,7 +701,7 @@ const EXERCISES = [
   hint:`<code>&lt;nav&gt;&lt;a href="#start"&gt;Start&lt;/a&gt; ...&lt;/nav&gt;</code>`,
   placeholder:`<nav>\n  <a href="#start">Start</a>\n  <a href="#portfolio">Portfolio</a>\n  <a href="#kontakt">Kontakt</a>\n</nav>`,
   check(v){ const ok=v.includes("<nav>")&&v.includes("#start")&&v.includes("#portfolio")&&v.includes("#kontakt"); return {ok,msg:ok?"Super! nav ist das semantische Element für die Navigation.":"nav mit drei Anker-Links einfügen."}; },
-  accumulated: '  <nav>\n    <a href="#start">Start</a> |\n    <a href="#portfolio">Portfolio</a> |\n    <a href="#kontakt">Kontakt</a>\n  </nav>\n'
+  accumulated: ''
 },
 {
   tag:"Links & Bilder", title:"Download-Link",
