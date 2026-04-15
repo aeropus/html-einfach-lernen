@@ -807,7 +807,7 @@ const EXERCISES = [
   desc:`Schreibe dieselbe Fetch-Anfrage, aber mit <code>async/await</code>: async-Funktion <code>ladeTodo()</code>, die mit await fetcht, dann mit await <code>.json()</code> aufruft und das Ergebnis loggt.`,
   hint:`<code>async function ladeTodo() { const res = await fetch(url); const data = await res.json(); console.log(data); }</code>`,
   placeholder:`async function ladeTodo() {\n  const res = await fetch("https://jsonplaceholder.typicode.com/todos/1");\n  const data = await res.json();\n  console.log(data);\n}\nladeTodo();`,
-  check(v){ const ok=v.includes("async")&&v.includes("await fetch")&&v.includes("await res.json()||await result.json()"); return {ok,msg:ok?"Perfekt! async/await macht fetch-Code viel lesbarer.":"async function + await fetch + await .json()"; } let ok2 = v.includes("async")&&v.includes("await")&&v.includes("fetch(")&&v.includes(".json()"); return {ok:ok2, msg:ok2?"Perfekt! async/await macht fetch-Code viel lesbarer.":"async function + await fetch + await .json()"}; },
+  check(v){ const ok=v.includes("async")&&v.includes("await")&&v.includes("fetch(")&&v.includes(".json()"); return {ok,msg:ok?"Perfekt! async/await macht fetch-Code viel lesbarer.":"async function + await fetch + await .json()"}; },
   accumulated: ""
 },
 {
