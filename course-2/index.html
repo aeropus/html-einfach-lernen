@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML, CSS & JS Pro-Kurs – 65 Übungen</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a35;
+    --accent: #a78bfa;
+    --accent2: #34d399;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --muted: #7a7a95;
+    --radius: 10px;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  #app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  #app-header h1 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  #app-header span { color: var(--muted); font-size: 0.85rem; font-family: var(--mono); }
+
+  #progress-bar-wrap {
+    flex: 1;
+    max-width: 280px;
+    margin: 0 24px;
+    background: var(--border);
+    height: 6px;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.5s ease;
+    border-radius: 99px;
+  }
+
+  /* ===== LAYOUT ===== */
+  #main-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+    min-height: calc(100vh - 65px);
+  }
+
+  /* ===== SIDEBAR ===== */
+  #sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    overflow-y: auto;
+    max-height: calc(100vh - 65px);
+    position: sticky;
+    top: 65px;
+  }
+  .chapter-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 12px 10px 6px;
+    font-family: var(--mono);
+  }
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+    font-family: var(--mono);
+  }
+  .sb-item.active { background: rgba(167,139,250,0.12); color: var(--accent); }
+  .sb-item.done { color: var(--green); }
+  .sb-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .sb-item:hover:not(.locked) { background: var(--surface2); color: var(--text); }
+  .sb-num {
+    font-size: 0.65rem;
+    min-width: 20px;
+    color: inherit;
+    opacity: 0.6;
+  }
+  .sb-check { font-size: 0.75rem; }
+
+  /* ===== EXERCISE AREA ===== */
+  #exercise-area {
+    padding: 40px 48px;
+    overflow-y: auto;
+    max-height: calc(100vh - 65px);
+  }
+
+  .ex-header {
+    margin-bottom: 32px;
+  }
+  .ex-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    background: rgba(52,211,153,0.15);
+    color: var(--accent2);
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    letter-spacing: 0.06em;
+  }
+  .ex-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .ex-desc {
+    color: #b0b0c8;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+  .ex-desc code {
+    background: var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 0.78rem;
+  }
+  .ex-hint {
+    background: rgba(167,139,250,0.08);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    color: #c4b5fd;
+    line-height: 1.6;
+  }
+  .ex-hint code { background: rgba(167,139,250,0.2); padding: 1px 5px; border-radius: 3px; color: #ddd6fe; }
+
+  /* ===== PRO BADGE ===== */
+  .pro-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0d0d0f;
+    font-size: 0.6rem;
+    font-family: var(--mono);
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.1em;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ===== CODE CONTEXT ===== */
+  .code-context-wrap {
+    background: #0a0a0e;
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 16px 0 4px;
+  }
+  .code-context-header {
+    background: #12122a;
+    border-bottom: 1px solid #2a3550;
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .code-context-badge {
+    background: rgba(167,139,250,0.15);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+  }
+  .code-context-pre {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 14px 16px;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 220px;
+    overflow-y: auto;
+    line-height: 1.65;
+  }
+  .code-context-done { color: #5a7a5a; }
+  .code-context-cursor {
+    display: block;
+    color: var(--accent);
+    background: rgba(167,139,250,0.07);
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+    margin-top: 2px;
+    animation: blink 1.2s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ===== CODE EDITOR ===== */
+  .editor-wrap {
+    background: #0a0a0e;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .editor-toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .editor-toolbar span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .btn-check {
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-check:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-check:active { transform: translateY(0); }
+
+  textarea.code-input {
+    width: 100%;
+    min-height: 130px;
+    background: transparent;
+    border: none;
+    color: #d0d0e8;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 16px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .feedback.err { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--red); }
+  .feedback.ok::before { content: "✓ "; }
+  .feedback.err::before { content: "✗ "; }
+
+  /* Nav buttons */
+  .ex-nav {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .btn-nav {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-nav:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .btn-nav.primary { background: var(--accent2); border-color: var(--accent2); color: #0d0d0f; }
+  .btn-nav.primary:hover { opacity: 0.85; background: var(--accent2); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ===== PREVIEW PANEL ===== */
+  #preview-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  #preview-panel h3 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+  }
+  #result-preview {
+    flex: 1;
+    background: #fff;
+    width: 100%;
+    border: none;
+    min-height: 300px;
+  }
+  #accumulated-code-display {
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    overflow-y: auto;
+    max-height: 260px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.6;
+  }
+
+  /* ===== FINISH SCREEN ===== */
+  #finish-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+  #finish-screen.show { display: flex; }
+  #finish-screen h2 { font-size: 3rem; font-weight: 800; color: var(--accent); margin-bottom: 12px; }
+  #finish-screen p { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+  .btn-show-result {
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-show-result:hover { opacity: 0.85; }
+
+  /* Locked overlay */
+  .locked-overlay {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+  .locked-overlay .lock-icon { font-size: 3rem; margin-bottom: 16px; }
+
+  @media (max-width: 1100px) {
+    #main-layout { grid-template-columns: 200px 1fr 260px; }
+  }
+  @media (max-width: 800px) {
+    #main-layout { grid-template-columns: 1fr 220px; }
+    #sidebar { display: none; }
+    #exercise-area { padding: 24px 16px; }
+  }
+  @media (max-width: 560px) {
+    #main-layout { grid-template-columns: 1fr; }
+    #preview-panel { display: none; }
+    #exercise-area { padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header id="app-header">
+  <h1>⟨HTML/CSS/JS⟩ Pro-Kurs <span class="pro-badge">PRO</span></h1>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <span id="progress-label">0 / 65 gelöst</span>
+</header>
+
+<!-- ===== MAIN LAYOUT ===== -->
+<div id="main-layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar" aria-label="Übungen"></nav>
+
+  <!-- EXERCISE CONTENT -->
+  <main id="exercise-area"></main>
+
+  <!-- LIVE PREVIEW -->
+  <aside id="preview-panel">
+    <h3>🔎 Deine App bisher</h3>
+    <iframe id="result-preview" title="Vorschau" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div id="accumulated-code-display"><!-- Code wird hier angezeigt --></div>
+  </aside>
+
+</div>
+
+<!-- FINISH SCREEN -->
+<div id="finish-screen">
+  <div style="font-size:5rem;margin-bottom:16px">🚀</div>
+  <h2>Pro-Kurs abgeschlossen!</h2>
+  <p>Herzlichen Glückwunsch! Du hast alle 65 Pro-Übungen erfolgreich gemeistert – CSS-Animationen, JS-Patterns und eine komplette interaktive App!</p>
+
+  <div style="margin-bottom:28px;">
+    <label style="display:block;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">Dein Name für das Zertifikat</label>
+    <input id="cert-name-input" type="text" placeholder="Deinen Namen eingeben …" maxlength="60" autofocus
+      style="font-size:1.5rem;font-family:Georgia,serif;text-align:center;background:var(--surface2);border:2px solid var(--accent);border-radius:8px;color:var(--text);padding:10px 24px;width:100%;max-width:400px;outline:none;" />
+  </div>
+
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn-show-result" onclick="printCertificate()">🏆 Pro-Zertifikat</button>
+    <button class="btn-show-result" style="background:var(--accent2);color:#0d0d0f;" onclick="downloadApp()">⬇️ App herunterladen</button>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// PRO KURS – 65 Übungen in 7 Kapitel
+// Aufbauend auf dem Grundkurs (HTML/CSS/JS Grundlagen bekannt)
+// =====================================================================
+
+const CHAPTERS = [
+  { title: "Kapitel 1 – CSS Variablen & Custom Properties", range: [0, 8] },
+  { title: "Kapitel 2 – CSS Animationen & Übergänge", range: [9, 17] },
+  { title: "Kapitel 3 – Fortgeschrittenes JavaScript", range: [18, 28] },
+  { title: "Kapitel 4 – DOM-Manipulation & Events", range: [29, 38] },
+  { title: "Kapitel 5 – Fetch API & JSON", range: [39, 47] },
+  { title: "Kapitel 6 – JavaScript Patterns & Klassen", range: [48, 56] },
+  { title: "Kapitel 7 – Interaktive App bauen", range: [57, 64] },
+];
+
+const EXERCISES = [
+
+// ── KAP 1: CSS Variablen & Custom Properties ─────────────────────────
+{
+  tag:"CSS Variablen", title:"Custom Properties definieren",
+  desc:`CSS-Variablen (Custom Properties) beginnen mit <code>--</code> und werden im <code>:root</code>-Selektor definiert. Definiere drei Variablen: <code>--farbe-haupt: #6c63ff</code>, <code>--farbe-text: #333</code> und <code>--abstand: 16px</code>.`,
+  hint:`<code>:root { --farbe-haupt: #6c63ff; --farbe-text: #333; --abstand: 16px; }</code>`,
+  placeholder:`:root {\n  --farbe-haupt: #6c63ff;\n  --farbe-text: #333;\n  --abstand: 16px;\n}`,
+  check(v){ const ok=v.includes(":root")&&v.includes("--farbe-haupt")&&v.includes("--farbe-text")&&v.includes("--abstand"); return {ok,msg:ok?"Perfekt! CSS-Variablen sind wiederverwendbar und leicht änderbar.":"Alle drei Variablen im :root definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Custom Properties verwenden",
+  desc:`CSS-Variablen werden mit <code>var(--name)</code> eingesetzt. Schreibe eine Regel für <code>h1</code>, die <code>var(--farbe-haupt)</code> als Textfarbe und <code>var(--abstand)</code> als margin-bottom nutzt.`,
+  hint:`<code>h1 { color: var(--farbe-haupt); margin-bottom: var(--abstand); }</code>`,
+  placeholder:`h1 {\n  color: var(--farbe-haupt);\n  margin-bottom: var(--abstand);\n}`,
+  check(v){ const ok=v.includes("var(--farbe-haupt)")&&v.includes("var(--abstand)"); return {ok,msg:ok?"Super! var() macht den Code wartbar und konsistent.":"var(--farbe-haupt) und var(--abstand) für h1 nutzen."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Fallback-Werte in var()",
+  desc:`<code>var()</code> akzeptiert einen Fallback als zweiten Parameter: <code>var(--name, fallback)</code>. Schreibe eine Regel für <code>.btn</code>: background ist <code>var(--farbe-btn, #007bff)</code> und padding <code>var(--btn-padding, 12px 24px)</code>.`,
+  hint:`<code>.btn { background: var(--farbe-btn, #007bff); padding: var(--btn-padding, 12px 24px); }</code>`,
+  placeholder:`.btn {\n  background: var(--farbe-btn, #007bff);\n  padding: var(--btn-padding, 12px 24px);\n}`,
+  check(v){ const ok=v.includes("var(--farbe-btn")&&v.includes("#007bff")&&v.includes("var(--btn-padding"); return {ok,msg:ok?"Richtig! Fallbacks sichern den Code ab, wenn Variablen fehlen.":"Fallback-Werte als zweiten Parameter in var() angeben."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Dark-Mode mit CSS Variablen umschalten",
+  desc:`Mit CSS-Variablen und einer Klasse lässt sich Dark Mode elegant umsetzen. Schreibe: <code>:root</code> mit <code>--bg: #fff</code> und <code>--text: #333</code>. Dann <code>.dark</code> mit denselben Variablen aber <code>--bg: #1a1a2e</code> und <code>--text: #e8e8f0</code>.`,
+  hint:`<code>.dark { --bg: #1a1a2e; --text: #e8e8f0; }</code>`,
+  placeholder:`:root {\n  --bg: #fff;\n  --text: #333;\n}\n.dark {\n  --bg: #1a1a2e;\n  --text: #e8e8f0;\n}`,
+  check(v){ const ok=v.includes(":root")&&v.includes(".dark")&&v.includes("--bg")&&v.includes("--text")&&v.includes("#1a1a2e"); return {ok,msg:ok?"Klasse! Das ist das professionelle Dark-Mode-Pattern.":":root und .dark jeweils mit --bg und --text definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Variablen für Spacing-System",
+  desc:`Viele Projekte nutzen ein konsistentes Abstand-System. Definiere in <code>:root</code>: <code>--space-xs: 4px</code>, <code>--space-sm: 8px</code>, <code>--space-md: 16px</code>, <code>--space-lg: 32px</code>, <code>--space-xl: 64px</code>.`,
+  hint:`5 Spacing-Variablen in :root.`,
+  placeholder:`:root {\n  --space-xs: 4px;\n  --space-sm: 8px;\n  --space-md: 16px;\n  --space-lg: 32px;\n  --space-xl: 64px;\n}`,
+  check(v){ const ok=v.includes("--space-xs")&&v.includes("--space-sm")&&v.includes("--space-md")&&v.includes("--space-lg")&&v.includes("--space-xl"); return {ok,msg:ok?"Ausgezeichnet! Ein Spacing-System verhindert magische Zahlen im CSS.":"Alle 5 Spacing-Variablen definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"CSS-Variablen mit calc() kombinieren",
+  desc:`<code>calc()</code> erlaubt Berechnungen mit Variablen. Schreibe eine Regel für <code>.doppelt</code>: width ist <code>calc(var(--space-xl) * 2)</code> und height <code>calc(var(--space-lg) + var(--space-md))</code>.`,
+  hint:`<code>.doppelt { width: calc(var(--space-xl) * 2); height: calc(var(--space-lg) + var(--space-md)); }</code>`,
+  placeholder:`.doppelt {\n  width: calc(var(--space-xl) * 2);\n  height: calc(var(--space-lg) + var(--space-md));\n}`,
+  check(v){ const ok=v.includes("calc(")&&v.includes("var(--space-xl)")&&v.includes("var(--space-lg)"); return {ok,msg:ok?"Perfekt! calc() und Variablen sind ein mächtiges Duo.":"calc() mit den Spacing-Variablen kombinieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Typografie-System mit Variablen",
+  desc:`Definiere ein vollständiges Typografie-System in <code>:root</code>: <code>--font-sm: 0.875rem</code>, <code>--font-md: 1rem</code>, <code>--font-lg: 1.25rem</code>, <code>--font-xl: 1.5rem</code> und <code>--font-xxl: 2rem</code>.`,
+  hint:`5 Schriftgrößen-Variablen in :root.`,
+  placeholder:`:root {\n  --font-sm: 0.875rem;\n  --font-md: 1rem;\n  --font-lg: 1.25rem;\n  --font-xl: 1.5rem;\n  --font-xxl: 2rem;\n}`,
+  check(v){ const ok=v.includes("--font-sm")&&v.includes("--font-md")&&v.includes("--font-lg")&&v.includes("--font-xl")&&v.includes("--font-xxl"); return {ok,msg:ok?"Super! Ein Typografiesystem hält Schriften konsistent.":"Alle 5 Schriftgrößen-Variablen definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Variablen für Farb-Palette",
+  desc:`Definiere eine Farb-Palette in <code>:root</code> mit: <code>--color-primary: #6c63ff</code>, <code>--color-success: #4ade80</code>, <code>--color-warning: #fbbf24</code>, <code>--color-danger: #f87171</code>.`,
+  hint:`4 Farb-Variablen in :root.`,
+  placeholder:`:root {\n  --color-primary: #6c63ff;\n  --color-success: #4ade80;\n  --color-warning: #fbbf24;\n  --color-danger: #f87171;\n}`,
+  check(v){ const ok=v.includes("--color-primary")&&v.includes("--color-success")&&v.includes("--color-warning")&&v.includes("--color-danger"); return {ok,msg:ok?"Korrekt! Eine Farbpalette macht Redesigns zum Kinderspiel.":"Alle 4 Farb-Variablen definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Variablen", title:"Variablen mit JavaScript ändern",
+  desc:`CSS-Variablen können per JS geändert werden: <code>document.documentElement.style.setProperty('--name', 'wert')</code>. Schreibe JS, das die Variable <code>--color-primary</code> auf <code>#e11d48</code> ändert.`,
+  hint:`<code>document.documentElement.style.setProperty('--color-primary', '#e11d48');</code>`,
+  placeholder:`document.documentElement.style.setProperty('--color-primary', '#e11d48');`,
+  check(v){ const ok=v.includes("setProperty")&&v.includes("--color-primary")&&v.includes("#e11d48"); return {ok,msg:ok?"Exzellent! CSS-Variablen + JS ermöglichen dynamische Themes.":"setProperty('--color-primary', '#e11d48') auf documentElement.style aufrufen."}; },
+  accumulated: ""
+},
+
+// ── KAP 2: CSS Animationen & Übergänge ───────────────────────────────
+{
+  tag:"CSS Animationen", title:"@keyframes – Grundstruktur",
+  desc:`Animationen werden mit <code>@keyframes</code> definiert. Schreibe eine Animation namens <code>einblenden</code>: von <code>opacity: 0</code> (0%) zu <code>opacity: 1</code> (100%).`,
+  hint:`<code>@keyframes einblenden { from { opacity: 0; } to { opacity: 1; } }</code>`,
+  placeholder:`@keyframes einblenden {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}`,
+  check(v){ const ok=v.includes("@keyframes einblenden")&&v.includes("opacity: 0")&&v.includes("opacity: 1"); return {ok,msg:ok?"Richtig! from/to ist kurz für 0%/100%.":"@keyframes einblenden mit from opacity:0 und to opacity:1."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"animation-Eigenschaft anwenden",
+  desc:`Eine <code>@keyframes</code>-Animation wird mit der <code>animation</code>-Eigenschaft angewendet. Schreibe eine Regel für <code>.karte</code>: animation <code>einblenden 0.5s ease-in forwards</code>.`,
+  hint:`<code>.karte { animation: einblenden 0.5s ease-in forwards; }</code>`,
+  placeholder:`.karte {\n  animation: einblenden 0.5s ease-in forwards;\n}`,
+  check(v){ const ok=v.includes("animation")&&v.includes("einblenden")&&v.includes("0.5s")&&v.includes("forwards"); return {ok,msg:ok?"Super! forwards hält den Endzustand der Animation.":"animation: einblenden 0.5s ease-in forwards;"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"Mehrere Keyframes (Prozent-Schritte)",
+  desc:`Mit Prozentzahlen können mehrere Zwischenschritte definiert werden. Schreibe eine Animation <code>pulsieren</code>: bei 0% und 100% scale(1), bei 50% scale(1.1).`,
+  hint:`<code>@keyframes pulsieren { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }</code>`,
+  placeholder:`@keyframes pulsieren {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.1); }\n}`,
+  check(v){ const ok=v.includes("@keyframes pulsieren")&&v.includes("scale(1)")&&v.includes("scale(1.1)")&&v.includes("50%"); return {ok,msg:ok?"Perfekt! 0%, 100% kombiniert spart eine Regel.":"pulsieren mit 0%/100% scale(1) und 50% scale(1.1)."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"animation-iteration-count: infinite",
+  desc:`Eine Animation endlos laufen lassen: <code>animation-iteration-count: infinite</code>. Schreibe eine Regel für <code>.spinner</code>: animation <code>drehen 1s linear infinite</code>. Definiere auch die @keyframes: <code>drehen</code> von <code>transform: rotate(0deg)</code> zu <code>rotate(360deg)</code>.`,
+  hint:`@keyframes drehen + .spinner { animation: drehen 1s linear infinite; }`,
+  placeholder:`@keyframes drehen {\n  from { transform: rotate(0deg); }\n  to { transform: rotate(360deg); }\n}\n.spinner {\n  animation: drehen 1s linear infinite;\n}`,
+  check(v){ const ok=v.includes("@keyframes drehen")&&v.includes("rotate(360deg)")&&v.includes("infinite"); return {ok,msg:ok?"Klasse! Das ist das Standard-Pattern für Lade-Spinner.":"@keyframes drehen mit rotate + .spinner mit infinite."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"animation-delay – Verzögerung",
+  desc:`<code>animation-delay</code> verzögert den Start. Schreibe Regeln für drei Elemente mit gestaffelten Delays: <code>.item-1</code> delay 0s, <code>.item-2</code> delay 0.2s, <code>.item-3</code> delay 0.4s – alle mit animation <code>einblenden 0.5s ease forwards</code>.`,
+  hint:`3 Regeln mit unterschiedlichem animation-delay.`,
+  placeholder:`.item-1 { animation: einblenden 0.5s ease forwards; animation-delay: 0s; }\n.item-2 { animation: einblenden 0.5s ease forwards; animation-delay: 0.2s; }\n.item-3 { animation: einblenden 0.5s ease forwards; animation-delay: 0.4s; }`,
+  check(v){ const ok=v.includes(".item-1")&&v.includes(".item-2")&&v.includes(".item-3")&&v.includes("animation-delay")&&v.includes("0.4s"); return {ok,msg:ok?"Wunderschön! Gestaffelte Animationen wirken sehr professionell.":"Drei Elemente mit unterschiedlichen animation-delay Werten."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"transition mit mehreren Eigenschaften",
+  desc:`<code>transition</code> kann mehrere Eigenschaften animieren. Schreibe eine Regel für <code>.button</code>: transition auf <code>background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease</code>. Und <code>.button:hover</code>: transform <code>translateY(-3px)</code>, box-shadow <code>0 8px 20px rgba(0,0,0,0.2)</code>.`,
+  hint:`Komma-getrennte Übergänge in transition.`,
+  placeholder:`.button {\n  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;\n}\n.button:hover {\n  transform: translateY(-3px);\n  box-shadow: 0 8px 20px rgba(0,0,0,0.2);\n}`,
+  check(v){ const ok=v.includes("transition")&&v.includes("transform")&&v.includes("box-shadow")&&v.includes("translateY(-3px)"); return {ok,msg:ok?"Exzellent! Mehrere Transitions machen Hover-Effekte sehr elegant.":"transition mit drei Eigenschaften + :hover mit transform und box-shadow."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"CSS transform – 2D-Transformationen",
+  desc:`<code>transform</code> kann kombiniert werden. Schreibe eine Regel für <code>.karte:hover</code>: transform mit <code>translateY(-5px) scale(1.02) rotate(-1deg)</code>.`,
+  hint:`<code>.karte:hover { transform: translateY(-5px) scale(1.02) rotate(-1deg); }</code>`,
+  placeholder:`.karte:hover {\n  transform: translateY(-5px) scale(1.02) rotate(-1deg);\n}`,
+  check(v){ const ok=v.includes("translateY(-5px)")&&v.includes("scale(1.02)")&&v.includes("rotate(-1deg)"); return {ok,msg:ok?"Perfekt! Kombinierte transforms sind sehr ausdrucksstark.":"translateY, scale und rotate kombinieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"CSS clip-path für Formmasken",
+  desc:`<code>clip-path</code> beschneidet ein Element in eine Form. Schreibe eine Regel für <code>.dreieck</code>: clip-path <code>polygon(50% 0%, 0% 100%, 100% 100%)</code>.`,
+  hint:`<code>.dreieck { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }</code>`,
+  placeholder:`.dreieck {\n  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);\n}`,
+  check(v){ const ok=v.includes("clip-path")&&v.includes("polygon"); return {ok,msg:ok?"Stark! clip-path ermöglicht kreative Formen ohne SVG.":"clip-path: polygon(...) für .dreieck."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Animationen", title:"CSS Gradient als Hintergrund",
+  desc:`Schreibe eine Regel für <code>.hero</code>: background ist ein linearer Gradient von <code>#6c63ff</code> (0°) zu <code>#e11d48</code>, mit min-height <code>400px</code> und display <code>flex</code>, align-items und justify-content <code>center</code>.`,
+  hint:`<code>background: linear-gradient(135deg, #6c63ff, #e11d48);</code>`,
+  placeholder:`.hero {\n  background: linear-gradient(135deg, #6c63ff, #e11d48);\n  min-height: 400px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}`,
+  check(v){ const ok=v.includes("linear-gradient")&&v.includes("#6c63ff")&&v.includes("#e11d48")&&v.includes("display: flex"); return {ok,msg:ok?"Schön! Gradienten geben modernen Seiten Tiefe und Dynamik.":"linear-gradient mit beiden Farben + Flexbox kombinieren."}; },
+  accumulated: ""
+},
+
+// ── KAP 3: Fortgeschrittenes JavaScript ──────────────────────────────
+{
+  tag:"JS Advanced", title:"Arrow Functions",
+  desc:`Arrow Functions sind eine kürzere Syntax für Funktionen. Schreibe eine Arrow Function <code>quadrat</code>, die eine Zahl <code>n</code> nimmt und <code>n * n</code> zurückgibt. Dann: <code>console.log(quadrat(5))</code>.`,
+  hint:`<code>const quadrat = n => n * n;</code>`,
+  placeholder:`const quadrat = n => n * n;\nconsole.log(quadrat(5));`,
+  check(v){ const ok=v.includes("=>")&&v.includes("n * n")&&v.includes("console.log(quadrat(5))"); return {ok,msg:ok?"Perfekt! Arrow Functions mit einem Parameter brauchen keine Klammern.":"const quadrat = n => n * n; dann console.log(quadrat(5))."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Destructuring – Arrays",
+  desc:`Array Destructuring ermöglicht elegantes Entpacken. Schreibe: Array <code>farben = ["rot", "grün", "blau"]</code>. Dann Destructuring: <code>const [erste, zweite, dritte] = farben</code>. Logge alle drei Variablen einzeln.`,
+  hint:`<code>const [erste, zweite, dritte] = farben;</code>`,
+  placeholder:`const farben = ["rot", "grün", "blau"];\nconst [erste, zweite, dritte] = farben;\nconsole.log(erste);\nconsole.log(zweite);\nconsole.log(dritte);`,
+  check(v){ const ok=v.includes("const [erste, zweite, dritte]")&&v.includes("farben")&&v.includes("console.log(erste)"); return {ok,msg:ok?"Super! Destructuring ist viel eleganter als farben[0], farben[1]...":"const [erste, zweite, dritte] = farben; dann drei console.log."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Destructuring – Objekte",
+  desc:`Objekt-Destructuring entpackt Eigenschaften in Variablen. Erstelle ein Objekt <code>person = { name: "Anna", alter: 28, beruf: "Entwicklerin" }</code>. Destructure <code>{ name, alter, beruf }</code> und logge alle drei.`,
+  hint:`<code>const { name, alter, beruf } = person;</code>`,
+  placeholder:`const person = { name: "Anna", alter: 28, beruf: "Entwicklerin" };\nconst { name, alter, beruf } = person;\nconsole.log(name, alter, beruf);`,
+  check(v){ const ok=v.includes("const { name, alter, beruf }")&&v.includes("person")&&v.includes("console.log"); return {ok,msg:ok?"Ausgezeichnet! Objekt-Destructuring ist in modernem JS allgegenwärtig.":"const { name, alter, beruf } = person;"}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Spread-Operator",
+  desc:`Der Spread-Operator (<code>...</code>) verteilt Elemente. Erstelle <code>arr1 = [1, 2, 3]</code> und <code>arr2 = [4, 5, 6]</code>. Kombiniere sie zu <code>kombiniert = [...arr1, ...arr2]</code>. Logge das Ergebnis.`,
+  hint:`<code>const kombiniert = [...arr1, ...arr2];</code>`,
+  placeholder:`const arr1 = [1, 2, 3];\nconst arr2 = [4, 5, 6];\nconst kombiniert = [...arr1, ...arr2];\nconsole.log(kombiniert);`,
+  check(v){ const ok=v.includes("...arr1")&&v.includes("...arr2")&&v.includes("kombiniert"); return {ok,msg:ok?"Richtig! Spread funktioniert auch mit Objekten: {...obj1, ...obj2}.":"const kombiniert = [...arr1, ...arr2];"}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Array-Methoden: map() und filter()",
+  desc:`<code>map()</code> transformiert, <code>filter()</code> filtert. Erstelle <code>zahlen = [1,2,3,4,5,6,7,8,9,10]</code>. Erstelle <code>gerade</code> (nur gerade Zahlen per filter) und <code>quadrate</code> (jede Zahl × 2 per map). Logge beide.`,
+  hint:`<code>const gerade = zahlen.filter(n => n % 2 === 0);</code>`,
+  placeholder:`const zahlen = [1,2,3,4,5,6,7,8,9,10];\nconst gerade = zahlen.filter(n => n % 2 === 0);\nconst quadrate = zahlen.map(n => n * 2);\nconsole.log(gerade);\nconsole.log(quadrate);`,
+  check(v){ const ok=v.includes(".filter(")&&v.includes(".map(")&&v.includes("n % 2 === 0"); return {ok,msg:ok?"Super! map und filter sind die wichtigsten Array-Methoden.":"filter für gerade, map für Verdopplung."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Array-Methode: reduce()",
+  desc:`<code>reduce()</code> reduziert ein Array auf einen Wert. Erstelle <code>preise = [19.99, 5.49, 34.00, 12.50]</code>. Berechne die Summe mit <code>reduce((summe, preis) => summe + preis, 0)</code> und logge sie.`,
+  hint:`<code>const summe = preise.reduce((acc, val) => acc + val, 0);</code>`,
+  placeholder:`const preise = [19.99, 5.49, 34.00, 12.50];\nconst summe = preise.reduce((acc, val) => acc + val, 0);\nconsole.log(summe);`,
+  check(v){ const ok=v.includes(".reduce(")&&v.includes("acc")&&v.includes("0"); return {ok,msg:ok?"Exzellent! reduce() ist mächtig für Aggregationen.":"preise.reduce((acc, val) => acc + val, 0)"}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Template Literals – Mehrzeilig",
+  desc:`Template Literals (Backtick-Strings) können mehrzeilig sein. Erstelle eine Variable <code>html</code> mit einem mehrzeiligen Template Literal, das eine HTML-Karte mit Titel "Produkt" und Preis "29,99 €" enthält (div > h2 + p).`,
+  hint:`<code>const html = \`<div><h2>Produkt</h2><p>29,99 €</p></div>\`;</code>`,
+  placeholder:`const html = \`\n  <div class="karte">\n    <h2>Produkt</h2>\n    <p>29,99 €</p>\n  </div>\n\`;\nconsole.log(html);`,
+  check(v){ const ok=v.includes("` ")|| v.includes("`\n")||v.includes("const html = `"); return {ok, msg: ok&&v.includes("Produkt")&&v.includes("29,99 €")?"Super! Template Literals machen HTML-Strings viel lesbarer.":"const html = `...` mit Produkt und 29,99 €."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Optional Chaining (?.) und Nullish Coalescing (??)",
+  desc:`<code>?.</code> verhindert Fehler bei undefined-Werten. <code>??</code> liefert einen Fallback. Schreibe: Objekt <code>user = { profil: { name: "Max" } }</code>. Logge <code>user?.profil?.name</code> und <code>user?.adresse?.stadt ?? "Unbekannt"</code>.`,
+  hint:`<code>user?.profil?.name</code> gibt "Max", <code>user?.adresse?.stadt ?? "Unbekannt"</code> gibt "Unbekannt".`,
+  placeholder:`const user = { profil: { name: "Max" } };\nconsole.log(user?.profil?.name);\nconsole.log(user?.adresse?.stadt ?? "Unbekannt");`,
+  check(v){ const ok=v.includes("?.")&&v.includes("??")&&v.includes("Unbekannt"); return {ok,msg:ok?"Perfekt! ?. und ?? sind moderne Sicherheitsnetze für JS.":"?. für safe access, ?? für Fallback."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Promises – Grundstruktur",
+  desc:`Ein <code>Promise</code> repräsentiert einen zukünftigen Wert. Schreibe eine Funktion <code>warte(ms)</code>, die ein Promise zurückgibt, das nach <code>ms</code> Millisekunden mit dem Text <code>"Fertig nach Xms"</code> resolved. Nutze <code>setTimeout</code>.`,
+  hint:`<code>return new Promise(resolve => setTimeout(() => resolve(\`Fertig nach \${ms}ms\`), ms));</code>`,
+  placeholder:`function warte(ms) {\n  return new Promise(resolve => {\n    setTimeout(() => resolve(\`Fertig nach \${ms}ms\`), ms);\n  });\n}\nwarte(1000).then(msg => console.log(msg));`,
+  check(v){ const ok=v.includes("new Promise")&&v.includes("setTimeout")&&v.includes("resolve"); return {ok,msg:ok?"Ausgezeichnet! Promises sind die Basis für async/await.":"new Promise mit resolve und setTimeout."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"async/await",
+  desc:`<code>async/await</code> macht asynchronen Code lesbar. Schreibe eine async-Funktion <code>ladeNutzer()</code>, die mit <code>await warte(500)</code> wartet und dann <code>"Nutzer geladen"</code> loggt. Rufe sie auf.`,
+  hint:`<code>async function ladeNutzer() { const result = await warte(500); console.log("Nutzer geladen"); }</code>`,
+  placeholder:`async function ladeNutzer() {\n  const result = await warte(500);\n  console.log("Nutzer geladen");\n}\nladeNutzer();`,
+  check(v){ const ok=v.includes("async")&&v.includes("await")&&v.includes("ladeNutzer"); return {ok,msg:ok?"Super! async/await ist heute der Standard für asynchronen Code.":"async function + await + Aufruf der Funktion."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Advanced", title:"Error Handling mit try/catch",
+  desc:`<code>try/catch</code> fängt Fehler ab. Schreibe eine async-Funktion mit try/catch: Im try-Block simuliere einen Fehler mit <code>throw new Error("Verbindung fehlgeschlagen")</code>. Im catch-Block logge <code>"Fehler: " + err.message</code>.`,
+  hint:`<code>try { throw new Error("...") } catch(err) { console.log("Fehler: " + err.message); }</code>`,
+  placeholder:`async function mitFehler() {\n  try {\n    throw new Error("Verbindung fehlgeschlagen");\n  } catch(err) {\n    console.log("Fehler: " + err.message);\n  }\n}\nmitFehler();`,
+  check(v){ const ok=v.includes("try")&&v.includes("catch")&&v.includes("throw new Error")&&v.includes("err.message"); return {ok,msg:ok?"Richtig! try/catch ist essenziell für robuste Anwendungen.":"try { throw } catch(err) { err.message }"}; },
+  accumulated: ""
+},
+
+// ── KAP 4: DOM-Manipulation & Events ─────────────────────────────────
+{
+  tag:"DOM Pro", title:"Element erstellen und einfügen",
+  desc:`<code>document.createElement()</code> erstellt ein neues Element, <code>appendChild()</code> hängt es ein. Erstelle ein <code>&lt;div&gt;</code> mit class <code>"karte"</code> und textContent <code>"Neue Karte"</code>. Hänge es an <code>document.body</code>.`,
+  hint:`<code>const div = document.createElement("div"); div.className = "karte"; div.textContent = "Neue Karte"; document.body.appendChild(div);</code>`,
+  placeholder:`const div = document.createElement("div");\ndiv.className = "karte";\ndiv.textContent = "Neue Karte";\ndocument.body.appendChild(div);`,
+  check(v){ const ok=v.includes("createElement")&&v.includes('"karte"')&&v.includes("textContent")&&v.includes("appendChild"); return {ok,msg:ok?"Perfekt! createElement + appendChild ist der sichere Weg.":"createElement, className, textContent, appendChild kombinieren."}; },
+  accumulated: `const proDiv = document.createElement("div");\nproDiv.className = "pro-karte";\nproDiv.style.cssText = "padding:12px;margin:8px;background:#6c63ff22;border-left:4px solid #6c63ff;border-radius:6px;";\nproDiv.textContent = "Pro-App geladen ✓";\ndocument.body.appendChild(proDiv);\n`
+},
+{
+  tag:"DOM Pro", title:"Event Delegation",
+  desc:`Event Delegation nutzt Event-Bubbling: Ein Listener am Elternelement fängt Events aller Kinder. Schreibe einen click-Listener auf <code>document.body</code>, der prüft ob <code>event.target.tagName === "BUTTON"</code> und dann den <code>textContent</code> des Buttons loggt.`,
+  hint:`<code>document.body.addEventListener("click", e => { if (e.target.tagName === "BUTTON") console.log(e.target.textContent); });</code>`,
+  placeholder:`document.body.addEventListener("click", function(e) {\n  if (e.target.tagName === "BUTTON") {\n    console.log(e.target.textContent);\n  }\n});`,
+  check(v){ const ok=v.includes("event.target")||v.includes("e.target"); return {ok,msg:ok&&(v.includes("BUTTON")||v.includes("tagName"))?"Exzellent! Delegation ist effizienter als viele einzelne Listener.":"e.target.tagName === \"BUTTON\" prüfen."}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"data-Attribute lesen",
+  desc:`HTML <code>data-*</code>-Attribute speichern benutzerdefinierte Daten. Schreibe JS: Finde ein Element mit <code>document.querySelector('[data-id="42"]')</code>. Lese dann <code>element.dataset.id</code> und logge es. (Das Element muss nicht wirklich existieren – zeige nur den Code-Aufbau.)`,
+  hint:`<code>element.dataset.id</code> gibt den Wert des data-id-Attributs.`,
+  placeholder:`const element = document.querySelector('[data-id="42"]');\nif (element) {\n  console.log(element.dataset.id);\n}`,
+  check(v){ const ok=v.includes("dataset")&&v.includes("data-id")&&v.includes("42"); return {ok,msg:ok?"Richtig! dataset macht benutzerdefinierte Daten direkt zugänglich.":"querySelector('[data-id=\"42\"]') + .dataset.id"}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"classList – add, remove, toggle",
+  desc:`<code>classList</code> erlaubt präzise Klassenverwaltung. Schreibe Code: Erstelle ein div mit id <code>"box"</code>. Füge Klasse <code>"aktiv"</code> hinzu, entferne sie wieder, und toggle <code>"sichtbar"</code>.`,
+  hint:`<code>el.classList.add("aktiv"); el.classList.remove("aktiv"); el.classList.toggle("sichtbar");</code>`,
+  placeholder:`const box = document.createElement("div");\nbox.id = "box";\ndocument.body.appendChild(box);\nbox.classList.add("aktiv");\nbox.classList.remove("aktiv");\nbox.classList.toggle("sichtbar");`,
+  check(v){ const ok=v.includes("classList.add")&&v.includes("classList.remove")&&v.includes("classList.toggle"); return {ok,msg:ok?"Super! classList ist besser als direktes className-Manipulation.":"add, remove und toggle auf classList aufrufen."}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"MutationObserver – DOM-Änderungen beobachten",
+  desc:`<code>MutationObserver</code> reagiert auf DOM-Änderungen. Schreibe Code: Erstelle einen Observer mit Callback der <code>"DOM geändert!"</code> loggt, beobachte <code>document.body</code> mit <code>{ childList: true }</code>.`,
+  hint:`<code>const obs = new MutationObserver(() => console.log("DOM geändert!")); obs.observe(document.body, { childList: true });</code>`,
+  placeholder:`const observer = new MutationObserver(() => {\n  console.log("DOM geändert!");\n});\nobserver.observe(document.body, { childList: true });`,
+  check(v){ const ok=v.includes("MutationObserver")&&v.includes("observe")&&v.includes("childList: true"); return {ok,msg:ok?"Fortgeschritten! MutationObserver ist ideal für reaktive Interfaces.":"new MutationObserver + .observe mit childList: true."}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"IntersectionObserver – Scroll-Effekte",
+  desc:`<code>IntersectionObserver</code> erkennt, wenn ein Element sichtbar wird. Schreibe einen Observer, der bei Sichtbarkeit (isIntersecting) die Klasse <code>"sichtbar"</code> zum Zielelement hinzufügt. Beobachte alle <code>.animiert</code>-Elemente.`,
+  hint:`<code>const io = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add("sichtbar"); }); });</code>`,
+  placeholder:`const io = new IntersectionObserver(entries => {\n  entries.forEach(entry => {\n    if (entry.isIntersecting) {\n      entry.target.classList.add("sichtbar");\n    }\n  });\n});\ndocument.querySelectorAll(".animiert").forEach(el => io.observe(el));`,
+  check(v){ const ok=v.includes("IntersectionObserver")&&v.includes("isIntersecting")&&v.includes("sichtbar"); return {ok,msg:ok?"Profi-Level! IntersectionObserver ist die moderne Methode für Scroll-Animationen.":"IntersectionObserver + isIntersecting + classList.add."}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"Formular-Validierung mit JS",
+  desc:`Schreibe eine Funktion <code>validiere(email)</code>: Teste mit Regex <code>/^[^\s@]+@[^\s@]+\.[^\s@]+$/</code> ob die E-Mail gültig ist. Gib <code>true</code> oder <code>false</code> zurück. Logge <code>validiere("test@example.com")</code> und <code>validiere("ungueltig")</code>.`,
+  hint:`<code>const validiere = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);</code>`,
+  placeholder:`const validiere = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);\nconsole.log(validiere("test@example.com"));\nconsole.log(validiere("ungueltig"));`,
+  check(v){ const ok=v.includes("validiere")&&(v.includes("/^[^\\s@]")||v.includes("/^[^\s@]"))&&v.includes(".test("); return {ok,msg:ok?"Perfekt! Regex für E-Mail-Validierung ist ein klassisches Muster.":"const validiere = email => /regex/.test(email);"}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"debounce – Funktion verzögern",
+  desc:`Debouncing verhindert, dass eine Funktion zu oft aufgerufen wird (z.B. bei Input-Events). Schreibe eine <code>debounce(fn, delay)</code>-Funktion die einen Timer zurückstellt und fn erst nach <code>delay</code>ms aufruft.`,
+  hint:`<code>function debounce(fn, delay) { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); }; }</code>`,
+  placeholder:`function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\nconst suche = debounce(text => console.log("Suche:", text), 300);\nsuche("Hallo");`,
+  check(v){ const ok=v.includes("debounce")&&v.includes("clearTimeout")&&v.includes("setTimeout"); return {ok,msg:ok?"Sehr fortgeschritten! debounce ist ein fundamentales JS-Pattern.":"debounce mit clearTimeout + setTimeout implementieren."}; },
+  accumulated: ""
+},
+{
+  tag:"DOM Pro", title:"localStorage mit JSON",
+  desc:`<code>localStorage</code> speichert nur Strings. Mit <code>JSON.stringify()</code> und <code>JSON.parse()</code> können Objekte gespeichert werden. Speichere ein Objekt <code>{ name: "Max", score: 100 }</code> unter <code>"spieler"</code> und lese es wieder aus.`,
+  hint:`<code>localStorage.setItem("spieler", JSON.stringify({...})); const spieler = JSON.parse(localStorage.getItem("spieler"));</code>`,
+  placeholder:`const daten = { name: "Max", score: 100 };\nlocalStorage.setItem("spieler", JSON.stringify(daten));\nconst gespeichert = JSON.parse(localStorage.getItem("spieler"));\nconsole.log(gespeichert.name, gespeichert.score);`,
+  check(v){ const ok=v.includes("JSON.stringify")&&v.includes("JSON.parse")&&v.includes("localStorage"); return {ok,msg:ok?"Richtig! JSON.stringify/parse ist das Standard-Pattern für localStorage.":"setItem mit JSON.stringify, getItem mit JSON.parse."}; },
+  accumulated: `const spielDaten = { besuche: 1, level: "Pro" };\nif (!localStorage.getItem("pro_spieler")) {\n  localStorage.setItem("pro_spieler", JSON.stringify(spielDaten));\n}\n`
+},
+{
+  tag:"DOM Pro", title:"History API – URL ohne Reload ändern",
+  desc:`<code>history.pushState()</code> ändert die URL ohne Seitenneuladen. Schreibe: <code>history.pushState({ seite: "profil" }, "", "/profil")</code> und dann einen <code>popstate</code>-Listener auf <code>window</code>, der den State loggt.`,
+  hint:`<code>history.pushState(state, title, url);</code>`,
+  placeholder:`history.pushState({ seite: "profil" }, "", "/profil");\nwindow.addEventListener("popstate", event => {\n  console.log("Zurück zu:", event.state);\n});`,
+  check(v){ const ok=v.includes("pushState")&&v.includes("popstate")&&v.includes("event.state"); return {ok,msg:ok?"Profi! pushState + popstate ist die Basis für Single-Page-Apps.":"pushState + popstate-Listener auf window."}; },
+  accumulated: ""
+},
+
+// ── KAP 5: Fetch API & JSON ───────────────────────────────────────────
+{
+  tag:"Fetch & JSON", title:"Fetch API – Grundstruktur",
+  desc:`<code>fetch(url)</code> lädt Daten von einem Server. Schreibe Code: Lade <code>https://jsonplaceholder.typicode.com/todos/1</code> mit fetch, wandle die Antwort mit <code>.json()</code> um und logge das Ergebnis.`,
+  hint:`<code>fetch(url).then(res => res.json()).then(data => console.log(data));</code>`,
+  placeholder:`fetch("https://jsonplaceholder.typicode.com/todos/1")\n  .then(res => res.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err));`,
+  check(v){ const ok=v.includes("fetch(")&&v.includes(".then(")&&v.includes(".json()"); return {ok,msg:ok?"Super! fetch ist die moderne Alternative zu XMLHttpRequest.":"fetch + .then(res => res.json()) + .then(data => ...)"}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"Fetch mit async/await",
+  desc:`Schreibe dieselbe Fetch-Anfrage, aber mit <code>async/await</code>: async-Funktion <code>ladeTodo()</code>, die mit await fetcht, dann mit await <code>.json()</code> aufruft und das Ergebnis loggt.`,
+  hint:`<code>async function ladeTodo() { const res = await fetch(url); const data = await res.json(); console.log(data); }</code>`,
+  placeholder:`async function ladeTodo() {\n  const res = await fetch("https://jsonplaceholder.typicode.com/todos/1");\n  const data = await res.json();\n  console.log(data);\n}\nladeTodo();`,
+  check(v){ const ok=v.includes("async")&&v.includes("await fetch")&&v.includes("await res.json()||await result.json()"); return {ok,msg:ok?"Perfekt! async/await macht fetch-Code viel lesbarer.":"async function + await fetch + await .json()"; } let ok2 = v.includes("async")&&v.includes("await")&&v.includes("fetch(")&&v.includes(".json()"); return {ok:ok2, msg:ok2?"Perfekt! async/await macht fetch-Code viel lesbarer.":"async function + await fetch + await .json()"}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"Fetch mit POST und JSON-Body",
+  desc:`Fetch kann auch Daten senden. Schreibe einen POST-Request an <code>https://jsonplaceholder.typicode.com/posts</code> mit method <code>"POST"</code>, headers <code>Content-Type: application/json</code> und body <code>JSON.stringify({ title: "Test", body: "Hallo" })</code>.`,
+  hint:`<code>fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({...}) })</code>`,
+  placeholder:`fetch("https://jsonplaceholder.typicode.com/posts", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ title: "Test", body: "Hallo" })\n}).then(res => res.json()).then(data => console.log(data));`,
+  check(v){ const ok=v.includes('method: "POST"')&&v.includes("Content-Type")&&v.includes("JSON.stringify"); return {ok,msg:ok?"Ausgezeichnet! POST + JSON ist der Standard für API-Aufrufe.":"method, headers und body für den POST-Request setzen."}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"Fehlerbehandlung bei Fetch",
+  desc:`Fetch wirft keinen Fehler bei HTTP-Fehlercodes (404, 500). Man muss <code>response.ok</code> prüfen. Schreibe async-Funktion mit try/catch: Prüfe <code>if (!res.ok) throw new Error(\`HTTP Fehler: \${res.status}\`)</code>.`,
+  hint:`<code>if (!res.ok) throw new Error(\`HTTP Fehler: \${res.status}\`);</code>`,
+  placeholder:`async function sicherFetch(url) {\n  try {\n    const res = await fetch(url);\n    if (!res.ok) throw new Error(\`HTTP Fehler: \${res.status}\`);\n    return await res.json();\n  } catch(err) {\n    console.error("Fehler:", err.message);\n  }\n}`,
+  check(v){ const ok=v.includes("res.ok")&&v.includes("throw new Error")&&v.includes("res.status"); return {ok,msg:ok?"Perfekt! Robuste Fehlerbehandlung ist Pflicht bei API-Aufrufen.":"if (!res.ok) throw new Error mit res.status."}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"JSON-Daten in DOM rendern",
+  desc:`Schreibe eine async-Funktion, die <code>https://jsonplaceholder.typicode.com/users/1</code> lädt und folgende Felder in einem div anzeigt: name und email (mit <code>innerHTML</code>).`,
+  hint:`data.name, data.email – ins DOM rendern.`,
+  placeholder:`async function zeigeNutzer() {\n  const res = await fetch("https://jsonplaceholder.typicode.com/users/1");\n  const data = await res.json();\n  const div = document.createElement("div");\n  div.innerHTML = \`<h3>\${data.name}</h3><p>\${data.email}</p>\`;\n  document.body.appendChild(div);\n}\nzeigeNutzer();`,
+  check(v){ const ok=v.includes("fetch")&&v.includes("data.name")&&v.includes("data.email")&&v.includes("innerHTML"); return {ok,msg:ok?"Super! Fetch + DOM-Rendering ist der Kern jeder Web-App.":"data.name und data.email per innerHTML ins DOM."}; },
+  accumulated: `async function ladeInfo() {\n  try {\n    const res = await fetch("https://jsonplaceholder.typicode.com/users/1");\n    if (res.ok) {\n      const d = await res.json();\n      document.querySelector(".pro-karte").innerHTML += \`<br><small>API-Demo: \${d.name} – \${d.email}</small>\`;\n    }\n  } catch(e) {}\n}\nladeInfo();\n`
+},
+{
+  tag:"Fetch & JSON", title:"Promise.all – Parallele Requests",
+  desc:`<code>Promise.all([])</code> führt mehrere Promises gleichzeitig aus. Lade parallel <code>todos/1</code> und <code>todos/2</code> von jsonplaceholder, wandle beide um und logge beide Titel.`,
+  hint:`<code>const [todo1, todo2] = await Promise.all([fetch(...).then(r=>r.json()), fetch(...).then(r=>r.json())]);</code>`,
+  placeholder:`async function parallelLaden() {\n  const [todo1, todo2] = await Promise.all([\n    fetch("https://jsonplaceholder.typicode.com/todos/1").then(r => r.json()),\n    fetch("https://jsonplaceholder.typicode.com/todos/2").then(r => r.json())\n  ]);\n  console.log(todo1.title, todo2.title);\n}\nparallelLaden();`,
+  check(v){ const ok=v.includes("Promise.all")&&v.includes("todos/1")&&v.includes("todos/2"); return {ok,msg:ok?"Exzellent! Promise.all ist viel schneller als sequentielles await.":"Promise.all mit zwei fetch-Requests."}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"AbortController – Request abbrechen",
+  desc:`Mit <code>AbortController</code> können laufende Requests abgebrochen werden. Erstelle einen Controller, übergib <code>signal: controller.signal</code> an fetch, und rufe nach 100ms <code>controller.abort()</code> auf.`,
+  hint:`<code>const controller = new AbortController(); fetch(url, { signal: controller.signal }); controller.abort();</code>`,
+  placeholder:`const controller = new AbortController();\nfetch("https://jsonplaceholder.typicode.com/todos/1", {\n  signal: controller.signal\n}).catch(err => console.log("Abgebrochen:", err.name));\nsetTimeout(() => controller.abort(), 100);`,
+  check(v){ const ok=v.includes("AbortController")&&v.includes("controller.signal")&&v.includes("controller.abort()"); return {ok,msg:ok?"Profi-Level! AbortController ist wichtig für UX (z.B. Suche beim Tippen).":"AbortController erstellen, signal übergeben, abort() aufrufen."}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"localStorage als Cache",
+  desc:`Schreibe eine Funktion <code>cachedFetch(url)</code>: Prüfe zuerst localStorage – wenn Daten vorhanden, logge <code>"aus Cache"</code> und gib sie zurück. Sonst fetch, speichere in localStorage und gib zurück.`,
+  hint:`Erst localStorage.getItem prüfen, dann fetch und localStorage.setItem.`,
+  placeholder:`async function cachedFetch(url) {\n  const key = "cache_" + url;\n  const gespeichert = localStorage.getItem(key);\n  if (gespeichert) {\n    console.log("aus Cache");\n    return JSON.parse(gespeichert);\n  }\n  const res = await fetch(url);\n  const data = await res.json();\n  localStorage.setItem(key, JSON.stringify(data));\n  return data;\n}`,
+  check(v){ const ok=v.includes("localStorage")&&v.includes("cachedFetch")&&v.includes("Cache"); return {ok,msg:ok?"Brilliant! Caching reduziert unnötige Netzwerkanfragen erheblich.":"localStorage prüfen → fetch → localStorage speichern."}; },
+  accumulated: ""
+},
+{
+  tag:"Fetch & JSON", title:"REST API – CRUD Grundmuster",
+  desc:`REST APIs nutzen HTTP-Methoden für CRUD. Schreibe vier Funktionen: <code>lesen(id)</code> (GET), <code>erstellen(daten)</code> (POST), <code>aktualisieren(id, daten)</code> (PUT), <code>loeschen(id)</code> (DELETE) – alle für <code>/api/items</code>.`,
+  hint:`Vier async-Funktionen mit unterschiedlichen fetch-Methoden.`,
+  placeholder:`const API = "https://jsonplaceholder.typicode.com/posts";\nconst lesen = id => fetch(\`\${API}/\${id}\`).then(r => r.json());\nconst erstellen = daten => fetch(API, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(daten) }).then(r => r.json());\nconst aktualisieren = (id, daten) => fetch(\`\${API}/\${id}\`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(daten) }).then(r => r.json());\nconst loeschen = id => fetch(\`\${API}/\${id}\`, { method: "DELETE" });`,
+  check(v){ const ok=v.includes("GET")||(!v.includes("method")&&v.includes("lesen")); return {ok,msg: v.includes("lesen")&&v.includes("erstellen")&&v.includes("aktualisieren")&&v.includes("loeschen")?"Perfekt! Das CRUD-Pattern ist die Grundlage jeder REST-App.":"Vier Funktionen: lesen, erstellen, aktualisieren, loeschen."}; },
+  accumulated: ""
+},
+
+// ── KAP 6: JavaScript Patterns & Klassen ─────────────────────────────
+{
+  tag:"JS Patterns", title:"ES6 Klassen",
+  desc:`ES6-Klassen sind syntaktischer Zucker über Prototypen. Schreibe eine Klasse <code>Tier</code> mit <code>constructor(name, art)</code> und einer Methode <code>vorstellen()</code>, die <code>\`Ich bin \${this.name}, ein \${this.art}\`</code> loggt.`,
+  hint:`<code>class Tier { constructor(name, art) { this.name=name; this.art=art; } vorstellen() { console.log(...); } }</code>`,
+  placeholder:`class Tier {\n  constructor(name, art) {\n    this.name = name;\n    this.art = art;\n  }\n  vorstellen() {\n    console.log(\`Ich bin \${this.name}, ein \${this.art}\`);\n  }\n}\nconst hund = new Tier("Bello", "Hund");\nhund.vorstellen();`,
+  check(v){ const ok=v.includes("class Tier")&&v.includes("constructor")&&v.includes("vorstellen")&&v.includes("this.name"); return {ok,msg:ok?"Super! ES6 Klassen machen objektorientiertes JS übersichtlicher.":"class Tier mit constructor und vorstellen()-Methode."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Klassen-Vererbung mit extends",
+  desc:`<code>extends</code> erbt von einer Klasse, <code>super()</code> ruft den Eltern-Konstruktor auf. Schreibe Klasse <code>Hund extends Tier</code> mit <code>constructor(name)</code> der <code>super(name, "Hund")</code> aufruft, plus Methode <code>bellen()</code> die <code>"Wuff!"</code> loggt.`,
+  hint:`<code>class Hund extends Tier { constructor(name) { super(name, "Hund"); } bellen() { console.log("Wuff!"); } }</code>`,
+  placeholder:`class Hund extends Tier {\n  constructor(name) {\n    super(name, "Hund");\n  }\n  bellen() {\n    console.log("Wuff!");\n  }\n}\nconst rex = new Hund("Rex");\nrex.vorstellen();\nrex.bellen();`,
+  check(v){ const ok=v.includes("extends Tier")&&v.includes("super(")&&v.includes("bellen"); return {ok,msg:ok?"Ausgezeichnet! extends + super ist das Fundament von Klassenvererbung.":"extends Tier, super() im constructor, bellen()-Methode."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Module Pattern – private Variablen",
+  desc:`Das Module Pattern kapselt private Variablen mit IIFEs oder Closures. Schreibe ein Objekt <code>Zaehler</code> mit einer privaten Variable <code>let wert = 0</code> (Closure) und Methoden <code>erhoehen()</code>, <code>verringern()</code> und <code>wertGeben()</code>.`,
+  hint:`<code>const Zaehler = (() => { let wert = 0; return { erhoehen: () => wert++, ... }; })();</code>`,
+  placeholder:`const Zaehler = (() => {\n  let wert = 0;\n  return {\n    erhoehen: () => ++wert,\n    verringern: () => --wert,\n    wertGeben: () => wert\n  };\n})();\nZaehler.erhoehen();\nZaehler.erhoehen();\nconsole.log(Zaehler.wertGeben());`,
+  check(v){ const ok=v.includes("Zaehler")&&v.includes("let wert")&&v.includes("erhoehen")&&v.includes("wertGeben"); return {ok,msg:ok?"Perfekt! Das Module Pattern ist ein fundamentales JS-Design-Pattern.":"IIFE mit privatem wert und öffentlichen Methoden."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Observer Pattern",
+  desc:`Das Observer Pattern ermöglicht Publish/Subscribe. Schreibe eine Klasse <code>EventEmitter</code> mit <code>on(event, fn)</code> (Listener registrieren) und <code>emit(event, data)</code> (alle Listener aufrufen).`,
+  hint:`Listeners in einem Objekt oder Map speichern.`,
+  placeholder:`class EventEmitter {\n  constructor() { this.listeners = {}; }\n  on(event, fn) {\n    if (!this.listeners[event]) this.listeners[event] = [];\n    this.listeners[event].push(fn);\n  }\n  emit(event, data) {\n    (this.listeners[event] || []).forEach(fn => fn(data));\n  }\n}\nconst emitter = new EventEmitter();\nemitter.on("klick", data => console.log("Klick:", data));\nemitter.emit("klick", { x: 100, y: 200 });`,
+  check(v){ const ok=v.includes("EventEmitter")&&v.includes("on(")&&v.includes("emit(")&&v.includes("listeners"); return {ok,msg:ok?"Profi-Pattern! EventEmitter ist die Basis von Node.js und vielen Frameworks.":"EventEmitter mit on() und emit() implementieren."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Factory Function",
+  desc:`Factory Functions erstellen Objekte ohne <code>new</code>. Schreibe eine Funktion <code>erstelleNutzer(name, rolle)</code>, die ein Objekt mit <code>name</code>, <code>rolle</code>, und <code>begrüssen()</code>-Methode zurückgibt. Erstelle zwei Nutzer.`,
+  hint:`<code>function erstelleNutzer(name, rolle) { return { name, rolle, begrüssen() { console.log(...); } }; }</code>`,
+  placeholder:`function erstelleNutzer(name, rolle) {\n  return {\n    name,\n    rolle,\n    begrüssen() {\n      console.log(\`Hallo, ich bin \${this.name} (\${this.rolle})\`);\n    }\n  };\n}\nconst admin = erstelleNutzer("Anna", "Admin");\nconst gast = erstelleNutzer("Ben", "Gast");\nadmin.begrüssen();\ngast.begrüssen();`,
+  check(v){ const ok=v.includes("erstelleNutzer")&&v.includes("return {")&&v.includes("begrüssen"); return {ok,msg:ok?"Super! Factory Functions sind flexibler als Klassen für einfache Objekte.":"erstelleNutzer gibt Objekt mit name, rolle, begrüssen zurück."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Singleton Pattern",
+  desc:`Ein Singleton stellt sicher, dass eine Klasse nur einmal instanziiert wird. Schreibe eine Klasse <code>Konfiguration</code> mit einer statischen Methode <code>getInstance()</code>, die immer dieselbe Instanz zurückgibt.`,
+  hint:`<code>static getInstance() { if (!this.instanz) this.instanz = new Konfiguration(); return this.instanz; }</code>`,
+  placeholder:`class Konfiguration {\n  constructor() { this.einstellungen = {}; }\n  static getInstance() {\n    if (!Konfiguration.instanz) {\n      Konfiguration.instanz = new Konfiguration();\n    }\n    return Konfiguration.instanz;\n  }\n  setze(key, val) { this.einstellungen[key] = val; }\n  hole(key) { return this.einstellungen[key]; }\n}\nconst k1 = Konfiguration.getInstance();\nconst k2 = Konfiguration.getInstance();\nconsole.log(k1 === k2);`,
+  check(v){ const ok=v.includes("getInstance")&&v.includes("instanz")&&v.includes("Konfiguration"); return {ok,msg:ok?"Exzellent! Singleton ist ideal für globalen State und Konfigurationen.":"getInstance() prüft ob Instanz existiert, erstellt sie sonst."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Proxy – Objekte abfangen",
+  desc:`<code>Proxy</code> ermöglicht das Abfangen von Objekt-Operationen. Schreibe einen Proxy für ein Objekt <code>{ name: "Max" }</code>, der bei get-Zugriffen loggt welche Eigenschaft gelesen wird.`,
+  hint:`<code>new Proxy(obj, { get(target, prop) { console.log("Gelesen:", prop); return target[prop]; } })</code>`,
+  placeholder:`const original = { name: "Max", alter: 30 };\nconst proxy = new Proxy(original, {\n  get(target, prop) {\n    console.log("Eigenschaft gelesen:", prop);\n    return target[prop];\n  }\n});\nconsole.log(proxy.name);\nconsole.log(proxy.alter);`,
+  check(v){ const ok=v.includes("new Proxy")&&v.includes("get(target")&&v.includes("target[prop]"); return {ok,msg:ok?"Fortgeschritten! Proxy ist die Basis von Vue.js Reactivity und vielem mehr.":"new Proxy mit get-Handler implementieren."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Generator Functions",
+  desc:`Generator Functions (<code>function*</code>) pausieren mit <code>yield</code>. Schreibe einen Generator <code>zahlenBereich(start, ende)</code>, der alle Zahlen von start bis ende nacheinander yielded. Iteriere ihn mit for...of.`,
+  hint:`<code>function* zahlenBereich(start, ende) { for(let i=start; i<=ende; i++) yield i; }</code>`,
+  placeholder:`function* zahlenBereich(start, ende) {\n  for (let i = start; i <= ende; i++) {\n    yield i;\n  }\n}\nfor (const zahl of zahlenBereich(1, 5)) {\n  console.log(zahl);\n}`,
+  check(v){ const ok=v.includes("function*")&&v.includes("yield")&&v.includes("for...of")||v.includes("for (const"); return {ok,msg:ok?"Brilliant! Generatoren sind mächtig für lazy evaluation und Iterationen.":"function* mit yield und for...of zum Iterieren."}; },
+  accumulated: ""
+},
+{
+  tag:"JS Patterns", title:"Symbol als eindeutiger Schlüssel",
+  desc:`<code>Symbol()</code> erzeugt garantiert einzigartige Werte. Erstelle zwei Symbole <code>ID = Symbol("id")</code> und <code>ROLLE = Symbol("rolle")</code>. Nutze sie als Eigenschaften-Schlüssel eines Objekts und lese sie wieder aus.`,
+  hint:`<code>const obj = { [ID]: 42, [ROLLE]: "Admin" }; console.log(obj[ID]);</code>`,
+  placeholder:`const ID = Symbol("id");\nconst ROLLE = Symbol("rolle");\nconst nutzer = {\n  name: "Anna",\n  [ID]: 42,\n  [ROLLE]: "Admin"\n};\nconsole.log(nutzer[ID]);\nconsole.log(nutzer[ROLLE]);`,
+  check(v){ const ok=v.includes("Symbol(")&&v.includes("[ID]")&&v.includes("[ROLLE]"); return {ok,msg:ok?"Super! Symbols sind ideal für private Metadaten ohne Namenskonflikte.":"Symbol() erstellen und als Objektschlüssel nutzen."}; },
+  accumulated: ""
+},
+
+// ── KAP 7: Interaktive App bauen ─────────────────────────────────────
+{
+  tag:"App Projekt", title:"App-Grundstruktur im DOM erstellen",
+  desc:`Schreibe die HTML-Grundstruktur einer Todo-App per JS: Erstelle einen <code>&lt;div id="app"&gt;</code> mit einem <code>&lt;h1&gt;</code> "Todo-App", einem <code>&lt;input&gt;</code> (id="todo-input", placeholder="Neue Aufgabe..."), einem <code>&lt;button&gt;</code> "Hinzufügen" und einem <code>&lt;ul id="todo-liste"&gt;</code>.`,
+  hint:`Alles per createElement und appendChild aufbauen oder innerHTML.`,
+  placeholder:`const app = document.createElement("div");\napp.id = "app";\napp.innerHTML = \`\n  <h1>Todo-App</h1>\n  <input id="todo-input" placeholder="Neue Aufgabe...">\n  <button id="todo-btn">Hinzufügen</button>\n  <ul id="todo-liste"></ul>\n\`;\ndocument.body.appendChild(app);`,
+  check(v){ const ok=v.includes("Todo-App")&&v.includes("todo-input")&&v.includes("todo-liste")&&v.includes("Hinzufügen"); return {ok,msg:ok?"Perfekt! Die App-Grundstruktur steht.":"h1, input#todo-input, button, ul#todo-liste erstellen."}; },
+  accumulated: `const app = document.createElement("div");\napp.id = "app";\napp.style.cssText = "max-width:500px;margin:20px auto;padding:20px;font-family:Arial,sans-serif;";\napp.innerHTML = \`\n  <h1 style="color:#6c63ff;">📝 Todo-App</h1>\n  <div style="display:flex;gap:8px;margin-bottom:16px;">\n    <input id="todo-input" placeholder="Neue Aufgabe..." style="flex:1;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:1rem;">\n    <button id="todo-btn" style="padding:10px 18px;background:#6c63ff;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;">+</button>\n  </div>\n  <ul id="todo-liste" style="list-style:none;padding:0;"></ul>\n\`;\ndocument.body.appendChild(app);\n`
+},
+{
+  tag:"App Projekt", title:"Todo hinzufügen",
+  desc:`Schreibe einen click-Listener für <code>#todo-btn</code>: Lese den Wert von <code>#todo-input</code>, füge bei nicht-leerem Wert ein <code>&lt;li&gt;</code> in <code>#todo-liste</code> ein (mit textContent des Inputs) und leere dann das Input-Feld.`,
+  hint:`Listener auf button → input.value → li erstellen → liste.appendChild → input leeren.`,
+  placeholder:`document.getElementById("todo-btn").addEventListener("click", function() {\n  const input = document.getElementById("todo-input");\n  const wert = input.value.trim();\n  if (!wert) return;\n  const li = document.createElement("li");\n  li.textContent = wert;\n  document.getElementById("todo-liste").appendChild(li);\n  input.value = "";\n});`,
+  check(v){ const ok=v.includes("todo-btn")&&v.includes("todo-input")&&v.includes("todo-liste")&&v.includes("appendChild"); return {ok,msg:ok?"Super! Das Kernelement jeder Todo-App funktioniert.":"click-Listener + input lesen + li erstellen + liste + input leeren."}; },
+  accumulated: `document.getElementById("todo-btn").addEventListener("click", function() {\n  const input = document.getElementById("todo-input");\n  const wert = input.value.trim();\n  if (!wert) return;\n  const li = document.createElement("li");\n  li.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px;margin:6px 0;background:#f8f8ff;border-left:4px solid #6c63ff;border-radius:4px;";\n  li.innerHTML = \`<input type="checkbox" style="cursor:pointer;"> <span style="flex:1;">\${wert}</span> <button onclick="this.parentElement.remove()" style="background:#f87171;color:white;border:none;border-radius:4px;padding:2px 8px;cursor:pointer;">✕</button>\`;\n  document.getElementById("todo-liste").appendChild(li);\n  input.value = "";\n  speichereAlles();\n});\n`
+},
+{
+  tag:"App Projekt", title:"Enter-Taste unterstützen",
+  desc:`Ergänze die Todo-App: Füge einen <code>keydown</code>-Listener auf <code>#todo-input</code> hinzu, der bei Taste <code>Enter</code> (event.key === "Enter") den Button-Klick auslöst (<code>document.getElementById("todo-btn").click()</code>).`,
+  hint:`<code>input.addEventListener("keydown", e => { if (e.key === "Enter") btn.click(); });</code>`,
+  placeholder:`document.getElementById("todo-input").addEventListener("keydown", function(e) {\n  if (e.key === "Enter") {\n    document.getElementById("todo-btn").click();\n  }\n});`,
+  check(v){ const ok=v.includes('e.key === "Enter"')&&v.includes("todo-btn")&&v.includes(".click()"); return {ok,msg:ok?"Perfekt! Enter-Support ist entscheidend für gute UX.":"keydown-Listener + e.key === \"Enter\" + .click()"}; },
+  accumulated: `document.getElementById("todo-input").addEventListener("keydown", function(e) {\n  if (e.key === "Enter") document.getElementById("todo-btn").click();\n});\n`
+},
+{
+  tag:"App Projekt", title:"Todos speichern und laden",
+  desc:`Schreibe zwei Funktionen: <code>speichereAlles()</code> liest alle <code>#todo-liste li</code>, sammelt deren textContent in einem Array und speichert es in localStorage als JSON. <code>ladeAlles()</code> liest aus localStorage und gibt das Array zurück (oder leer).`,
+  hint:`querySelectorAll li → map textContent → JSON.stringify → localStorage.`,
+  placeholder:`function speichereAlles() {\n  const items = Array.from(document.querySelectorAll("#todo-liste li"))\n    .map(li => li.textContent);\n  localStorage.setItem("todos", JSON.stringify(items));\n}\nfunction ladeAlles() {\n  return JSON.parse(localStorage.getItem("todos") || "[]");\n}\nconsole.log(ladeAlles());`,
+  check(v){ const ok=v.includes("speichereAlles")&&v.includes("ladeAlles")&&v.includes("localStorage")&&v.includes("JSON.stringify"); return {ok,msg:ok?"Ausgezeichnet! Persistenz macht die App wirklich nützlich.":"Zwei Funktionen: speichern mit JSON.stringify, laden mit JSON.parse."}; },
+  accumulated: `function speichereAlles() {\n  const items = Array.from(document.querySelectorAll("#todo-liste li span"))\n    .map(span => span.textContent);\n  localStorage.setItem("pro_todos", JSON.stringify(items));\n}\nconst gespeichert = JSON.parse(localStorage.getItem("pro_todos") || "[]");\ngespeichert.forEach(text => {\n  const btn = document.getElementById("todo-btn");\n  const input = document.getElementById("todo-input");\n  if (input && btn) { input.value = text; btn.click(); }\n});\n`
+},
+{
+  tag:"App Projekt", title:"Filter-Funktion für Todos",
+  desc:`Schreibe eine Funktion <code>filtereListeNach(text)</code>: Iteriere alle <code>#todo-liste li</code>. Zeige jedes Item (<code>style.display = ""</code>), verstecke es (<code>style.display = "none"</code>), wenn dessen textContent (lowercase) <code>text</code> (lowercase) nicht enthält.`,
+  hint:`querySelectorAll + forEach + includes(text.toLowerCase()).`,
+  placeholder:`function filtereListeNach(text) {\n  document.querySelectorAll("#todo-liste li").forEach(li => {\n    const passt = li.textContent.toLowerCase().includes(text.toLowerCase());\n    li.style.display = passt ? "" : "none";\n  });\n}`,
+  check(v){ const ok=v.includes("filtereListeNach")&&v.includes(".toLowerCase()")&&v.includes(".includes(")&&v.includes("display"); return {ok,msg:ok?"Richtig! Live-Filter ist ein sehr häufiges UI-Pattern.":"forEach + toLowerCase + includes + display none/leerer String."}; },
+  accumulated: `function filtereListeNach(text) {\n  document.querySelectorAll("#todo-liste li").forEach(li => {\n    li.style.display = li.textContent.toLowerCase().includes(text.toLowerCase()) ? "" : "none";\n  });\n}\nconst suchInput = document.createElement("input");\nsuchInput.placeholder = "Suchen...";\nsuchInput.style.cssText = "width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;box-sizing:border-box;";\nsuchInput.addEventListener("input", e => filtereListeNach(e.target.value));\napp.insertBefore(suchInput, document.getElementById("todo-liste"));\n`
+},
+{
+  tag:"App Projekt", title:"Statistik-Anzeige mit Template Literals",
+  desc:`Schreibe eine Funktion <code>zeigeStatistik()</code>: Zähle alle Todos (<code>#todo-liste li</code>) und erledigte (mit Checkbox <code>checked</code>). Zeige in einem <code>#statistik</code>-Element: <code>\`\${erledigt}/\${gesamt} erledigt\`</code>.`,
+  hint:`querySelectorAll li length für gesamt, filter auf checked inputs für erledigt.`,
+  placeholder:`function zeigeStatistik() {\n  const lis = document.querySelectorAll("#todo-liste li");\n  const gesamt = lis.length;\n  const erledigt = document.querySelectorAll("#todo-liste input:checked").length;\n  const el = document.getElementById("statistik") || document.createElement("div");\n  el.id = "statistik";\n  el.textContent = \`\${erledigt}/\${gesamt} erledigt\`;\n  document.getElementById("app").prepend(el);\n}`,
+  check(v){ const ok=v.includes("zeigeStatistik")&&v.includes("gesamt")&&v.includes("erledigt")&&v.includes("checked"); return {ok,msg:ok?"Super! Statistiken machen Apps informativer und motivierender.":"gesamt = lis.length, erledigt = checked inputs, Template Literal."}; },
+  accumulated: `const stats = document.createElement("div");\nstats.style.cssText = "font-size:0.85rem;color:#888;margin-bottom:12px;font-family:monospace;";\nstats.id = "statistik";\napp.insertBefore(stats, app.querySelector("ul"));\nfunction aktualisiereStats() {\n  const lis = document.querySelectorAll("#todo-liste li").length;\n  const checked = document.querySelectorAll("#todo-liste input:checked").length;\n  stats.textContent = \`📊 \${checked}/\${lis} erledigt\`;\n}\napp.addEventListener("click", aktualisiereStats);\n`
+},
+{
+  tag:"App Projekt", title:"Drag & Drop Reihenfolge",
+  desc:`Mache Listenelemente verschiebbar. Setze <code>draggable="true"</code> auf neu erstellte <code>li</code>-Elemente. Füge einen <code>dragstart</code>-Listener hinzu, der das Element in einer Variable speichert. Füge auf der <code>ul</code> <code>dragover</code> (preventDefault) und <code>drop</code> (insertBefore) hinzu.`,
+  hint:`dragstart speichert Element, drop ruft insertBefore auf der Liste auf.`,
+  placeholder:`let gezogenes = null;\nconst liste = document.getElementById("todo-liste");\ndocument.addEventListener("dragstart", e => {\n  if (e.target.tagName === "LI") gezogenes = e.target;\n});\nliste.addEventListener("dragover", e => e.preventDefault());\nliste.addEventListener("drop", e => {\n  e.preventDefault();\n  if (gezogenes && e.target.tagName === "LI") {\n    liste.insertBefore(gezogenes, e.target);\n  }\n});`,
+  check(v){ const ok=v.includes("dragstart")&&v.includes("dragover")&&v.includes("drop")&&v.includes("insertBefore"); return {ok,msg:ok?"Excellent! Drag & Drop macht Listen intuitiv bedienbar.":"dragstart + dragover (preventDefault) + drop + insertBefore."}; },
+  accumulated: `let gezogen = null;\ndocument.getElementById("todo-liste").addEventListener("dragstart", e => { if (e.target.tagName==="LI") { gezogen = e.target; e.target.style.opacity="0.5"; } });\ndocument.getElementById("todo-liste").addEventListener("dragend", e => { e.target.style.opacity=""; });\ndocument.getElementById("todo-liste").addEventListener("dragover", e => e.preventDefault());\ndocument.getElementById("todo-liste").addEventListener("drop", e => { e.preventDefault(); if (gezogen && e.target.tagName==="LI") { document.getElementById("todo-liste").insertBefore(gezogen, e.target); speichereAlles && speichereAlles(); } });\n`
+},
+{
+  tag:"App Projekt", title:"App fertigstellen – Zertifikat-Code",
+  desc:`Du bist fast am Ziel! Schreibe abschließend eine Funktion <code>exportiereAlles()</code>, die alle <code>#todo-liste li span</code>-Texte sammelt, in einem String mit Newlines verbindet und diesen per <code>navigator.clipboard.writeText()</code> in die Zwischenablage kopiert (und <code>"Kopiert!"</code> loggt).`,
+  hint:`<code>const text = [...spans].map(s => s.textContent).join("\\n"); navigator.clipboard.writeText(text);</code>`,
+  placeholder:`async function exportiereAlles() {\n  const spans = document.querySelectorAll("#todo-liste li span");\n  const text = Array.from(spans).map(s => s.textContent).join("\\n");\n  await navigator.clipboard.writeText(text);\n  console.log("Kopiert!");\n}\nexportiereAlles();`,
+  check(v){ const ok=v.includes("exportiereAlles")&&(v.includes("clipboard")||v.includes("join"))&&v.includes("textContent"); return {ok,msg:ok?"🎉 Herzlichen Glückwunsch! Du hast den kompletten Pro-Kurs abgeschlossen!":"exportiereAlles mit querySelectorAll, map, join und clipboard."}; },
+  accumulated: `async function exportiereAlles() {\n  const spans = document.querySelectorAll("#todo-liste li span");\n  const text = Array.from(spans).map(s => s.textContent).join("\\n");\n  try {\n    await navigator.clipboard.writeText(text);\n  } catch(e) {}\n}\nconst exportBtn = document.createElement("button");\nexportBtn.textContent = "📋 Exportieren";\nexportBtn.style.cssText = "margin-top:12px;padding:8px 16px;background:#34d399;color:#0d0d0f;border:none;border-radius:6px;cursor:pointer;font-weight:bold;";\nexportBtn.onclick = exportiereAlles;\napp.appendChild(exportBtn);\n`
+}
+];
+
+// =====================================================================
+// STATE
+// =====================================================================
+const TOTAL = 65;
+let state = {
+  current: 0,
+  solved: new Array(TOTAL).fill(false),
+};
+
+try {
+  const saved = JSON.parse(localStorage.getItem("html_prokurs_state")||"null");
+  if (saved && saved.solved && saved.solved.length===TOTAL) state = saved;
+} catch(e){}
+
+function saveState() {
+  try { localStorage.setItem("html_prokurs_state", JSON.stringify(state)); } catch(e){}
+}
+
+// =====================================================================
+// BUILD SIDEBAR
+// =====================================================================
+function buildSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = "";
+  CHAPTERS.forEach(ch => {
+    const h = document.createElement("div");
+    h.className = "chapter-title";
+    h.textContent = ch.title;
+    sb.appendChild(h);
+    for (let i = ch.range[0]; i <= ch.range[1]; i++) {
+      const ex = EXERCISES[i];
+      const div = document.createElement("div");
+      const isLocked = !isUnlocked(i);
+      const isDone = state.solved[i];
+      div.className = "sb-item" + (i===state.current?" active":"") + (isDone?" done":"") + (isLocked?" locked":"");
+      div.innerHTML = `<span class="sb-num">${String(i+1).padStart(2,"0")}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ex.title}</span><span class="sb-check">${isDone?"✓":isLocked?"🔒":""}</span>`;
+      if (!isLocked) div.onclick = () => goTo(i);
+      sb.appendChild(div);
+    }
+  });
+}
+
+function isUnlocked(i) {
+  if (i===0) return true;
+  return state.solved[i-1];
+}
+
+// =====================================================================
+// BUILD EXERCISE
+// =====================================================================
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getAccumulatedSoFar(upToIndex) {
+  let parts = [];
+  for (let j = 0; j < upToIndex; j++) {
+    if (EXERCISES[j].accumulated) parts.push(EXERCISES[j].accumulated);
+  }
+  return parts.join('');
+}
+
+function buildExercise(i) {
+  const ex = EXERCISES[i];
+  const area = document.getElementById("exercise-area");
+  if (!isUnlocked(i)) {
+    area.innerHTML = `<div class="locked-overlay"><div class="lock-icon">🔒</div><p>Diese Übung ist noch gesperrt.<br>Löse zuerst Übung ${i} um fortzufahren.</p></div>`;
+    return;
+  }
+  const totalEx = EXERCISES.length;
+  const prevDisabled = i===0?"disabled":"";
+  const nextDisabled = (!state.solved[i]||i===totalEx-1)?"disabled":"";
+
+  const accumulated = getAccumulatedSoFar(i);
+  const hasAccumulated = accumulated.trim().length > 0;
+  const filename = 'app.js';
+  const contextHtml = hasAccumulated ? `
+    <div class="code-context-wrap">
+      <div class="code-context-header">
+        <span>📄 Dein App-Code bisher</span>
+        <span class="code-context-badge">✏️ dein Code kommt hier unten hin</span>
+      </div>
+      <pre class="code-context-pre"><span class="code-context-done">${escapeHtml(accumulated)}</span><span class="code-context-cursor">▌ // ✏️ Hier kommt deine Lösung für Übung ${i+1}</span></pre>
+    </div>
+  ` : '';
+
+  area.innerHTML = `
+    <div class="ex-header">
+      <div class="ex-tag">Übung ${i+1} / ${totalEx} – ${escapeHtml(ex.tag)}</div>
+      <div class="ex-title" id="ex-title-${i}"></div>
+      <div class="ex-desc">${ex.desc}</div>
+    </div>
+    <div class="ex-hint">${ex.hint}</div>
+    ${contextHtml}
+    <div class="editor-wrap">
+      <div class="editor-toolbar">
+        <span>${escapeHtml(filename)}</span>
+        <button class="btn-check" onclick="checkAnswer(${i})">▶ Prüfen</button>
+      </div>
+      <textarea class="code-input" id="code-input-${i}" spellcheck="false"></textarea>
+    </div>
+    <div class="feedback" id="feedback-${i}"></div>
+    <div class="ex-nav">
+      <button class="btn-nav" onclick="goTo(${i-1})" ${prevDisabled}>← Zurück</button>
+      <button class="btn-nav primary" id="next-btn-${i}" onclick="goTo(${i+1})" ${nextDisabled}>Weiter →</button>
+    </div>
+  `;
+  document.getElementById(`ex-title-${i}`).textContent = ex.title;
+  const ta = document.getElementById(`code-input-${i}`);
+  if (ta) {
+    ta.placeholder = ex.placeholder;
+    ta.value = state.solved[i] ? ex.placeholder : "";
+  }
+  if (state.solved[i]) {
+    showFeedback(i, true, "Bereits gelöst ✓");
+    document.getElementById(`next-btn-${i}`).disabled = false;
+  }
+}
+
+// =====================================================================
+// CHECK ANSWER
+// =====================================================================
+function checkAnswer(i) {
+  const ta = document.getElementById(`code-input-${i}`);
+  if (!ta) return;
+  const val = ta.value;
+  const ex = EXERCISES[i];
+  const result = ex.check(val);
+  showFeedback(i, result.ok, result.msg);
+  if (result.ok && !state.solved[i]) {
+    state.solved[i] = true;
+    saveState();
+    updateProgress();
+    buildSidebar();
+    const nextBtn = document.getElementById(`next-btn-${i}`);
+    if (nextBtn) nextBtn.disabled = false;
+    updatePreview();
+    if (i===EXERCISES.length-1) {
+      setTimeout(()=>{ document.getElementById("finish-screen").classList.add("show"); }, 800);
+    }
+  }
+}
+
+function showFeedback(i, ok, msg) {
+  const fb = document.getElementById(`feedback-${i}`);
+  if (!fb) return;
+  fb.className = "feedback show " + (ok?"ok":"err");
+  fb.textContent = msg;
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function goTo(i) {
+  if (i<0||i>=EXERCISES.length) return;
+  if (!isUnlocked(i)) return;
+  state.current = i;
+  saveState();
+  buildSidebar();
+  buildExercise(i);
+  updateProgress();
+  document.getElementById("exercise-area").scrollTop = 0;
+}
+
+// =====================================================================
+// PROGRESS
+// =====================================================================
+function updateProgress() {
+  const count = state.solved.filter(Boolean).length;
+  document.getElementById("progress-bar").style.width = (count/TOTAL*100)+"%";
+  document.getElementById("progress-label").textContent = `${count} / ${TOTAL} gelöst`;
+}
+
+// =====================================================================
+// PREVIEW
+// =====================================================================
+function buildFinalJS() {
+  let code = '';
+  for (let i = 0; i < EXERCISES.length; i++) {
+    if (state.solved[i] && EXERCISES[i].accumulated) {
+      code += EXERCISES[i].accumulated;
+    }
+  }
+  return code;
+}
+
+function buildFinalHTML() {
+  const js = buildFinalJS();
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meine Pro-App</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+:root { --color-primary: #6c63ff; --space-md: 16px; }
+</style>
+</head>
+<body>
+<script>
+${js}
+<\/script>
+</body>
+</html>`;
+}
+
+function updatePreview() {
+  const html = buildFinalHTML();
+  const iframe = document.getElementById("result-preview");
+  try {
+    iframe.srcdoc = html;
+  } catch(e) {}
+  document.getElementById("accumulated-code-display").textContent = buildFinalJS().slice(0,600)+(buildFinalJS().length>600?"…":"");
+}
+
+function downloadApp() {
+  const html = buildFinalHTML();
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "meine-pro-app.html";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+function printCertificate() {
+  const name = document.getElementById("cert-name-input").value.trim() || "–";
+  const d = new Date();
+  const date = "Nordhorn, " + d.toLocaleDateString("de-DE", {day:"2-digit",month:"long",year:"numeric"});
+  const win = window.open("", "_blank");
+  win.document.write(`<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8">
+<title>Pro-Zertifikat – ${name}</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d0d1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: Georgia, serif; }
+  .cert {
+    width: 90vw; max-width: 900px;
+    padding: 60px 80px;
+    text-align: center;
+    border: 10px solid #a78bfa;
+    box-shadow: inset 0 0 0 4px #0d0d1a, inset 0 0 0 8px #a78bfa;
+    color: #e8e8f0;
+    background: #12121e;
+  }
+  .emoji { font-size: 4rem; margin-bottom: 10px; }
+  .top { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: #7a7a95; margin-bottom: 6px; font-family: monospace; }
+  .title { font-size: 2.8rem; font-weight: bold; color: #a78bfa; margin-bottom: 4px; }
+  .sub { font-size: 0.85rem; color: #7a7a95; margin-bottom: 32px; font-family: monospace; }
+  .label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: #7a7a95; margin-bottom: 6px; font-family: monospace; }
+  .name { font-size: 3rem; color: #e8e8f0; border-bottom: 2px solid #a78bfa; display: inline-block; padding: 4px 24px 8px; min-width: 300px; margin-bottom: 28px; }
+  .txt { font-size: 0.9rem; color: #b0b0c8; line-height: 1.9; margin-bottom: 8px; font-family: monospace; }
+  .badge { font-size: 1rem; font-weight: bold; color: #34d399; letter-spacing: 0.05em; margin-bottom: 28px; }
+  hr { border: none; border-top: 1px solid #a78bfa44; margin: 24px 0; }
+  .date { font-size: 0.75rem; color: #7a7a95; font-family: monospace; }
+</style></head><body>
+<div class="cert">
+  <div class="emoji">🚀</div>
+  <div class="top">Pro-Zertifikat der Teilnahme</div>
+  <div class="title">HTML, CSS &amp; JavaScript</div>
+  <div class="sub">Pro-Kurs · 65 Übungen</div>
+  <div class="label">Ausgestellt für</div>
+  <div class="name">${name}</div>
+  <div class="txt">hat den kompletten Pro-Kurs erfolgreich absolviert<br>und dabei CSS Custom Properties, Animationen,<br>fortgeschrittenes JavaScript sowie Fetch API und<br>Design Patterns professionell gemeistert.</div>
+  <div class="badge">✦ 65 / 65 Pro-Übungen gelöst ✦</div>
+  <hr>
+  <div class="date">${date}</div>
+</div>
+<script>window.onload=()=>{ window.print(); }<\/script>
+</body></html>`);
+  win.document.close();
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+buildSidebar();
+buildExercise(state.current);
+updateProgress();
+updatePreview();
+</script>
+</body>
+</html>
