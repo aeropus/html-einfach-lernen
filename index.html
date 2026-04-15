@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML, CSS & JS Grundkurs – 120 Übungen</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --ink: #f0ece4;
+    --ink2: #9a9488;
+    --yellow: #f0c040;
+    --blue: #3d6fff;
+    --green: #3ecf8e;
+    --red: #ff5c5c;
+    --surface: #111113;
+    --border: rgba(240,236,228,0.08);
+    --radius: 12px;
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    background: rgba(10,10,10,0.7);
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--yellow);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .header-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--yellow);
+    color: #0a0a0a;
+    padding: 9px 22px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .header-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(240,236,228,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,236,228,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--blue);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.1s ease forwards;
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(4.5rem, 11vw, 10rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s ease forwards;
+  }
+
+  .hero-title em {
+    font-style: normal;
+    color: var(--yellow);
+    display: inline-block;
+  }
+
+  .hero-title .line2 {
+    display: block;
+    color: var(--ink2);
+  }
+
+  .hero-sub {
+    max-width: 540px;
+    font-size: 1.05rem;
+    color: var(--ink2);
+    line-height: 1.7;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.35s ease forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.5s ease forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--yellow);
+    color: #0a0a0a;
+    padding: 16px 36px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-primary:hover::after { opacity: 0.1; }
+
+  .btn-secondary {
+    font-size: 0.9rem;
+    color: var(--ink2);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--ink); border-color: var(--ink2); }
+
+  .hero-stats {
+    position: absolute;
+    right: 48px;
+    bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    opacity: 0;
+    animation: fadeIn 1s 0.8s ease forwards;
+  }
+
+  .stat-item { text-align: right; }
+  .stat-num {
+    font-family: var(--display);
+    font-size: 3.2rem;
+    line-height: 1;
+    color: var(--ink);
+    display: block;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--ink2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 48px;
+  }
+
+  /* ── CHAPTER OVERVIEW ── */
+  .section {
+    padding: 100px 48px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 56px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 120px;
+  }
+
+  .chapters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+
+  .chapter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .chapter-card:hover { background: #161618; }
+  .chapter-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--card-accent, var(--border));
+    transition: opacity 0.2s;
+  }
+  .chapter-card:hover::before { opacity: 1; }
+
+  .chapter-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--ink2);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .chapter-name {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .chapter-desc {
+    font-size: 0.8rem;
+    color: var(--ink2);
+    line-height: 1.55;
+  }
+  .chapter-tag {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(240,236,228,0.06);
+    color: var(--ink2);
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .feature-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px;
+    position: relative;
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+  .feature-title {
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .feature-desc {
+    font-size: 0.85rem;
+    color: var(--ink2);
+    line-height: 1.65;
+  }
+  .feature-large {
+    grid-column: 1 / -1;
+    background: #0d0f1a;
+    border-color: rgba(61,111,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .feature-large .feature-icon { font-size: 3rem; margin: 0; }
+
+  /* ── TECH STRIP ── */
+  .tech-strip {
+    padding: 40px 48px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tech-scroll {
+    display: flex;
+    gap: 56px;
+    animation: scroll 20s linear infinite;
+    white-space: nowrap;
+    align-items: center;
+  }
+
+  .tech-item {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--ink2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+  .tech-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--dot-color, var(--border));
+    flex-shrink: 0;
+  }
+
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── BIG CTA ── */
+  .cta-section {
+    padding: 120px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(240,192,64,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 24px;
+  }
+
+  .cta-headline {
+    font-family: var(--display);
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+
+  .cta-sub {
+    font-size: 1rem;
+    color: var(--ink2);
+    max-width: 420px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink2);
+  }
+  .footer-link {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-link:hover { color: var(--yellow); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    header { padding: 16px 24px; }
+    .hero { padding: 0 24px 60px; }
+    .hero-stats { display: none; }
+    .section { padding: 64px 24px; }
+    .divider { margin: 0 24px; }
+    .tech-strip { padding: 32px 24px; }
+    .cta-section { padding: 80px 24px; }
+    footer { padding: 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-large { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">⟨HTML/CSS/JS⟩ Grundkurs</div>
+  <a href="/course" class="header-cta">
+    Kurs starten →
+  </a>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+
+  <div class="hero-tag">Vollständiger Grundkurs · Für Einsteiger</div>
+
+  <h1 class="hero-title">
+    <em>HTML,</em> CSS<br>
+    <span class="line2">&amp; JavaScript.</span>
+  </h1>
+
+  <p class="hero-sub">
+    120 hands-on Übungen, die dich von der ersten Zeile Code bis zu einer
+    vollständigen, interaktiven Webseite führen. Lerne durch Tun – direkt im Browser.
+  </p>
+
+  <div class="hero-actions">
+    <a href="/course" class="btn-primary">
+      <span>Jetzt kostenlos starten</span>
+      <span>→</span>
+    </a>
+    <a href="#kursinhalt" class="btn-secondary">
+      Kursinhalt ansehen ↓
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">120</span>
+      <span class="stat-label">Übungen</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">11</span>
+      <span class="stat-label">Kapitel</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">0€</span>
+      <span class="stat-label">Kosten</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── TECH STRIP ── -->
+<div class="tech-strip">
+  <div class="tech-scroll">
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f07320"></span>HTML5</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3d6fff"></span>CSS3</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f0c040"></span>JavaScript ES6+</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3ecf8e"></span>DOM Manipulation</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#a78bfa"></span>Flexbox & Grid</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f07320"></span>Formulare</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3d6fff"></span>Responsive Design</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f0c040"></span>Events & Callbacks</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3ecf8e"></span>localStorage</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#a78bfa"></span>Semantisches HTML</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f07320"></span>HTML5</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3d6fff"></span>CSS3</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f0c040"></span>JavaScript ES6+</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3ecf8e"></span>DOM Manipulation</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#a78bfa"></span>Flexbox & Grid</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f07320"></span>Formulare</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3d6fff"></span>Responsive Design</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#f0c040"></span>Events & Callbacks</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#3ecf8e"></span>localStorage</span>
+    <span class="tech-item"><span class="tech-dot" style="--dot-color:#a78bfa"></span>Semantisches HTML</span>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<section class="section" id="features">
+  <div class="section-label reveal">So funktioniert's</div>
+
+  <div class="features-grid">
+    <div class="feature-item reveal" style="transition-delay:0.05s">
+      <span class="feature-icon">✍️</span>
+      <div class="feature-title">Schreibe echten Code</div>
+      <p class="feature-desc">Jede Übung hat einen integrierten Code-Editor. Du tippst, der Kurs prüft deine Lösung sofort – kein externes Tool nötig.</p>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.1s">
+      <span class="feature-icon">🔒</span>
+      <div class="feature-title">Schritt für Schritt entsperrt</div>
+      <p class="feature-desc">Übungen bauen aufeinander auf. Du löst eine, die nächste öffnet sich. Kein Überspringen – kein Schummeln.</p>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.15s">
+      <span class="feature-icon">👁️</span>
+      <div class="feature-title">Live-Vorschau in Echtzeit</div>
+      <p class="feature-desc">Eine Live-Vorschau zeigt dir nach jeder gelösten Übung, wie deine Webseite Stück für Stück wächst.</p>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.2s">
+      <span class="feature-icon">🏆</span>
+      <div class="feature-title">Dein Abschluss-Zertifikat</div>
+      <p class="feature-desc">Nach 120 Übungen kannst du ein personalisiertes PDF-Zertifikat herunterladen – und deine fertige Webseite als HTML exportieren.</p>
+    </div>
+    <div class="feature-item feature-large reveal" style="transition-delay:0.25s">
+      <div>
+        <div class="feature-title" style="font-size:1.3rem;margin-bottom:12px">Alles lokal im Browser</div>
+        <p class="feature-desc" style="max-width:500px">Kein Account, kein Server, keine Installation. Der Kurs läuft vollständig als einzelne HTML-Datei direkt in deinem Browser. Dein Fortschritt wird automatisch gespeichert.</p>
+      </div>
+      <span class="feature-icon">⚡</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── CHAPTER OVERVIEW ── -->
+<section class="section" id="kursinhalt">
+  <div class="section-label reveal">Kursinhalt – 11 Kapitel</div>
+
+  <div class="chapters-grid">
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f07320;transition-delay:0.02s">
+      <div class="chapter-num">Kapitel 01</div>
+      <div class="chapter-name">HTML Grundstruktur</div>
+      <div class="chapter-desc">DOCTYPE, html, head, body – der Aufbau jeder Webseite.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f07320;transition-delay:0.04s">
+      <div class="chapter-num">Kapitel 02</div>
+      <div class="chapter-name">Texte &amp; Überschriften</div>
+      <div class="chapter-desc">h1–h6, p, strong, em, br, blockquote und mehr.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f07320;transition-delay:0.06s">
+      <div class="chapter-num">Kapitel 03</div>
+      <div class="chapter-name">Links &amp; Bilder</div>
+      <div class="chapter-desc">Externe Links, Anker, E-Mail-Links, img, figure.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f07320;transition-delay:0.08s">
+      <div class="chapter-num">Kapitel 04</div>
+      <div class="chapter-name">Listen &amp; Tabellen</div>
+      <div class="chapter-desc">ul, ol, dl, table, thead, tbody, colspan.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f07320;transition-delay:0.1s">
+      <div class="chapter-num">Kapitel 05</div>
+      <div class="chapter-name">Formulare</div>
+      <div class="chapter-desc">Inputs, Labels, Buttons, Validierung und Accessibility.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#3d6fff;transition-delay:0.12s">
+      <div class="chapter-num">Kapitel 06</div>
+      <div class="chapter-name">CSS Grundlagen</div>
+      <div class="chapter-desc">Selektoren, Farben, Schriften, margin, padding, border.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#3d6fff;transition-delay:0.14s">
+      <div class="chapter-num">Kapitel 07</div>
+      <div class="chapter-name">CSS Layout &amp; Box-Modell</div>
+      <div class="chapter-desc">display, position, float, overflow, z-index.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#3d6fff;transition-delay:0.16s">
+      <div class="chapter-num">Kapitel 08</div>
+      <div class="chapter-name">CSS Farben &amp; Schriften</div>
+      <div class="chapter-desc">Hex, RGB, Verläufe, Google Fonts, text-shadow.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#3d6fff;transition-delay:0.18s">
+      <div class="chapter-num">Kapitel 09</div>
+      <div class="chapter-name">Flexbox &amp; Grid</div>
+      <div class="chapter-desc">Moderne Layouts meistern: flex-direction, gap, grid-template.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#3ecf8e;transition-delay:0.2s">
+      <div class="chapter-num">Kapitel 10</div>
+      <div class="chapter-name">Webseite fertigstellen</div>
+      <div class="chapter-desc">header, main, footer, Media Queries, hover-Effekte.</div>
+      <span class="chapter-tag">10 Übungen</span>
+    </a>
+    <a href="/course" class="chapter-card reveal" style="--card-accent:#f0c040;transition-delay:0.22s;grid-column: span 1">
+      <div class="chapter-num">Kapitel 11</div>
+      <div class="chapter-name">JavaScript auf der Webseite</div>
+      <div class="chapter-desc">DOM, Events, Arrays, Bedingungen, Funktionen, localStorage – deine Seite wird lebendig.</div>
+      <span class="chapter-tag">20 Übungen</span>
+    </a>
+  </div>
+</section>
+
+<!-- ── BIG CTA ── -->
+<section class="cta-section">
+  <p class="cta-eyebrow reveal">Bereit loszulegen?</p>
+  <h2 class="cta-headline reveal">Deine erste<br>Webseite wartet.</h2>
+  <p class="cta-sub reveal">Keine Vorkenntnisse nötig. Öffne den Kurs und schreibe deine erste Zeile HTML.</p>
+  <a href="/course" class="btn-primary reveal" style="font-size:1.1rem;padding:18px 48px;display:inline-flex">
+    <span>Kurs öffnen</span>
+    <span>→</span>
+  </a>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span class="footer-text">⟨HTML/CSS/JS⟩ Grundkurs · 120 Übungen · Kostenlos</span>
+  <a href="/course" class="footer-link">Direkt zum Kurs →</a>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
