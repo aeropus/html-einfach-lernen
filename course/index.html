@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML, CSS & JS Grundkurs – 120 Übungen</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a35;
+    --accent: #f0c040;
+    --accent2: #5b8fff;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --muted: #7a7a95;
+    --radius: 10px;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  #app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  #app-header h1 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  #app-header span { color: var(--muted); font-size: 0.85rem; font-family: var(--mono); }
+
+  #progress-bar-wrap {
+    flex: 1;
+    max-width: 280px;
+    margin: 0 24px;
+    background: var(--border);
+    height: 6px;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.5s ease;
+    border-radius: 99px;
+  }
+
+  /* ===== LAYOUT ===== */
+  #main-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+    min-height: calc(100vh - 65px);
+  }
+
+  /* ===== SIDEBAR ===== */
+  #sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    overflow-y: auto;
+    max-height: calc(100vh - 65px);
+    position: sticky;
+    top: 65px;
+  }
+  .chapter-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 12px 10px 6px;
+    font-family: var(--mono);
+  }
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+    font-family: var(--mono);
+  }
+  .sb-item.active { background: rgba(240,192,64,0.12); color: var(--accent); }
+  .sb-item.done { color: var(--green); }
+  .sb-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .sb-item:hover:not(.locked) { background: var(--surface2); color: var(--text); }
+  .sb-num {
+    font-size: 0.65rem;
+    min-width: 20px;
+    color: inherit;
+    opacity: 0.6;
+  }
+  .sb-check { font-size: 0.75rem; }
+
+  /* ===== EXERCISE AREA ===== */
+  #exercise-area {
+    padding: 40px 48px;
+    overflow-y: auto;
+    max-height: calc(100vh - 65px);
+  }
+
+  .ex-header {
+    margin-bottom: 32px;
+  }
+  .ex-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    background: rgba(91,143,255,0.15);
+    color: var(--accent2);
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    letter-spacing: 0.06em;
+  }
+  .ex-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .ex-desc {
+    color: #b0b0c8;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+  .ex-desc code {
+    background: var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 0.78rem;
+  }
+  .ex-hint {
+    background: rgba(91,143,255,0.08);
+    border-left: 3px solid var(--accent2);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    color: #a0b8ff;
+    line-height: 1.6;
+  }
+  .ex-hint code { background: rgba(91,143,255,0.2); padding: 1px 5px; border-radius: 3px; color: #c0d8ff; }
+
+  /* ===== CODE CONTEXT (accumulated so far) ===== */
+  .code-context-wrap {
+    background: #0a0a0e;
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 16px 0 4px;
+  }
+  .code-context-header {
+    background: #12122a;
+    border-bottom: 1px solid #2a3550;
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .code-context-badge {
+    background: rgba(240,192,64,0.15);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+  }
+  .code-context-pre {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 14px 16px;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 220px;
+    overflow-y: auto;
+    line-height: 1.65;
+  }
+  .code-context-done { color: #5a7a5a; }
+  .code-context-cursor {
+    display: block;
+    color: var(--accent);
+    background: rgba(240,192,64,0.07);
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+    margin-top: 2px;
+    animation: blink 1.2s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ===== CODE EDITOR ===== */
+  .editor-wrap {
+    background: #0a0a0e;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .editor-toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .editor-toolbar span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .btn-check {
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-check:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-check:active { transform: translateY(0); }
+
+  textarea.code-input {
+    width: 100%;
+    min-height: 130px;
+    background: transparent;
+    border: none;
+    color: #d0d0e8;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 16px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .feedback.err { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--red); }
+  .feedback.ok::before { content: "✓ "; }
+  .feedback.err::before { content: "✗ "; }
+
+  /* Nav buttons */
+  .ex-nav {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .btn-nav {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-nav:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .btn-nav.primary { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .btn-nav.primary:hover { opacity: 0.85; background: var(--accent2); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ===== PREVIEW PANEL ===== */
+  #preview-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  #preview-panel h3 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+  }
+  #result-preview {
+    flex: 1;
+    background: #fff;
+    width: 100%;
+    border: none;
+    min-height: 300px;
+  }
+  #accumulated-code-display {
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    overflow-y: auto;
+    max-height: 260px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.6;
+  }
+
+  /* ===== FINISH SCREEN ===== */
+  #finish-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+  #finish-screen.show { display: flex; }
+  #finish-screen h2 { font-size: 3rem; font-weight: 800; color: var(--accent); margin-bottom: 12px; }
+  #finish-screen p { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+  .btn-show-result {
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-show-result:hover { opacity: 0.85; }
+
+  /* ===== TOOLTIP / locked overlay ===== */
+  .locked-overlay {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+  .locked-overlay .lock-icon { font-size: 3rem; margin-bottom: 16px; }
+
+  @media (max-width: 1100px) {
+    #main-layout { grid-template-columns: 200px 1fr 260px; }
+  }
+  @media (max-width: 800px) {
+    #main-layout { grid-template-columns: 1fr 220px; }
+    #sidebar { display: none; }
+    #exercise-area { padding: 24px 16px; }
+  }
+  @media (max-width: 560px) {
+    #main-layout { grid-template-columns: 1fr; }
+    #preview-panel { display: none; }
+    #exercise-area { padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header id="app-header">
+  <h1>⟨HTML/CSS/JS⟩ Grundkurs</h1>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+  <span id="progress-label">0 / 100 gelöst</span>
+</header>
+
+<!-- ===== MAIN LAYOUT ===== -->
+<div id="main-layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar" aria-label="Übungen"></nav>
+
+  <!-- EXERCISE CONTENT -->
+  <main id="exercise-area"></main>
+
+  <!-- LIVE PREVIEW -->
+  <aside id="preview-panel">
+    <h3>🔎 Deine Webseite bisher</h3>
+    <iframe id="result-preview" title="Vorschau" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div id="accumulated-code-display"><!-- Code wird hier angezeigt --></div>
+  </aside>
+
+</div>
+
+<!-- FINISH SCREEN -->
+<div id="finish-screen">
+  <div style="font-size:5rem;margin-bottom:16px">🎉</div>
+  <h2>Kurs abgeschlossen!</h2>
+  <p>Herzlichen Glückwunsch! Du hast alle 120 Übungen erfolgreich abgeschlossen – HTML, CSS und JavaScript auf einer echten Webseite!</p>
+
+  <div style="margin-bottom:28px;">
+    <label style="display:block;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">Dein Name für das Zertifikat</label>
+    <input id="cert-name-input" type="text" placeholder="Deinen Namen eingeben …" maxlength="60" autofocus
+      style="font-size:1.5rem;font-family:Georgia,serif;text-align:center;background:var(--surface2);border:2px solid var(--accent);border-radius:8px;color:var(--text);padding:10px 24px;width:100%;max-width:400px;outline:none;" />
+  </div>
+
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn-show-result" onclick="printCertificate()">🏆 PDF-Zertifikat</button>
+    <button class="btn-show-result" style="background:var(--accent2);color:#fff;" onclick="downloadWebsite()">⬇️ Webseite als HTML</button>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// EXERCISE DEFINITIONS – 100 Übungen in 10 Kapitel
+// accumulated: Teile des endgültigen HTML, die diese Übung beisteuert
+// check(input): gibt {ok, msg} zurück
+// =====================================================================
+
+const CHAPTERS = [
+  { title: "Kapitel 1 – HTML Grundstruktur", range: [0, 9] },
+  { title: "Kapitel 2 – Texte & Überschriften", range: [10, 19] },
+  { title: "Kapitel 3 – Links & Bilder", range: [20, 29] },
+  { title: "Kapitel 4 – Listen & Tabellen", range: [30, 39] },
+  { title: "Kapitel 5 – Formulare", range: [40, 49] },
+  { title: "Kapitel 6 – CSS Grundlagen", range: [50, 59] },
+  { title: "Kapitel 7 – CSS Layout & Box-Modell", range: [60, 69] },
+  { title: "Kapitel 8 – CSS Farben & Schriften", range: [70, 79] },
+  { title: "Kapitel 9 – CSS Flexbox & Grid", range: [80, 89] },
+  { title: "Kapitel 10 – Webseite fertigstellen", range: [90, 99] },
+  { title: "Kapitel 11 – JavaScript auf der Webseite", range: [100, 119] },
+];
+
+// accumulated HTML-Blöcke für die final result page
+// Wir bauen eine kleine "Portfolio / Info"-Seite
+let accumulatedHTML = new Array(100).fill("");
+
+const EXERCISES = [
+// ── KAP 1: Grundstruktur ──────────────────────────────────────────────
+{
+  tag:"Grundstruktur", title:"DOCTYPE – Der Anfang jeder Webseite",
+  desc:`Jede HTML-Datei beginnt mit dem DOCTYPE. Schreibe den DOCTYPE für HTML5 auf einer Zeile.`,
+  hint:`Der DOCTYPE für HTML5 lautet: <code>&lt;!DOCTYPE html&gt;</code>`,
+  placeholder:`<!DOCTYPE html>`,
+  check(v){ const ok=v.trim().toLowerCase()==="<!doctype html>"; return {ok,msg:ok?"Perfekt! Das ist der HTML5 DOCTYPE.":"Nicht ganz. Schreibe genau: <!DOCTYPE html>"}; },
+  accumulated: "<!DOCTYPE html>\n"
+},
+{
+  tag:"Grundstruktur", title:"Das <html>-Element",
+  desc:`Das <code>&lt;html&gt;</code>-Element umschließt die gesamte Seite. Schreibe ein öffnendes <code>&lt;html&gt;</code>-Tag mit dem Sprach-Attribut <code>lang="de"</code>.`,
+  hint:`Attribute werden im öffnenden Tag angegeben: <code>&lt;html lang="de"&gt;</code>`,
+  placeholder:`<html lang="de">`,
+  check(v){ const ok=/^<html\s+lang=["']de["']\s*>$/i.test(v.trim()); return {ok,msg:ok?"Super! Das html-Element mit lang-Attribut ist korrekt.":"Schreibe: <html lang=\"de\">"}; },
+  accumulated: '<html lang="de">\n'
+},
+{
+  tag:"Grundstruktur", title:"Der <head>-Bereich",
+  desc:`Im <code>&lt;head&gt;</code> stehen unsichtbare Meta-Informationen. Schreibe ein öffnendes und schließendes <code>&lt;head&gt;</code>-Tag (leer, zwei Zeilen).`,
+  hint:`<code>&lt;head&gt;</code> auf Zeile 1, <code>&lt;/head&gt;</code> auf Zeile 2`,
+  placeholder:`<head>\n</head>`,
+  check(v){ const ok=/^<head>\s*<\/head>$/i.test(v.trim()); return {ok,msg:ok?"Richtig! Der leere head-Bereich.":"Schreibe: <head> und </head> jeweils auf einer Zeile."}; },
+  accumulated: "<head>\n"
+},
+{
+  tag:"Grundstruktur", title:"charset – Zeichensatz festlegen",
+  desc:`Damit Umlaute (ä, ö, ü) korrekt angezeigt werden, muss der Zeichensatz auf UTF-8 gesetzt werden. Schreibe das passende <code>&lt;meta&gt;</code>-Tag.`,
+  hint:`<code>&lt;meta charset="UTF-8"&gt;</code> – meta-Tags haben keinen schließenden Tag.`,
+  placeholder:`<meta charset="UTF-8">`,
+  check(v){ const ok=/^<meta\s+charset=["']UTF-8["']\s*\/?>$/i.test(v.trim()); return {ok,msg:ok?"Korrekt! UTF-8 ist der Standard-Zeichensatz für das Web.":"Schreibe: <meta charset=\"UTF-8\">"}; },
+  accumulated: '  <meta charset="UTF-8">\n'
+},
+{
+  tag:"Grundstruktur", title:"viewport – Mobile Darstellung",
+  desc:`Das viewport-Meta-Tag sorgt dafür, dass die Seite auf Mobilgeräten gut aussieht. Schreibe es mit den Werten <code>width=device-width, initial-scale=1.0</code>.`,
+  hint:`<code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>`,
+  placeholder:`<meta name="viewport" content="width=device-width, initial-scale=1.0">`,
+  check(v){ const ok=v.includes('name="viewport"')&&v.includes('width=device-width')&&v.includes('initial-scale=1'); return {ok,msg:ok?"Perfekt! Deine Seite ist jetzt mobilfreundlich.":"Achte darauf, dass name=\"viewport\" und content=\"width=device-width, initial-scale=1.0\" enthalten sind."}; },
+  accumulated: '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+},
+{
+  tag:"Grundstruktur", title:"<title> – Seitentitel",
+  desc:`Der Titel der Seite erscheint im Browser-Tab. Schreibe das <code>&lt;title&gt;</code>-Element mit dem Inhalt <strong>Meine Webseite</strong>.`,
+  hint:`<code>&lt;title&gt;Meine Webseite&lt;/title&gt;</code>`,
+  placeholder:`<title>Meine Webseite</title>`,
+  check(v){ const ok=/<title>\s*Meine Webseite\s*<\/title>/i.test(v.trim()); return {ok,msg:ok?"Super! Der Titel erscheint im Browser-Tab.":"Schreibe: <title>Meine Webseite</title>"}; },
+  accumulated: '  <title>Meine Webseite</title>\n'
+},
+{
+  tag:"Grundstruktur", title:"Das <body>-Element",
+  desc:`Nach dem <code>&lt;head&gt;</code> kommt der <code>&lt;body&gt;</code>. Schreibe das schließende <code>&lt;/head&gt;</code>-Tag und dann öffnendes + schließendes <code>&lt;body&gt;</code>-Tag (leer).`,
+  hint:`<code>&lt;/head&gt;</code> dann <code>&lt;body&gt;</code> und <code>&lt;/body&gt;</code>`,
+  placeholder:`</head>\n<body>\n</body>`,
+  check(v){ const ok=v.includes("</head>")&&v.includes("<body>")&&v.includes("</body>"); return {ok,msg:ok?"Richtig! Im body kommt bald dein sichtbarer Inhalt.":"Schreibe: </head> dann <body></body>."}; },
+  accumulated: "</head>\n<body>\n"
+},
+{
+  tag:"Grundstruktur", title:"Kommentare in HTML",
+  desc:`Kommentare werden vom Browser ignoriert, helfen aber beim Lesen des Codes. Schreibe einen HTML-Kommentar mit dem Text <em>Hier beginnt die Seite</em>.`,
+  hint:`Kommentare: <code>&lt;!-- Dein Text --&gt;</code>`,
+  placeholder:`<!-- Hier beginnt die Seite -->`,
+  check(v){ const ok=/<!--.*Hier beginnt die Seite.*-->/i.test(v.trim()); return {ok,msg:ok?"Richtig! Kommentare helfen dir und anderen, den Code zu verstehen.":"Schreibe: <!-- Hier beginnt die Seite -->"}; },
+  accumulated: "  <!-- Hier beginnt die Seite -->\n"
+},
+{
+  tag:"Grundstruktur", title:"Schließendes </html>-Tag",
+  desc:`Jede geöffnete Tag muss wieder geschlossen werden. Schreibe das schließende <code>&lt;/html&gt;</code>-Tag.`,
+  hint:`<code>&lt;/html&gt;</code>`,
+  placeholder:`</html>`,
+  check(v){ const ok=v.trim().toLowerCase()==="</html>"; return {ok,msg:ok?"Korrekt! Das schließende html-Tag beendet das Dokument.":"Schreibe: </html>"}; },
+  accumulated: ""
+},
+{
+  tag:"Grundstruktur", title:"Vollständige HTML-Grundstruktur",
+  desc:`Jetzt kannst du alles zusammensetzen! Schreibe eine vollständige minimale HTML-Seite: DOCTYPE, &lt;html lang="de"&gt;, &lt;head&gt; mit charset und title "Test", &lt;body&gt; mit einem Absatz "Hallo Welt".`,
+  hint:`Beginne mit <code>&lt;!DOCTYPE html&gt;</code> und baue alles darunter auf.`,
+  placeholder:`<!DOCTYPE html>\n<html lang="de">\n<head>\n  <meta charset="UTF-8">\n  <title>Test</title>\n</head>\n<body>\n  <p>Hallo Welt</p>\n</body>\n</html>`,
+  check(v){ const ok=v.includes("<!DOCTYPE html>")&&v.includes('lang="de"')&&v.includes("<title>Test</title>")&&v.includes("<p>Hallo Welt</p>"); return {ok,msg:ok?"Ausgezeichnet! Du hast eine vollständige HTML-Seite erstellt!":"Überprüfe: DOCTYPE, html lang=de, meta charset, title=Test, p=Hallo Welt sind alle enthalten?"}; },
+  accumulated: ""
+},
+
+// ── KAP 2: Texte & Überschriften ─────────────────────────────────────
+{
+  tag:"Texte", title:"Überschrift h1",
+  desc:`Erstelle eine <code>&lt;h1&gt;</code>-Überschrift mit dem Text <strong>Über mich</strong>. h1 ist die wichtigste Überschrift einer Seite.`,
+  hint:`<code>&lt;h1&gt;Über mich&lt;/h1&gt;</code>`,
+  placeholder:`<h1>Über mich</h1>`,
+  check(v){ const ok=/<h1>\s*Über mich\s*<\/h1>/i.test(v.trim()); return {ok,msg:ok?"Super! Die h1 ist die Hauptüberschrift.":"Schreibe: <h1>Über mich</h1>"}; },
+  accumulated: '  <h1>Über mich</h1>\n'
+},
+{
+  tag:"Texte", title:"Überschrift h2",
+  desc:`Erstelle eine <code>&lt;h2&gt;</code>-Überschrift mit dem Text <strong>Meine Interessen</strong>. h2 ist eine Unterüberschrift.`,
+  hint:`<code>&lt;h2&gt;Meine Interessen&lt;/h2&gt;</code>`,
+  placeholder:`<h2>Meine Interessen</h2>`,
+  check(v){ const ok=/<h2>\s*Meine Interessen\s*<\/h2>/i.test(v.trim()); return {ok,msg:ok?"Richtig! h2 steht unter h1 in der Hierarchie.":"Schreibe: <h2>Meine Interessen</h2>"}; },
+  accumulated: '  <h2>Meine Interessen</h2>\n'
+},
+{
+  tag:"Texte", title:"Absatz <p>",
+  desc:`Schreibe einen Absatz (<code>&lt;p&gt;</code>) mit dem Text: <em>Ich lerne gerade HTML und CSS und es macht mir viel Spaß!</em>`,
+  hint:`<code>&lt;p&gt;Text hier&lt;/p&gt;</code>`,
+  placeholder:`<p>Ich lerne gerade HTML und CSS und es macht mir viel Spaß!</p>`,
+  check(v){ const ok=/<p>.*HTML.*CSS.*<\/p>/i.test(v.trim()); return {ok,msg:ok?"Perfekt! Absätze sind die häufigsten Text-Elemente.":"Dein p-Tag sollte HTML und CSS erwähnen."}; },
+  accumulated: '  <p>Ich lerne gerade HTML und CSS und es macht mir viel Spaß!</p>\n'
+},
+{
+  tag:"Texte", title:"Fettschrift <strong>",
+  desc:`Schreibe einen Absatz, der das Wort <strong>wichtig</strong> in Fettschrift enthält. Nutze <code>&lt;strong&gt;</code> für semantische Wichtigkeit.`,
+  hint:`<code>&lt;p&gt;Das ist &lt;strong&gt;wichtig&lt;/strong&gt;.&lt;/p&gt;</code>`,
+  placeholder:`<p>Das ist <strong>wichtig</strong>.</p>`,
+  check(v){ const ok=v.includes("<strong>")&&v.includes("</strong>")&&v.includes("<p>"); return {ok,msg:ok?"Richtig! strong macht Text fett und zeigt Wichtigkeit.":"Nutze <strong>...</strong> innerhalb eines <p>-Tags."}; },
+  accumulated: '  <p>Das ist mir <strong>sehr wichtig</strong>.</p>\n'
+},
+{
+  tag:"Texte", title:"Kursivschrift <em>",
+  desc:`Schreibe einen Absatz, der ein Wort in <em>Kursivschrift</em> enthält. Nutze <code>&lt;em&gt;</code> (emphasis).`,
+  hint:`<code>&lt;p&gt;Das ist &lt;em&gt;betont&lt;/em&gt;.&lt;/p&gt;</code>`,
+  placeholder:`<p>Das ist <em>betont</em>.</p>`,
+  check(v){ const ok=v.includes("<em>")&&v.includes("</em>"); return {ok,msg:ok?"Super! em steht für Betonung / Emphasis.":"Nutze <em>...</em> für Kursivschrift."}; },
+  accumulated: '  <p>Webentwicklung ist <em>wirklich</em> spannend.</p>\n'
+},
+{
+  tag:"Texte", title:"Zeilenumbruch <br>",
+  desc:`Manchmal möchte man einen Zeilenumbruch ohne neuen Absatz. Schreibe einen Absatz mit zwei Zeilen, getrennt durch <code>&lt;br&gt;</code>.`,
+  hint:`<code>&lt;p&gt;Zeile 1&lt;br&gt;Zeile 2&lt;/p&gt;</code>`,
+  placeholder:`<p>Zeile 1<br>Zeile 2</p>`,
+  check(v){ const ok=v.includes("<br")&&v.includes("<p>"); return {ok,msg:ok?"Korrekt! br erzeugt einen einfachen Zeilenumbruch.":"Nutze <br> innerhalb eines <p>-Tags."}; },
+  accumulated: '  <p>Zeile 1<br>Zeile 2</p>\n'
+},
+{
+  tag:"Texte", title:"Trennlinie <hr>",
+  desc:`<code>&lt;hr&gt;</code> zeichnet eine horizontale Linie zur visuellen Trennung. Schreibe einen <code>&lt;hr&gt;</code>-Tag.`,
+  hint:`<code>&lt;hr&gt;</code> ist ein leeres Element ohne Inhalt.`,
+  placeholder:`<hr>`,
+  check(v){ const ok=/^<hr\s*\/?>$/i.test(v.trim()); return {ok,msg:ok?"Richtig! hr ist eine horizontale Trennlinie.":"Schreibe einfach: <hr>"}; },
+  accumulated: '  <hr>\n'
+},
+{
+  tag:"Texte", title:"Blockzitat <blockquote>",
+  desc:`Für längere Zitate gibt es <code>&lt;blockquote&gt;</code>. Schreibe ein Blockzitat mit dem Text <em>Der beste Weg, etwas zu lernen, ist es zu tun.</em>`,
+  hint:`<code>&lt;blockquote&gt;Zitat&lt;/blockquote&gt;</code>`,
+  placeholder:`<blockquote>Der beste Weg, etwas zu lernen, ist es zu tun.</blockquote>`,
+  check(v){ const ok=v.includes("<blockquote>")&&v.includes("</blockquote>"); return {ok,msg:ok?"Super! blockquote rückt Zitate typisch ein.":"Nutze <blockquote>...</blockquote>"}; },
+  accumulated: '  <blockquote>Der beste Weg, etwas zu lernen, ist es zu tun.</blockquote>\n'
+},
+{
+  tag:"Texte", title:"Kleiner Text <small>",
+  desc:`<code>&lt;small&gt;</code> macht Text kleiner, z.B. für rechtliche Hinweise. Schreibe einen Absatz mit einem Wort in <code>&lt;small&gt;</code>.`,
+  hint:`<code>&lt;p&gt;Normal &lt;small&gt;klein&lt;/small&gt;&lt;/p&gt;</code>`,
+  placeholder:`<p>Normal <small>klein</small></p>`,
+  check(v){ const ok=v.includes("<small>")&&v.includes("</small>"); return {ok,msg:ok?"Korrekt!":"Nutze <small>...</small>"}; },
+  accumulated: '  <p><small>© 2024 Meine Webseite</small></p>\n'
+},
+{
+  tag:"Texte", title:"Überschriften h1–h4 kombinieren",
+  desc:`Schreibe h1 "Titel", h2 "Untertitel", h3 "Abschnitt", h4 "Unterabschnitt" – alle vier Ebenen nacheinander.`,
+  hint:`Vier Tags untereinander: <code>&lt;h1&gt;...&lt;/h1&gt;</code> bis <code>&lt;h4&gt;...&lt;/h4&gt;</code>`,
+  placeholder:`<h1>Titel</h1>\n<h2>Untertitel</h2>\n<h3>Abschnitt</h3>\n<h4>Unterabschnitt</h4>`,
+  check(v){ const ok=v.includes("<h1>")&&v.includes("<h2>")&&v.includes("<h3>")&&v.includes("<h4>"); return {ok,msg:ok?"Perfekt! Du kennst jetzt h1–h4.":"Alle vier Ebenen h1, h2, h3, h4 müssen enthalten sein."}; },
+  accumulated: ""
+},
+
+// ── KAP 3: Links & Bilder ─────────────────────────────────────────────
+{
+  tag:"Links & Bilder", title:"Ein einfacher Link",
+  desc:`Links werden mit <code>&lt;a&gt;</code> erstellt. Das <code>href</code>-Attribut gibt das Ziel an. Schreibe einen Link auf <code>https://www.google.de</code> mit dem Linktext "Google".`,
+  hint:`<code>&lt;a href="https://www.google.de"&gt;Google&lt;/a&gt;</code>`,
+  placeholder:`<a href="https://www.google.de">Google</a>`,
+  check(v){ const ok=v.includes('href="https://www.google.de"')&&v.includes(">Google<"); return {ok,msg:ok?"Super! Das ist ein externer Link.":"href muss auf https://www.google.de zeigen, Linktext = Google"}; },
+  accumulated: '  <a href="https://www.google.de">Google</a>\n'
+},
+{
+  tag:"Links & Bilder", title:"Link in neuem Tab öffnen",
+  desc:`Mit dem Attribut <code>target="_blank"</code> öffnet ein Link in einem neuen Tab. Füge es zu einem Link auf MDN (<code>https://developer.mozilla.org</code>) mit Linktext "MDN" hinzu.`,
+  hint:`<code>&lt;a href="..." target="_blank"&gt;MDN&lt;/a&gt;</code>`,
+  placeholder:`<a href="https://developer.mozilla.org" target="_blank">MDN</a>`,
+  check(v){ const ok=v.includes('target="_blank"')&&v.includes("href="); return {ok,msg:ok?"Korrekt! _blank öffnet immer einen neuen Tab.":"Vergiss nicht target=\"_blank\""}; },
+  accumulated: '  <a href="https://developer.mozilla.org" target="_blank">MDN Docs</a>\n'
+},
+{
+  tag:"Links & Bilder", title:"E-Mail-Link",
+  desc:`Mit <code>mailto:</code> kann man einen Link erstellen, der das E-Mail-Programm öffnet. Erstelle einen mailto-Link auf <code>info@beispiel.de</code> mit Linktext "Schreib mir".`,
+  hint:`<code>&lt;a href="mailto:info@beispiel.de"&gt;Schreib mir&lt;/a&gt;</code>`,
+  placeholder:`<a href="mailto:info@beispiel.de">Schreib mir</a>`,
+  check(v){ const ok=v.includes("mailto:")&&v.includes("<a "); return {ok,msg:ok?"Richtig! mailto-Links öffnen den E-Mail-Client.":"Nutze href=\"mailto:...\""}; },
+  accumulated: '  <a href="mailto:info@beispiel.de">Schreib mir</a>\n'
+},
+{
+  tag:"Links & Bilder", title:"Bild einbinden",
+  desc:`Bilder werden mit <code>&lt;img&gt;</code> eingebunden. Pflicht-Attribute: <code>src</code> (Quelle) und <code>alt</code> (Alternativtext). Schreibe ein img-Tag mit <code>src="foto.jpg"</code> und <code>alt="Mein Foto"</code>.`,
+  hint:`<code>&lt;img src="foto.jpg" alt="Mein Foto"&gt;</code>`,
+  placeholder:`<img src="foto.jpg" alt="Mein Foto">`,
+  check(v){ const ok=v.includes('src="foto.jpg"')&&v.includes('alt="Mein Foto"'); return {ok,msg:ok?"Super! src und alt sind Pflicht bei jedem Bild.":"Beide Attribute src und alt müssen vorhanden sein."}; },
+  accumulated: '  <img src="https://picsum.photos/400/200" alt="Mein Foto" style="max-width:100%">\n'
+},
+{
+  tag:"Links & Bilder", title:"Bild mit Breite",
+  desc:`Mit dem <code>width</code>-Attribut kannst du die Bildbreite in Pixeln festlegen. Schreibe ein img-Tag mit <code>width="300"</code>, einem beliebigen src und alt.`,
+  hint:`<code>&lt;img src="bild.jpg" alt="..." width="300"&gt;</code>`,
+  placeholder:`<img src="bild.jpg" alt="Beispiel" width="300">`,
+  check(v){ const ok=v.includes('width="300"')&&v.includes("<img"); return {ok,msg:ok?"Korrekt! Breite in Pixeln wird direkt im HTML angegeben.":"Füge width=\"300\" zum img-Tag hinzu."}; },
+  accumulated: ""
+},
+{
+  tag:"Links & Bilder", title:"Bild als Link",
+  desc:`Du kannst ein Bild klickbar machen, indem du <code>&lt;img&gt;</code> in ein <code>&lt;a&gt;</code>-Tag einwickelst. Schreibe so einen kombinierten Tag (Ziel beliebig).`,
+  hint:`<code>&lt;a href="..."&gt;&lt;img src="..." alt="..."&gt;&lt;/a&gt;</code>`,
+  placeholder:`<a href="https://www.google.de"><img src="logo.png" alt="Logo"></a>`,
+  check(v){ const ok=v.includes("<a ")&&v.includes("<img")&&v.includes("</a>"); return {ok,msg:ok?"Super! Ein Bild innerhalb von a wird zum klickbaren Link.":"Schachtele img innerhalb von a..."}; },
+  accumulated: ""
+},
+{
+  tag:"Links & Bilder", title:"Anker-Link (Sprung auf der Seite)",
+  desc:`Anker-Links springen zu einem Element mit einer bestimmten ID. Schreibe einen Link der zur ID "kontakt" springt, Linktext: "Zum Kontakt".`,
+  hint:`<code>&lt;a href="#kontakt"&gt;Zum Kontakt&lt;/a&gt;</code> – das # zeigt, dass es ein Anker-Link ist.`,
+  placeholder:`<a href="#kontakt">Zum Kontakt</a>`,
+  check(v){ const ok=v.includes('href="#kontakt"'); return {ok,msg:ok?"Richtig! # vor der ID ermöglicht Seitensprünge.":"href muss #kontakt enthalten."}; },
+  accumulated: '  <a href="#kontakt">Zum Kontakt</a>\n'
+},
+{
+  tag:"Links & Bilder", title:"figure und figcaption",
+  desc:`<code>&lt;figure&gt;</code> umschließt ein Bild mit Beschriftung (<code>&lt;figcaption&gt;</code>). Schreibe dieses Konstrukt mit einem Platzhalterbild und dem Untertitel "Ein schönes Bild".`,
+  hint:`<code>&lt;figure&gt;&lt;img src="..." alt="..."&gt;&lt;figcaption&gt;Untertitel&lt;/figcaption&gt;&lt;/figure&gt;</code>`,
+  placeholder:`<figure>\n  <img src="foto.jpg" alt="Foto">\n  <figcaption>Ein schönes Bild</figcaption>\n</figure>`,
+  check(v){ const ok=v.includes("<figure>")&&v.includes("<figcaption>")&&v.includes("</figure>"); return {ok,msg:ok?"Perfekt! figure mit figcaption ist semantisch korrekt für Bildunterschriften.":"Nutze figure, img und figcaption."}; },
+  accumulated: '  <figure>\n    <img src="https://picsum.photos/200/120" alt="Foto">\n    <figcaption>Ein Bild von meinem Hobbyprojekt</figcaption>\n  </figure>\n'
+},
+{
+  tag:"Links & Bilder", title:"Navigation mit Links",
+  desc:`Erstelle einen <code>&lt;nav&gt;</code>-Bereich mit drei Links: "Start", "Portfolio", "Kontakt" – alle als Anker-Links (#start, #portfolio, #kontakt).`,
+  hint:`<code>&lt;nav&gt;&lt;a href="#start"&gt;Start&lt;/a&gt; ...&lt;/nav&gt;</code>`,
+  placeholder:`<nav>\n  <a href="#start">Start</a>\n  <a href="#portfolio">Portfolio</a>\n  <a href="#kontakt">Kontakt</a>\n</nav>`,
+  check(v){ const ok=v.includes("<nav>")&&v.includes("#start")&&v.includes("#portfolio")&&v.includes("#kontakt"); return {ok,msg:ok?"Super! nav ist das semantische Element für die Navigation.":"nav mit drei Anker-Links einfügen."}; },
+  accumulated: '  <nav>\n    <a href="#start">Start</a> |\n    <a href="#portfolio">Portfolio</a> |\n    <a href="#kontakt">Kontakt</a>\n  </nav>\n'
+},
+{
+  tag:"Links & Bilder", title:"Download-Link",
+  desc:`Mit dem Attribut <code>download</code> kann ein Link eine Datei herunterladen statt sie zu öffnen. Schreibe einen Link der "lebenslauf.pdf" herunterlädt.`,
+  hint:`<code>&lt;a href="lebenslauf.pdf" download&gt;Lebenslauf herunterladen&lt;/a&gt;</code>`,
+  placeholder:`<a href="lebenslauf.pdf" download>Lebenslauf herunterladen</a>`,
+  check(v){ const ok=v.includes("download")&&v.includes("<a "); return {ok,msg:ok?"Korrekt! Das download-Attribut löst den Datei-Download aus.":"Füge download als Attribut hinzu."}; },
+  accumulated: ""
+},
+
+// ── KAP 4: Listen & Tabellen ─────────────────────────────────────────
+{
+  tag:"Listen", title:"Unsortierte Liste <ul>",
+  desc:`Erstelle eine unsortierte Liste (<code>&lt;ul&gt;</code>) mit drei Listenelementen: "HTML", "CSS", "JavaScript".`,
+  hint:`<code>&lt;ul&gt;&lt;li&gt;HTML&lt;/li&gt;&lt;li&gt;CSS&lt;/li&gt;...&lt;/ul&gt;</code>`,
+  placeholder:`<ul>\n  <li>HTML</li>\n  <li>CSS</li>\n  <li>JavaScript</li>\n</ul>`,
+  check(v){ const ok=v.includes("<ul>")&&v.includes("<li>HTML</li>")&&(v.match(/<li>/g)||[]).length>=3; return {ok,msg:ok?"Richtig! ul = unordered list, li = list item.":"ul mit mindestens drei li-Elementen, HTML als erstes."}; },
+  accumulated: '  <ul>\n    <li>HTML</li>\n    <li>CSS</li>\n    <li>JavaScript</li>\n  </ul>\n'
+},
+{
+  tag:"Listen", title:"Sortierte Liste <ol>",
+  desc:`Erstelle eine sortierte (nummerierte) Liste (<code>&lt;ol&gt;</code>) mit den Schritten: "Code schreiben", "Testen", "Veröffentlichen".`,
+  hint:`<code>&lt;ol&gt;&lt;li&gt;...&lt;/li&gt;...&lt;/ol&gt;</code>`,
+  placeholder:`<ol>\n  <li>Code schreiben</li>\n  <li>Testen</li>\n  <li>Veröffentlichen</li>\n</ol>`,
+  check(v){ const ok=v.includes("<ol>")&&(v.match(/<li>/g)||[]).length>=3; return {ok,msg:ok?"Korrekt! ol erzeugt automatisch Nummerierungen.":"Nutze <ol> mit drei <li>-Elementen."}; },
+  accumulated: '  <ol>\n    <li>Code schreiben</li>\n    <li>Testen</li>\n    <li>Veröffentlichen</li>\n  </ol>\n'
+},
+{
+  tag:"Listen", title:"Verschachtelte Liste",
+  desc:`Listen können ineinander verschachtelt werden. Erstelle eine ul mit einem Punkt "Sprachen", der eine weitere ul mit "Deutsch" und "Englisch" als Kinder hat.`,
+  hint:`Ein <code>&lt;li&gt;</code> enthält selbst eine <code>&lt;ul&gt;</code>.`,
+  placeholder:`<ul>\n  <li>Sprachen\n    <ul>\n      <li>Deutsch</li>\n      <li>Englisch</li>\n    </ul>\n  </li>\n</ul>`,
+  check(v){ const uls=(v.match(/<ul>/g)||[]).length; const ok=uls>=2&&v.includes("Deutsch"); return {ok,msg:ok?"Super! Verschachtelte Listen erlauben Hierarchien.":"Zwei verschachtelte ul-Elemente werden benötigt."}; },
+  accumulated: ""
+},
+{
+  tag:"Tabellen", title:"Einfache Tabelle",
+  desc:`Tabellen bestehen aus <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code> (Zeile), <code>&lt;th&gt;</code> (Kopfzelle) und <code>&lt;td&gt;</code> (Datenzelle). Erstelle eine Tabelle mit einer Kopfzeile "Name | Alter" und einer Datenzeile "Max | 25".`,
+  hint:`table → tr → th für Köpfe, td für Daten.`,
+  placeholder:`<table>\n  <tr>\n    <th>Name</th>\n    <th>Alter</th>\n  </tr>\n  <tr>\n    <td>Max</td>\n    <td>25</td>\n  </tr>\n</table>`,
+  check(v){ const ok=v.includes("<table>")&&v.includes("<th>")&&v.includes("<td>")&&v.includes("Max"); return {ok,msg:ok?"Perfekt! Die Tabellen-Grundstruktur sitzt!":"Nutze table, tr, th und td. Name=Max, Alter=25."}; },
+  accumulated: '  <table border="1" cellpadding="6">\n    <tr><th>Name</th><th>Alter</th></tr>\n    <tr><td>Max</td><td>25</td></tr>\n  </table>\n'
+},
+{
+  tag:"Tabellen", title:"Tabellen-Kopfbereich <thead>",
+  desc:`Semantisch korrekte Tabellen haben <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code> und optionalen <code>&lt;tfoot&gt;</code>. Schreibe eine Tabelle mit thead und tbody, je mit einer Zeile.`,
+  hint:`<code>&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;...&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;...&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</code>`,
+  placeholder:`<table>\n  <thead>\n    <tr><th>Spalte</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>Wert</td></tr>\n  </tbody>\n</table>`,
+  check(v){ const ok=v.includes("<thead>")&&v.includes("<tbody>"); return {ok,msg:ok?"Korrekt! thead/tbody helfen Screenreadern und beim Styling.":"Beide Elemente thead und tbody werden benötigt."}; },
+  accumulated: ""
+},
+{
+  tag:"Tabellen", title:"Zellen verbinden mit colspan",
+  desc:`Mit <code>colspan="2"</code> kann eine Zelle mehrere Spalten überspannen. Schreibe eine Tabelle: Zeile 1 hat eine th mit colspan=2 "Gesamtübersicht", Zeile 2 hat zwei td "Links" und "Rechts".`,
+  hint:`<code>&lt;th colspan="2"&gt;Gesamtübersicht&lt;/th&gt;</code>`,
+  placeholder:`<table>\n  <tr><th colspan="2">Gesamtübersicht</th></tr>\n  <tr><td>Links</td><td>Rechts</td></tr>\n</table>`,
+  check(v){ const ok=v.includes('colspan="2"')&&v.includes("Gesamtübersicht"); return {ok,msg:ok?"Super! colspan verbindet Spalten.":"colspan=\"2\" bei der th-Zelle nicht vergessen."}; },
+  accumulated: ""
+},
+{
+  tag:"Listen", title:"Definitionsliste <dl>",
+  desc:`<code>&lt;dl&gt;</code> (Definition List) ist für Begriffserklärungen. Mit <code>&lt;dt&gt;</code> (Term) und <code>&lt;dd&gt;</code> (Definition). Schreibe eine dl mit "HTML" als dt und "Auszeichnungssprache" als dd.`,
+  hint:`<code>&lt;dl&gt;&lt;dt&gt;HTML&lt;/dt&gt;&lt;dd&gt;Auszeichnungssprache&lt;/dd&gt;&lt;/dl&gt;</code>`,
+  placeholder:`<dl>\n  <dt>HTML</dt>\n  <dd>Auszeichnungssprache</dd>\n</dl>`,
+  check(v){ const ok=v.includes("<dl>")&&v.includes("<dt>")&&v.includes("<dd>"); return {ok,msg:ok?"Richtig! dl/dt/dd ist ideal für Glossare und FAQs.":"Nutze dl, dt und dd."}; },
+  accumulated: '  <dl>\n    <dt>HTML</dt><dd>Auszeichnungssprache für Webseiten</dd>\n    <dt>CSS</dt><dd>Gestaltungssprache für das Web</dd>\n  </dl>\n'
+},
+{
+  tag:"Listen", title:"Listen mit IDs versehen",
+  desc:`IDs erlauben, Elemente eindeutig zu identifizieren. Schreibe eine ul mit der ID "skill-list" und zwei beliebigen li-Elementen.`,
+  hint:`<code>&lt;ul id="skill-list"&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code>`,
+  placeholder:`<ul id="skill-list">\n  <li>HTML</li>\n  <li>CSS</li>\n</ul>`,
+  check(v){ const ok=v.includes('id="skill-list"')&&v.includes("<li>"); return {ok,msg:ok?"Korrekt! IDs sind eindeutig – jede ID nur einmal pro Seite.":"id=\"skill-list\" beim ul-Tag nicht vergessen."}; },
+  accumulated: '  <ul id="skill-list">\n    <li>Webdesign</li>\n    <li>Programmieren</li>\n    <li>Kreativität</li>\n  </ul>\n'
+},
+{
+  tag:"Tabellen", title:"Tabelle mit class-Attribut",
+  desc:`Mit dem <code>class</code>-Attribut kann man Elemente für CSS ansprechen. Schreibe eine Tabelle mit der Klasse "datentabelle" und einer Zeile mit zwei Zellen.`,
+  hint:`<code>&lt;table class="datentabelle"&gt;...&lt;/table&gt;</code>`,
+  placeholder:`<table class="datentabelle">\n  <tr>\n    <td>A</td>\n    <td>B</td>\n  </tr>\n</table>`,
+  check(v){ const ok=v.includes('class="datentabelle"'); return {ok,msg:ok?"Super! class-Attribut wird für CSS und JS genutzt.":"class=\"datentabelle\" beim table-Tag eintragen."}; },
+  accumulated: ""
+},
+{
+  tag:"Listen", title:"Listen und Tabellen kombinieren",
+  desc:`Schreibe eine Seite mit einer ul (3 Punkte) und direkt danach einer table (1 Kopfzeile + 1 Datenzeile).`,
+  hint:`ul mit li × 3, dann table mit tr × 2`,
+  placeholder:`<ul>\n  <li>A</li>\n  <li>B</li>\n  <li>C</li>\n</ul>\n<table>\n  <tr><th>Kopf</th></tr>\n  <tr><td>Daten</td></tr>\n</table>`,
+  check(v){ const ok=v.includes("<ul>")&&v.includes("<table>")&&(v.match(/<li>/g)||[]).length>=3; return {ok,msg:ok?"Ausgezeichnet! Listen und Tabellen kombiniert.":"ul mit 3 li + table mit Kopf- und Datenzeile."}; },
+  accumulated: ""
+},
+
+// ── KAP 5: Formulare ──────────────────────────────────────────────────
+{
+  tag:"Formulare", title:"Das <form>-Element",
+  desc:`Formulare beginnen mit <code>&lt;form&gt;</code>. Das <code>action</code>-Attribut gibt an, wohin die Daten gesendet werden. Schreibe ein leeres Formular mit action="/senden".`,
+  hint:`<code>&lt;form action="/senden"&gt;&lt;/form&gt;</code>`,
+  placeholder:`<form action="/senden">\n</form>`,
+  check(v){ const ok=v.includes('<form')&&v.includes('action='); return {ok,msg:ok?"Richtig! action gibt die Ziel-URL des Formulars an.":"<form action=\"/senden\"> wird benötigt."}; },
+  accumulated: '  <form action="/senden" method="post">\n'
+},
+{
+  tag:"Formulare", title:"Texteingabe <input type=text>",
+  desc:`Das häufigste Formularelement ist das Texteingabefeld. Schreibe ein input-Tag vom Typ "text" mit name="name" und placeholder="Dein Name".`,
+  hint:`<code>&lt;input type="text" name="name" placeholder="Dein Name"&gt;</code>`,
+  placeholder:`<input type="text" name="name" placeholder="Dein Name">`,
+  check(v){ const ok=v.includes('type="text"')&&v.includes('name="name"')&&v.includes('placeholder='); return {ok,msg:ok?"Super! type=text ist das Standard-Eingabefeld.":"type, name und placeholder müssen stimmen."}; },
+  accumulated: '    <input type="text" name="name" placeholder="Dein Name"><br>\n'
+},
+{
+  tag:"Formulare", title:"E-Mail-Eingabe",
+  desc:`<code>type="email"</code> validiert automatisch das E-Mail-Format im Browser. Schreibe ein entsprechendes input-Feld mit name="email".`,
+  hint:`<code>&lt;input type="email" name="email" placeholder="deine@email.de"&gt;</code>`,
+  placeholder:`<input type="email" name="email" placeholder="deine@email.de">`,
+  check(v){ const ok=v.includes('type="email"')&&v.includes('name="email"'); return {ok,msg:ok?"Korrekt! Der Browser prüft das E-Mail-Format automatisch.":"type=\"email\" und name=\"email\" werden benötigt."}; },
+  accumulated: '    <input type="email" name="email" placeholder="deine@email.de"><br>\n'
+},
+{
+  tag:"Formulare", title:"Passwortfeld",
+  desc:`<code>type="password"</code> versteckt die Eingabe mit Punkten. Schreibe ein Passwortfeld mit name="passwort".`,
+  hint:`<code>&lt;input type="password" name="passwort"&gt;</code>`,
+  placeholder:`<input type="password" name="passwort">`,
+  check(v){ const ok=v.includes('type="password"'); return {ok,msg:ok?"Richtig! Passwörter werden automatisch verschleiert.":"type=\"password\" verwenden."}; },
+  accumulated: '    <input type="password" name="passwort" placeholder="Passwort"><br>\n'
+},
+{
+  tag:"Formulare", title:"Label für Eingabefelder",
+  desc:`<code>&lt;label&gt;</code> beschriftet ein Eingabefeld. Das <code>for</code>-Attribut verbindet label mit dem Input via ID. Schreibe ein label "Name:" das zur ID "name-field" gehört, plus das zugehörige input.`,
+  hint:`<code>&lt;label for="name-field"&gt;Name:&lt;/label&gt;&lt;input id="name-field" type="text"&gt;</code>`,
+  placeholder:`<label for="name-field">Name:</label>\n<input id="name-field" type="text">`,
+  check(v){ const ok=v.includes('<label')&&v.includes('for="name-field"')&&v.includes('id="name-field"'); return {ok,msg:ok?"Super! label verbessert Barrierefreiheit – Klick auf label fokussiert das Feld.":"for und id müssen übereinstimmen: name-field."}; },
+  accumulated: '    <label for="msg">Nachricht:</label><br>\n'
+},
+{
+  tag:"Formulare", title:"Textarea für langen Text",
+  desc:`<code>&lt;textarea&gt;</code> ist für mehrzeiligen Text. Schreibe eine textarea mit name="nachricht", rows="4" und cols="40".`,
+  hint:`<code>&lt;textarea name="nachricht" rows="4" cols="40"&gt;&lt;/textarea&gt;</code>`,
+  placeholder:`<textarea name="nachricht" rows="4" cols="40"></textarea>`,
+  check(v){ const ok=v.includes("<textarea")&&v.includes('rows="4"')&&v.includes("</textarea>"); return {ok,msg:ok?"Korrekt! textarea ist resize-bar und mehrzeilig.":"rows, cols und das schließende Tag nicht vergessen."}; },
+  accumulated: '    <textarea id="msg" name="nachricht" rows="4" cols="40"></textarea><br>\n'
+},
+{
+  tag:"Formulare", title:"Checkbox",
+  desc:`<code>type="checkbox"</code> ist ein Kästchen, das an- oder abgehakt werden kann. Schreibe eine Checkbox mit name="agb" und dem Labeltext "AGB akzeptieren".`,
+  hint:`<code>&lt;input type="checkbox" name="agb" id="agb"&gt; &lt;label for="agb"&gt;AGB akzeptieren&lt;/label&gt;</code>`,
+  placeholder:`<input type="checkbox" name="agb" id="agb">\n<label for="agb">AGB akzeptieren</label>`,
+  check(v){ const ok=v.includes('type="checkbox"')&&v.includes("AGB"); return {ok,msg:ok?"Richtig! checked-Attribut würde es vorausgewählt machen.":"type=\"checkbox\" und den Label-Text nicht vergessen."}; },
+  accumulated: '    <input type="checkbox" name="agb" id="agb"> <label for="agb">AGB akzeptieren</label><br>\n'
+},
+{
+  tag:"Formulare", title:"Select-Dropdown",
+  desc:`<code>&lt;select&gt;</code> erstellt ein Dropdown-Menü. Schreibe ein select mit name="land" und drei option-Elementen: "Deutschland", "Österreich", "Schweiz".`,
+  hint:`<code>&lt;select name="land"&gt;&lt;option&gt;Deutschland&lt;/option&gt;...&lt;/select&gt;</code>`,
+  placeholder:`<select name="land">\n  <option>Deutschland</option>\n  <option>Österreich</option>\n  <option>Schweiz</option>\n</select>`,
+  check(v){ const ok=v.includes("<select")&&v.includes("<option>")&&v.includes("Deutschland"); return {ok,msg:ok?"Super! select mit option-Elementen bildet Dropdowns.":"select + drei options, mit Deutschland als erste Option."}; },
+  accumulated: '    <select name="land">\n      <option>Deutschland</option>\n      <option>Österreich</option>\n      <option>Schweiz</option>\n    </select><br>\n'
+},
+{
+  tag:"Formulare", title:"Submit-Button",
+  desc:`Der Abschicken-Button sendet das Formular. Schreibe einen <code>&lt;button type="submit"&gt;</code> mit dem Text "Absenden".`,
+  hint:`<code>&lt;button type="submit"&gt;Absenden&lt;/button&gt;</code>`,
+  placeholder:`<button type="submit">Absenden</button>`,
+  check(v){ const ok=v.includes('type="submit"')&&v.includes("Absenden"); return {ok,msg:ok?"Korrekt! type=submit sendet das Formular.":"type=\"submit\" und den Text Absenden verwenden."}; },
+  accumulated: '    <button type="submit">Absenden</button>\n  </form>\n'
+},
+{
+  tag:"Formulare", title:"Pflichtfeld mit required",
+  desc:`Das Attribut <code>required</code> erzwingt eine Eingabe vor dem Absenden. Schreibe ein Textfeld mit required.`,
+  hint:`<code>&lt;input type="text" name="pflicht" required&gt;</code>`,
+  placeholder:`<input type="text" name="pflicht" required>`,
+  check(v){ const ok=v.includes("required")&&v.includes("<input"); return {ok,msg:ok?"Richtig! required ist eine einfache HTML-Validierung ohne JavaScript.":"required als Attribut zum input-Tag hinzufügen."}; },
+  accumulated: ""
+},
+
+// ── KAP 6: CSS Grundlagen ────────────────────────────────────────────
+{
+  tag:"CSS", title:"Inline CSS",
+  desc:`Die einfachste Art CSS anzuwenden: das <code>style</code>-Attribut direkt im Tag. Schreibe einen roten h1-Text: <code>&lt;h1 style="color: red;"&gt;Hallo&lt;/h1&gt;</code>`,
+  hint:`<code>&lt;h1 style="color: red;"&gt;Hallo&lt;/h1&gt;</code>`,
+  placeholder:`<h1 style="color: red;">Hallo</h1>`,
+  check(v){ const ok=v.includes('style="color: red;"')||v.includes("style='color: red;'"); return {ok,msg:ok?"Korrekt! Inline-CSS hat die höchste Spezifität, aber schlechteste Wartbarkeit.":"style=\"color: red;\" direkt im h1-Tag."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"Internal CSS mit <style>",
+  desc:`CSS im <code>&lt;style&gt;</code>-Tag gilt für die ganze Seite. Schreibe einen style-Block, der alle <code>p</code>-Elemente blau färbt.`,
+  hint:`<code>&lt;style&gt;p { color: blue; }&lt;/style&gt;</code>`,
+  placeholder:`<style>\n  p {\n    color: blue;\n  }\n</style>`,
+  check(v){ const ok=v.includes("<style>")&&v.includes("color")&&v.includes("blue"); return {ok,msg:ok?"Super! Internal CSS gilt für die gesamte Seite.":"style-Block mit p { color: blue; } schreiben."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"CSS Selektor – Element",
+  desc:`Schreibe eine CSS-Regel, die alle <code>&lt;h2&gt;</code>-Elemente grün macht (<code>color: green</code>).`,
+  hint:`<code>h2 { color: green; }</code>`,
+  placeholder:`h2 {\n  color: green;\n}`,
+  check(v){ const ok=v.includes("h2")&&v.includes("color")&&v.includes("green"); return {ok,msg:ok?"Richtig! Elementselektor wählt alle Tags dieses Typs.":"h2 { color: green; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"CSS Selektor – Klasse",
+  desc:`Klassensektoren beginnen mit einem Punkt. Schreibe eine CSS-Regel für die Klasse <code>.highlight</code> mit gelbem Hintergrund (<code>background-color: yellow</code>).`,
+  hint:`<code>.highlight { background-color: yellow; }</code>`,
+  placeholder:`.highlight {\n  background-color: yellow;\n}`,
+  check(v){ const ok=v.includes(".highlight")&&v.includes("background-color"); return {ok,msg:ok?"Korrekt! .klassenname ist der Klassenselektor.":".highlight { background-color: yellow; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"CSS Selektor – ID",
+  desc:`ID-Selektoren beginnen mit #. Schreibe eine Regel für die ID <code>#header</code> mit einer Schriftgröße von 24px.`,
+  hint:`<code>#header { font-size: 24px; }</code>`,
+  placeholder:`#header {\n  font-size: 24px;\n}`,
+  check(v){ const ok=v.includes("#header")&&v.includes("font-size"); return {ok,msg:ok?"Richtig! IDs haben höhere Spezifität als Klassen.":"#header { font-size: 24px; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"Schriftfarbe und Hintergrundfarbe",
+  desc:`Schreibe eine CSS-Regel für <code>body</code>: Hintergrund <code>#f0f0f0</code> (hellgrau) und Textfarbe <code>#333333</code>.`,
+  hint:`<code>body { background-color: #f0f0f0; color: #333333; }</code>`,
+  placeholder:`body {\n  background-color: #f0f0f0;\n  color: #333333;\n}`,
+  check(v){ const ok=v.includes("body")&&v.includes("background-color")&&v.includes("color"); return {ok,msg:ok?"Super! Hex-Farbwerte sind das Standard-Format im Web.":"background-color und color beide beim body definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"Schriftart festlegen",
+  desc:`Schreibe eine CSS-Regel für <code>body</code> die die Schriftart auf <code>Arial, sans-serif</code> setzt.`,
+  hint:`<code>body { font-family: Arial, sans-serif; }</code>`,
+  placeholder:`body {\n  font-family: Arial, sans-serif;\n}`,
+  check(v){ const ok=v.includes("font-family")&&v.includes("Arial"); return {ok,msg:ok?"Korrekt! Fallback-Schriften nach dem Komma sind Best Practice.":"font-family: Arial, sans-serif;"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"Schriftgröße und Zeilenhöhe",
+  desc:`Schreibe eine CSS-Regel für <code>p</code>: Schriftgröße <code>16px</code> und Zeilenhöhe <code>1.6</code>.`,
+  hint:`<code>p { font-size: 16px; line-height: 1.6; }</code>`,
+  placeholder:`p {\n  font-size: 16px;\n  line-height: 1.6;\n}`,
+  check(v){ const ok=v.includes("font-size")&&v.includes("line-height"); return {ok,msg:ok?"Richtig! line-height 1.5–1.8 gilt als gut lesbar.":"font-size und line-height für p festlegen."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"Mehrere Selektoren kombinieren",
+  desc:`Man kann mehrere Selektoren mit Komma in eine Regel fassen. Schreibe eine Regel, die <code>h1, h2, h3</code> alle blau macht.`,
+  hint:`<code>h1, h2, h3 { color: blue; }</code>`,
+  placeholder:`h1, h2, h3 {\n  color: blue;\n}`,
+  check(v){ const ok=v.includes("h1")&&v.includes("h2")&&v.includes("h3")&&v.includes(",")&&v.includes("color"); return {ok,msg:ok?"Super! Selektor-Gruppen sparen Code.":"h1, h2, h3 { color: blue; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS", title:"CSS Kommentar",
+  desc:`CSS-Kommentare werden mit <code>/* */</code> geschrieben. Schreibe zwei CSS-Kommentare: einen einzeiligen und einen der zwei Zeilen überbrückt.`,
+  hint:`<code>/* einzeilig */</code> oder mehrzeilig über mehrere Zeilen.`,
+  placeholder:`/* Das ist ein Kommentar */\n/*\n  Mehrzeiliger\n  Kommentar\n*/`,
+  check(v){ const ok=(v.match(/\/\*/g)||[]).length>=2; return {ok,msg:ok?"Korrekt! CSS-Kommentare werden vom Browser ignoriert.":"Zwei /* ... */ Kommentare schreiben."}; },
+  accumulated: ""
+},
+
+// ── KAP 7: Box-Modell & Layout ────────────────────────────────────────
+{
+  tag:"Box-Modell", title:"margin – Außenabstand",
+  desc:`<code>margin</code> erzeugt Abstand außerhalb des Elements. Schreibe eine CSS-Regel für <code>.karte</code> mit einem margin von <code>20px</code>.`,
+  hint:`<code>.karte { margin: 20px; }</code>`,
+  placeholder:`.karte {\n  margin: 20px;\n}`,
+  check(v){ const ok=v.includes(".karte")&&v.includes("margin"); return {ok,msg:ok?"Richtig! margin: 20px gilt für alle vier Seiten gleichzeitig.":".karte { margin: 20px; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"padding – Innenabstand",
+  desc:`<code>padding</code> erzeugt Abstand innerhalb des Elements, zwischen Inhalt und Rand. Schreibe eine Regel für <code>.box</code> mit padding <code>10px 20px</code> (oben/unten 10px, links/rechts 20px).`,
+  hint:`<code>.box { padding: 10px 20px; }</code>`,
+  placeholder:`.box {\n  padding: 10px 20px;\n}`,
+  check(v){ const ok=v.includes(".box")&&v.includes("padding"); return {ok,msg:ok?"Super! padding: top/bottom left/right – die Kurzschreibweise.":".box { padding: 10px 20px; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"border – Rahmen",
+  desc:`<code>border</code> zeichnet einen Rahmen. Syntax: <code>Breite Stil Farbe</code>. Schreibe eine Regel für <code>.rahmen</code> mit einem 2px soliden schwarzen Rand.`,
+  hint:`<code>.rahmen { border: 2px solid black; }</code>`,
+  placeholder:`.rahmen {\n  border: 2px solid black;\n}`,
+  check(v){ const ok=v.includes(".rahmen")&&v.includes("border")&&v.includes("solid"); return {ok,msg:ok?"Korrekt! border: 2px solid black ist die Kurzschreibweise.":".rahmen { border: 2px solid black; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"border-radius – Abgerundete Ecken",
+  desc:`<code>border-radius</code> rundet Ecken ab. Schreibe eine Regel für <code>.rund</code> mit border-radius <code>8px</code>.`,
+  hint:`<code>.rund { border-radius: 8px; }</code>`,
+  placeholder:`.rund {\n  border-radius: 8px;\n}`,
+  check(v){ const ok=v.includes("border-radius"); return {ok,msg:ok?"Richtig! border-radius: 50% ergibt einen perfekten Kreis.":".rund { border-radius: 8px; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"width und height",
+  desc:`<code>width</code> und <code>height</code> legen die Größe eines Elements fest. Schreibe eine Regel für <code>.bild-box</code>: width <code>300px</code>, height <code>200px</code>.`,
+  hint:`<code>.bild-box { width: 300px; height: 200px; }</code>`,
+  placeholder:`.bild-box {\n  width: 300px;\n  height: 200px;\n}`,
+  check(v){ const ok=v.includes("width")&&v.includes("height")&&v.includes("300px"); return {ok,msg:ok?"Super! width/height mit px sind absolute Größenangaben.":".bild-box mit width: 300px und height: 200px."}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"max-width für responsive Design",
+  desc:`<code>max-width</code> begrenzt die maximale Breite. Ideal für responsive Container. Schreibe eine Regel für <code>.container</code>: max-width <code>960px</code> und margin <code>auto</code> (zum Zentrieren).`,
+  hint:`<code>.container { max-width: 960px; margin: auto; }</code>`,
+  placeholder:`.container {\n  max-width: 960px;\n  margin: auto;\n}`,
+  check(v){ const ok=v.includes("max-width")&&v.includes("margin")&&v.includes("auto"); return {ok,msg:ok?"Korrekt! margin: auto zentriert Block-Elemente horizontal.":"max-width: 960px und margin: auto kombinieren."}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"box-sizing: border-box",
+  desc:`Standardmäßig wird padding zur width addiert. Mit <code>box-sizing: border-box</code> ist padding bereits in der width enthalten. Schreibe eine universelle Regel dafür.`,
+  hint:`<code>* { box-sizing: border-box; }</code> – der *-Selektor wählt alle Elemente.`,
+  placeholder:`* {\n  box-sizing: border-box;\n}`,
+  check(v){ const ok=v.includes("box-sizing")&&v.includes("border-box"); return {ok,msg:ok?"Richtig! box-sizing: border-box ist heute best practice für jedes Projekt.":"* { box-sizing: border-box; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"overflow – Überlauf steuern",
+  desc:`<code>overflow</code> steuert, was passiert wenn der Inhalt größer als das Element ist. Schreibe eine Regel für <code>.scrollbox</code>: height <code>100px</code>, overflow <code>auto</code>.`,
+  hint:`<code>.scrollbox { height: 100px; overflow: auto; }</code>`,
+  placeholder:`.scrollbox {\n  height: 100px;\n  overflow: auto;\n}`,
+  check(v){ const ok=v.includes("overflow")&&v.includes("auto"); return {ok,msg:ok?"Korrekt! overflow: auto blendet Scrollbars nur bei Bedarf ein.":"overflow: auto und height: 100px."}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"display: block vs inline",
+  desc:`<code>display</code> steuert das Verhalten. Schreibe je eine Regel: <code>.block-el</code> mit display <code>block</code> und <code>.inline-el</code> mit display <code>inline</code>.`,
+  hint:`Zwei separate Regeln mit den entsprechenden display-Werten.`,
+  placeholder:`.block-el {\n  display: block;\n}\n.inline-el {\n  display: inline;\n}`,
+  check(v){ const ok=v.includes("display: block")&&v.includes("display: inline"); return {ok,msg:ok?"Super! Block-Elemente beginnen auf einer neuen Zeile, Inline-Elemente nicht.":"Beide display-Werte müssen vorkommen."}; },
+  accumulated: ""
+},
+{
+  tag:"Box-Modell", title:"display: none – Elemente verstecken",
+  desc:`<code>display: none</code> versteckt ein Element vollständig (kein Platz). Schreibe eine Regel für <code>.versteckt</code>.`,
+  hint:`<code>.versteckt { display: none; }</code>`,
+  placeholder:`.versteckt {\n  display: none;\n}`,
+  check(v){ const ok=v.includes("display: none"); return {ok,msg:ok?"Korrekt! display: none entfernt das Element aus dem Dokumentfluss.":".versteckt { display: none; }"}; },
+  accumulated: ""
+},
+
+// ── KAP 8: Farben & Schriften ────────────────────────────────────────
+{
+  tag:"Farben & Schriften", title:"RGB-Farben",
+  desc:`RGB(rot, grün, blau) mit Werten 0–255. Schreibe eine Regel für <code>.rgb</code>: Hintergrundfarbe <code>rgb(70, 130, 180)</code> (Stahlblau) und weiße Textfarbe.`,
+  hint:`<code>.rgb { background-color: rgb(70, 130, 180); color: white; }</code>`,
+  placeholder:`.rgb {\n  background-color: rgb(70, 130, 180);\n  color: white;\n}`,
+  check(v){ const ok=v.includes("rgb(")&&v.includes("color"); return {ok,msg:ok?"Super! RGB ist ein weiteres gängiges Farbformat.":"rgb() mit drei Werten und zusätzlich color: white."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"RGBA – Farbe mit Transparenz",
+  desc:`RGBA fügt einen Alpha-Kanal (Transparenz 0–1) hinzu. Schreibe eine Regel für <code>.transparent</code>: background-color <code>rgba(0, 0, 0, 0.5)</code> (halbtransparentes Schwarz).`,
+  hint:`<code>.transparent { background-color: rgba(0, 0, 0, 0.5); }</code>`,
+  placeholder:`.transparent {\n  background-color: rgba(0, 0, 0, 0.5);\n}`,
+  check(v){ const ok=v.includes("rgba("); return {ok,msg:ok?"Korrekt! 0 = vollständig transparent, 1 = vollständig opak.":"rgba() mit vier Werten verwenden."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"CSS-Farbkeywords",
+  desc:`CSS kennt über 140 benannte Farben. Schreibe eine Regel für <code>h1</code> mit der Farbe <code>tomato</code> und für <code>h2</code> mit <code>steelblue</code>.`,
+  hint:`<code>h1 { color: tomato; } h2 { color: steelblue; }</code>`,
+  placeholder:`h1 { color: tomato; }\nh2 { color: steelblue; }`,
+  check(v){ const ok=v.includes("tomato")&&v.includes("steelblue"); return {ok,msg:ok?"Super! Farbnamen sind lesbar, hex-Werte sind präziser.":"tomato für h1 und steelblue für h2."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"Hintergrundverlauf",
+  desc:`<code>background: linear-gradient(...)</code> erzeugt Farbverläufe. Schreibe eine Regel für <code>.gradient</code>: linear-gradient von <code>#667eea</code> zu <code>#764ba2</code>.`,
+  hint:`<code>.gradient { background: linear-gradient(135deg, #667eea, #764ba2); }</code>`,
+  placeholder:`.gradient {\n  background: linear-gradient(135deg, #667eea, #764ba2);\n}`,
+  check(v){ const ok=v.includes("linear-gradient"); return {ok,msg:ok?"Richtig! Verläufe machen Designs moderner und lebendiger.":"linear-gradient() mit Winkel und zwei Farben."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"Google Font einbinden",
+  desc:`Google Fonts können via CSS @import eingebunden werden. Schreibe einen @import, der die Schrift 'Roboto' lädt (URL: https://fonts.googleapis.com/css2?family=Roboto&display=swap).`,
+  hint:`<code>@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');</code>`,
+  placeholder:`@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
+  check(v){ const ok=v.includes("@import")&&v.includes("fonts.googleapis.com"); return {ok,msg:ok?"Perfekt! @import sollte ganz oben in der CSS-Datei stehen.":"@import url('...') mit der googleapis URL."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"font-weight und font-style",
+  desc:`<code>font-weight</code> (100–900 oder bold/normal) und <code>font-style</code> (italic/normal). Schreibe eine Regel für <code>strong</code>: font-weight <code>700</code> und für <code>em</code>: font-style <code>italic</code>.`,
+  hint:`<code>strong { font-weight: 700; } em { font-style: italic; }</code>`,
+  placeholder:`strong { font-weight: 700; }\nem { font-style: italic; }`,
+  check(v){ const ok=v.includes("font-weight")&&v.includes("font-style"); return {ok,msg:ok?"Korrekt! 700 entspricht bold.":"Beide Eigenschaften für strong und em definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"text-align",
+  desc:`<code>text-align</code> richtet Text aus. Schreibe Regeln: <code>h1</code> zentriert, <code>p</code> linksbündig.`,
+  hint:`<code>h1 { text-align: center; } p { text-align: left; }</code>`,
+  placeholder:`h1 {\n  text-align: center;\n}\np {\n  text-align: left;\n}`,
+  check(v){ const ok=v.includes("text-align: center")&&v.includes("text-align: left"); return {ok,msg:ok?"Richtig! Weitere Werte: right, justify.":"text-align: center für h1, left für p."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"text-decoration",
+  desc:`<code>text-decoration</code> steuert Unterstreichungen. Schreibe eine Regel, die Links (<code>a</code>) keine Unterstreichung haben (<code>text-decoration: none</code>).`,
+  hint:`<code>a { text-decoration: none; }</code>`,
+  placeholder:`a {\n  text-decoration: none;\n}`,
+  check(v){ const ok=v.includes("text-decoration")&&v.includes("none"); return {ok,msg:ok?"Korrekt! Vergiss aber, dem Nutzer trotzdem deutlich zu machen, dass es ein Link ist.":"a { text-decoration: none; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"letter-spacing und word-spacing",
+  desc:`<code>letter-spacing</code> verändert den Abstand zwischen Buchstaben, <code>word-spacing</code> zwischen Wörtern. Schreibe Regeln für <code>.spaced</code> mit letter-spacing <code>2px</code> und word-spacing <code>5px</code>.`,
+  hint:`<code>.spaced { letter-spacing: 2px; word-spacing: 5px; }</code>`,
+  placeholder:`.spaced {\n  letter-spacing: 2px;\n  word-spacing: 5px;\n}`,
+  check(v){ const ok=v.includes("letter-spacing")&&v.includes("word-spacing"); return {ok,msg:ok?"Super! letter-spacing wird oft für Überschriften genutzt.":"Beide Eigenschaften für .spaced."}; },
+  accumulated: ""
+},
+{
+  tag:"Farben & Schriften", title:"box-shadow",
+  desc:`<code>box-shadow</code> fügt Schatten hinzu. Syntax: <code>x y unschärfe farbe</code>. Schreibe eine Regel für <code>.schatten</code>: box-shadow <code>2px 4px 8px rgba(0,0,0,0.2)</code>.`,
+  hint:`<code>.schatten { box-shadow: 2px 4px 8px rgba(0,0,0,0.2); }</code>`,
+  placeholder:`.schatten {\n  box-shadow: 2px 4px 8px rgba(0,0,0,0.2);\n}`,
+  check(v){ const ok=v.includes("box-shadow"); return {ok,msg:ok?"Richtig! Schatten geben Tiefe und Kontrast.":".schatten { box-shadow: ... }"}; },
+  accumulated: ""
+},
+
+// ── KAP 9: Flexbox & Grid ────────────────────────────────────────────
+{
+  tag:"Flexbox", title:"display: flex",
+  desc:`Flexbox ist ein mächtiges Layout-System. Es beginnt mit <code>display: flex</code> am Elternelement. Schreibe eine Regel für <code>.flex-container</code>.`,
+  hint:`<code>.flex-container { display: flex; }</code>`,
+  placeholder:`.flex-container {\n  display: flex;\n}`,
+  check(v){ const ok=v.includes("display: flex"); return {ok,msg:ok?"Korrekt! Alle direkten Kind-Elemente werden jetzt Flex-Items.":".flex-container { display: flex; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Flexbox", title:"flex-direction",
+  desc:`<code>flex-direction</code> bestimmt die Richtung. Schreibe Regeln: <code>.zeile</code> mit flex-direction <code>row</code> und <code>.spalte</code> mit <code>column</code>.`,
+  hint:`row = horizontal (Standard), column = vertikal`,
+  placeholder:`.zeile {\n  display: flex;\n  flex-direction: row;\n}\n.spalte {\n  display: flex;\n  flex-direction: column;\n}`,
+  check(v){ const ok=v.includes("flex-direction: row")&&v.includes("flex-direction: column"); return {ok,msg:ok?"Super! row-reverse und column-reverse sind weitere Werte.":"Beide Richtungen row und column definieren."}; },
+  accumulated: ""
+},
+{
+  tag:"Flexbox", title:"justify-content",
+  desc:`<code>justify-content</code> verteilt Items auf der Hauptachse. Schreibe eine Regel für <code>.verteilt</code>: display flex und justify-content <code>space-between</code>.`,
+  hint:`<code>.verteilt { display: flex; justify-content: space-between; }</code>`,
+  placeholder:`.verteilt {\n  display: flex;\n  justify-content: space-between;\n}`,
+  check(v){ const ok=v.includes("justify-content")&&v.includes("space-between"); return {ok,msg:ok?"Richtig! space-between verteilt den Abstand gleichmäßig zwischen Items.":"justify-content: space-between verwenden."}; },
+  accumulated: ""
+},
+{
+  tag:"Flexbox", title:"align-items",
+  desc:`<code>align-items</code> richtet Items auf der Kreuzachse aus. Schreibe eine Regel für <code>.zentriert</code>: display flex, min-height 100px, align-items <code>center</code>.`,
+  hint:`<code>.zentriert { display: flex; min-height: 100px; align-items: center; }</code>`,
+  placeholder:`.zentriert {\n  display: flex;\n  min-height: 100px;\n  align-items: center;\n}`,
+  check(v){ const ok=v.includes("align-items")&&v.includes("center"); return {ok,msg:ok?"Perfekt! align-items: center ist der Klassiker für vertikale Zentrierung.":"align-items: center zusammen mit display: flex."}; },
+  accumulated: ""
+},
+{
+  tag:"Flexbox", title:"flex-wrap",
+  desc:`<code>flex-wrap: wrap</code> lässt Items in die nächste Zeile umbrechen, wenn kein Platz mehr ist. Schreibe eine Regel für <code>.gitter</code> mit display flex und flex-wrap wrap.`,
+  hint:`<code>.gitter { display: flex; flex-wrap: wrap; }</code>`,
+  placeholder:`.gitter {\n  display: flex;\n  flex-wrap: wrap;\n}`,
+  check(v){ const ok=v.includes("flex-wrap")&&v.includes("wrap"); return {ok,msg:ok?"Korrekt! flex-wrap macht Flex-Layouts responsiv.":".gitter { display: flex; flex-wrap: wrap; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Flexbox", title:"flex: 1 – Platz aufteilen",
+  desc:`<code>flex: 1</code> bei einem Kind-Element lässt es den verfügbaren Platz füllen. Schreibe eine Regel für <code>.wachsen</code> mit flex <code>1</code>.`,
+  hint:`<code>.wachsen { flex: 1; }</code>`,
+  placeholder:`.wachsen {\n  flex: 1;\n}`,
+  check(v){ const ok=v.includes("flex: 1"); return {ok,msg:ok?"Richtig! flex: 1 bedeutet gleichmäßige Platzteilung.":".wachsen { flex: 1; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Grid", title:"display: grid",
+  desc:`CSS Grid ist ideal für zweidimensionale Layouts. Schreibe eine Regel für <code>.grid</code>: display <code>grid</code> und grid-template-columns <code>repeat(3, 1fr)</code> (3 gleiche Spalten).`,
+  hint:`<code>.grid { display: grid; grid-template-columns: repeat(3, 1fr); }</code>`,
+  placeholder:`.grid {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n}`,
+  check(v){ const ok=v.includes("display: grid")&&v.includes("grid-template-columns"); return {ok,msg:ok?"Super! 1fr = 1 freie Einheit – alle Spalten gleich breit.":"display: grid und grid-template-columns: repeat(3, 1fr)"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Grid", title:"gap – Abstände im Grid",
+  desc:`<code>gap</code> setzt Abstände zwischen Grid-Zellen. Schreibe eine Regel für <code>.grid-gap</code>: display grid, grid-template-columns repeat(2,1fr), gap <code>20px</code>.`,
+  hint:`<code>.grid-gap { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }</code>`,
+  placeholder:`.grid-gap {\n  display: grid;\n  grid-template-columns: repeat(2, 1fr);\n  gap: 20px;\n}`,
+  check(v){ const ok=v.includes("gap: 20px")&&v.includes("grid"); return {ok,msg:ok?"Korrekt! gap ersetzt margin-hacks und funktioniert auch bei Flexbox.":"gap: 20px in einer Grid-Regel."}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Grid", title:"grid-column überspannen",
+  desc:`<code>grid-column: 1 / 3</code> lässt ein Element zwei Spalten überspannen. Schreibe eine Regel für <code>.breit</code>: grid-column <code>1 / 3</code>.`,
+  hint:`<code>.breit { grid-column: 1 / 3; }</code>`,
+  placeholder:`.breit {\n  grid-column: 1 / 3;\n}`,
+  check(v){ const ok=v.includes("grid-column"); return {ok,msg:ok?"Super! Startlinie / Endlinie — span ist eine Alternative.":".breit { grid-column: 1 / 3; }"}; },
+  accumulated: ""
+},
+{
+  tag:"CSS Grid", title:"Flexbox-Layout für Navigation",
+  desc:`Schreibe eine vollständige Flex-Navigation: <code>nav</code> mit display flex, justify-content space-between, align-items center, padding 16px, background #333, und color white.`,
+  hint:`5 Eigenschaften in einer Regel für nav.`,
+  placeholder:`nav {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 16px;\n  background: #333;\n  color: white;\n}`,
+  check(v){ const ok=v.includes("display: flex")&&v.includes("justify-content")&&v.includes("align-items")&&v.includes("background"); return {ok,msg:ok?"Perfekt! Das ist eine typische responsive Navigationsleiste.":"Alle 5 Eigenschaften für nav definieren."}; },
+  accumulated: ""
+},
+
+// ── KAP 10: Webseite fertigstellen ────────────────────────────────────
+{
+  tag:"Webseite", title:"Header-Bereich mit <header>",
+  desc:`Schreibe einen semantischen <code>&lt;header&gt;</code>-Bereich mit einer h1 "Meine Webseite" und einem nav-Bereich (leer reicht).`,
+  hint:`<code>&lt;header&gt;&lt;h1&gt;Meine Webseite&lt;/h1&gt;&lt;nav&gt;&lt;/nav&gt;&lt;/header&gt;</code>`,
+  placeholder:`<header>\n  <h1>Meine Webseite</h1>\n  <nav></nav>\n</header>`,
+  check(v){ const ok=v.includes("<header>")&&v.includes("<h1>")&&v.includes("<nav>"); return {ok,msg:ok?"Richtig! header ist das semantische Element für den Seitenkopf.":"header mit h1 und nav."}; },
+  accumulated: '  <header style="background:#0056b3;color:white;padding:20px;text-align:center;">\n    <h1>Meine Webseite</h1>\n    <nav><a href="#ueber" style="color:white;margin:0 10px;">Über mich</a><a href="#skills" style="color:white;margin:0 10px;">Skills</a><a href="#kontakt" style="color:white;margin:0 10px;">Kontakt</a></nav>\n  </header>\n'
+},
+{
+  tag:"Webseite", title:"Hauptinhalt mit <main>",
+  desc:`<code>&lt;main&gt;</code> kennzeichnet den Hauptinhalt. Schreibe einen main-Bereich mit einer Sektion (id="ueber") und einer h2 "Über mich" sowie einem kurzen Absatz.`,
+  hint:`<code>&lt;main&gt;&lt;section id="ueber"&gt;&lt;h2&gt;Über mich&lt;/h2&gt;&lt;p&gt;...&lt;/p&gt;&lt;/section&gt;&lt;/main&gt;</code>`,
+  placeholder:`<main>\n  <section id="ueber">\n    <h2>Über mich</h2>\n    <p>Ich lerne Webentwicklung.</p>\n  </section>\n</main>`,
+  check(v){ const ok=v.includes("<main>")&&v.includes('id="ueber"')&&v.includes("<h2>"); return {ok,msg:ok?"Super! main sollte nur einmal pro Seite verwendet werden.":"main > section#ueber > h2 + p"}; },
+  accumulated: '  <main style="max-width:800px;margin:30px auto;padding:0 20px;">\n    <section id="ueber">\n      <h2>Über mich</h2>\n      <p>Hallo! Ich bin ein angehender Webentwickler und habe diesen Kurs erfolgreich absolviert.</p>\n    </section>\n'
+},
+{
+  tag:"Webseite", title:"Skills-Sektion mit Liste",
+  desc:`Schreibe eine Sektion mit id="skills", einer h2 "Meine Skills" und einer ul mit drei Skill-Punkten.`,
+  hint:`section id=skills > h2 + ul > li × 3`,
+  placeholder:`<section id="skills">\n  <h2>Meine Skills</h2>\n  <ul>\n    <li>HTML</li>\n    <li>CSS</li>\n    <li>JavaScript</li>\n  </ul>\n</section>`,
+  check(v){ const ok=v.includes('id="skills"')&&v.includes("<ul>")&&(v.match(/<li>/g)||[]).length>=3; return {ok,msg:ok?"Korrekt! Skills sind ein klassischer Inhalt einer Portfolio-Seite.":"section#skills mit ul und mindestens 3 li."}; },
+  accumulated: '    <section id="skills">\n      <h2>Meine Skills</h2>\n      <ul>\n        <li>✅ HTML</li>\n        <li>✅ CSS</li>\n        <li>✅ JavaScript</li>\n      </ul>\n    </section>\n'
+},
+{
+  tag:"Webseite", title:"Kontakt-Sektion mit Formular",
+  desc:`Schreibe eine Sektion id="kontakt" mit h2 "Kontakt" und einem einfachen Formular: Name-Input und Submit-Button.`,
+  hint:`section#kontakt > h2 + form > input + button`,
+  placeholder:`<section id="kontakt">\n  <h2>Kontakt</h2>\n  <form>\n    <input type="text" name="name" placeholder="Dein Name">\n    <button type="submit">Senden</button>\n  </form>\n</section>`,
+  check(v){ const ok=v.includes('id="kontakt"')&&v.includes("<form")&&v.includes("<input"); return {ok,msg:ok?"Perfekt! Kontakt-Sektionen sind auf fast jeder Seite zu finden.":"section#kontakt mit form, input und button."}; },
+  accumulated: '    <section id="kontakt">\n      <h2>Kontakt</h2>\n      <form>\n        <input type="text" name="name" placeholder="Dein Name" style="padding:8px;margin:4px;">\n        <input type="email" name="email" placeholder="E-Mail" style="padding:8px;margin:4px;">\n        <br><button type="submit" style="margin-top:8px;padding:8px 20px;background:#0056b3;color:white;border:none;border-radius:4px;cursor:pointer;">Senden</button>\n      </form>\n    </section>\n  </main>\n'
+},
+{
+  tag:"Webseite", title:"Footer mit <footer>",
+  desc:`Der <code>&lt;footer&gt;</code> steht am Ende der Seite. Schreibe einen footer mit einem Copyright-Hinweis.`,
+  hint:`<code>&lt;footer&gt;&lt;p&gt;&copy; 2024 Mein Name&lt;/p&gt;&lt;/footer&gt;</code>`,
+  placeholder:`<footer>\n  <p>&copy; 2024 Mein Name</p>\n</footer>`,
+  check(v){ const ok=v.includes("<footer>")&&v.includes("</footer>"); return {ok,msg:ok?"Richtig! &copy; ist der HTML-Zeichencode für das © Symbol.":"footer mit Copyright-Hinweis."}; },
+  accumulated: '  <footer style="text-align:center;padding:20px;background:#333;color:white;margin-top:40px;">\n    <p>&copy; 2024 Meine Webseite – Erstellt mit HTML & CSS</p>\n  </footer>\n'
+},
+{
+  tag:"Webseite", title:"CSS für den body",
+  desc:`Schreibe CSS für den Body deiner Seite: font-family <code>Arial, sans-serif</code>, margin <code>0</code>, background <code>#f4f4f4</code>, color <code>#333</code>.`,
+  hint:`<code>body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; color: #333; }</code>`,
+  placeholder:`body {\n  font-family: Arial, sans-serif;\n  margin: 0;\n  background: #f4f4f4;\n  color: #333;\n}`,
+  check(v){ const ok=v.includes("font-family")&&v.includes("margin: 0")&&v.includes("background"); return {ok,msg:ok?"Super! margin: 0 entfernt den Standard-Außenabstand des Browsers.":"Alle vier Eigenschaften für body."}; },
+  accumulated: ""
+},
+{
+  tag:"Webseite", title:"CSS :hover Pseudo-Klasse",
+  desc:`<code>:hover</code> aktiviert eine Regel nur wenn die Maus darüber ist. Schreibe eine Regel, die Links beim Hovern die Farbe <code>orange</code> bekommen.`,
+  hint:`<code>a:hover { color: orange; }</code>`,
+  placeholder:`a:hover {\n  color: orange;\n}`,
+  check(v){ const ok=v.includes(":hover")&&v.includes("color"); return {ok,msg:ok?"Richtig! :hover ist eine der meistgenutzten Pseudo-Klassen.":"a:hover { color: orange; }"}; },
+  accumulated: ""
+},
+{
+  tag:"Webseite", title:"CSS transition für sanfte Übergänge",
+  desc:`<code>transition</code> erzeugt sanfte Übergänge bei CSS-Änderungen. Schreibe eine Regel für <code>a</code>: transition <code>color 0.3s ease</code>.`,
+  hint:`<code>a { transition: color 0.3s ease; }</code>`,
+  placeholder:`a {\n  transition: color 0.3s ease;\n}`,
+  check(v){ const ok=v.includes("transition")&&v.includes("0.3s"); return {ok,msg:ok?"Korrekt! Transitions machen Hover-Effekte viel professioneller.":"transition: color 0.3s ease;"}; },
+  accumulated: ""
+},
+{
+  tag:"Webseite", title:"Media Query für Mobilgeräte",
+  desc:`Mit Media Queries passt du das Layout für verschiedene Bildschirmgrößen an. Schreibe eine, die für Bildschirme unter 600px die <code>font-size</code> des <code>body</code> auf <code>14px</code> setzt.`,
+  hint:`<code>@media (max-width: 600px) { body { font-size: 14px; } }</code>`,
+  placeholder:`@media (max-width: 600px) {\n  body {\n    font-size: 14px;\n  }\n}`,
+  check(v){ const ok=v.includes("@media")&&v.includes("600px")&&v.includes("font-size"); return {ok,msg:ok?"Super! Media Queries sind das Herzstück von Responsive Design.":"@media (max-width: 600px) { body { font-size: 14px; } }"}; },
+  accumulated: ""
+},
+{
+  tag:"Webseite", title:"Deine Webseite ist fertig! 🎉",
+  desc:`Du hast alle 100 HTML/CSS-Übungen gemeistert! Als letzten Schritt: Schreibe einen h1-Tag mit dem Text <strong>Fertig!</strong> als Abschluss.`,
+  hint:`<code>&lt;h1&gt;Fertig!&lt;/h1&gt;</code>`,
+  placeholder:`<h1>Fertig!</h1>`,
+  check(v){ const ok=/<h1>\s*Fertig!\s*<\/h1>/i.test(v.trim()); return {ok,msg:ok?"🎉 HTML & CSS geschafft! Weiter geht's mit JavaScript!":"Schreibe: <h1>Fertig!</h1>"}; },
+  accumulated: ""
+},
+
+// ── KAP 11: JavaScript auf deiner Webseite ───────────────────────────
+// Alle JS-Übungen ergänzen die fertige Webseite um interaktive Features.
+// Das eingebettete <script>-Tag wird schrittweise aufgebaut.
+{
+  tag:"JS – Grundlagen", title:"Das script-Tag einbinden",
+  desc:`JavaScript gehört in ein <code>&lt;script&gt;</code>-Tag. Schreibe ein öffnendes und schließendes <code>&lt;script&gt;</code>-Tag (leer) – es wird am Ende des &lt;body&gt; platziert.`,
+  hint:`<code>&lt;script&gt;&lt;/script&gt;</code>`,
+  placeholder:`<script>\n<\/script>`,
+  check(v){ const ok=v.includes("<script>")&&v.includes("<\/script>"); return {ok,msg:ok?"Richtig! Das script-Tag ist der Container für JavaScript auf der Seite.":"Schreibe: <script> und <\/script>"}; },
+  accumulated:`\n<script>\n`
+},
+{
+  tag:"JS – Grundlagen", title:"console.log() zur Fehlersuche",
+  desc:`<code>console.log()</code> gibt Werte in der Browser-Konsole (F12) aus – unverzichtbar beim Debuggen. Schreibe <code>console.log("Seite geladen!");</code>.`,
+  hint:`<code>console.log("Seite geladen!");</code>`,
+  placeholder:`console.log("Seite geladen!");`,
+  check(v){ const ok=v.includes("console.log")&&v.includes("Seite geladen"); return {ok,msg:ok?"Super! Öffne F12 → Konsole um es zu sehen.":"Schreibe: console.log(\"Seite geladen!\");"}; },
+  accumulated:`console.log("Seite geladen!");\n`
+},
+{
+  tag:"JS – Grundlagen", title:"Variable für den Seitentitel",
+  desc:`Deklariere eine Variable <code>seitenTitel</code> mit <code>const</code> und weise ihr den String <code>"Meine Webseite"</code> zu.`,
+  hint:`<code>const seitenTitel = "Meine Webseite";</code>`,
+  placeholder:`const seitenTitel = "Meine Webseite";`,
+  check(v){ const ok=/const\s+seitenTitel\s*=\s*["']Meine Webseite["']/.test(v.trim()); return {ok,msg:ok?"Perfekt! const für Werte, die sich nicht ändern.":"const seitenTitel = \"Meine Webseite\";"}; },
+  accumulated:`const seitenTitel = "Meine Webseite";\n`
+},
+{
+  tag:"JS – DOM", title:"Seitentitel per JS setzen",
+  desc:`Mit <code>document.title</code> kannst du den Browser-Tab-Titel ändern. Setze <code>document.title</code> auf die Variable <code>seitenTitel</code>.`,
+  hint:`<code>document.title = seitenTitel;</code>`,
+  placeholder:`document.title = seitenTitel;`,
+  check(v){ const ok=v.includes("document.title")&&v.includes("seitenTitel"); return {ok,msg:ok?"Richtig! Der Tab-Titel ändert sich sofort.":"document.title = seitenTitel;"}; },
+  accumulated:`document.title = seitenTitel;\n`
+},
+{
+  tag:"JS – DOM", title:"Element per ID finden",
+  desc:`Mit <code>document.getElementById()</code> greifst du auf HTML-Elemente zu. Speichere das Element mit ID <code>"ueber"</code> in einer Konstante <code>sectionUeber</code>.`,
+  hint:`<code>const sectionUeber = document.getElementById("ueber");</code>`,
+  placeholder:`const sectionUeber = document.getElementById("ueber");`,
+  check(v){ const ok=v.includes("getElementById")&&v.includes("ueber")&&v.includes("sectionUeber"); return {ok,msg:ok?"Super! getElementById ist die direkteste DOM-Methode.":"const sectionUeber = document.getElementById(\"ueber\");"}; },
+  accumulated:`const sectionUeber = document.getElementById("ueber");\n`
+},
+{
+  tag:"JS – DOM", title:"Begrüßungstext per Template Literal",
+  desc:`Setze den Inhalt von <code>sectionUeber</code> mit <code>innerHTML</code>. Nutze ein Template Literal: <code>\`&lt;h2&gt;Über mich&lt;/h2&gt;&lt;p&gt;Hallo! Ich habe ${"{"} new Date().getFullYear() {"}"} alle 120 Übungen gemeistert.&lt;/p&gt;\`</code>`,
+  hint:`<code>sectionUeber.innerHTML = \`&lt;h2&gt;...&lt;/h2&gt;&lt;p&gt;...${"{"}new Date().getFullYear(){"}"}...&lt;/p&gt;\`;</code>`,
+  placeholder:"sectionUeber.innerHTML = `<h2>Über mich</h2><p>Hallo! Ich habe ${new Date().getFullYear()} alle 120 Übungen gemeistert.</p>`;",
+  check(v){ const ok=v.includes("innerHTML")&&v.includes("sectionUeber")&&v.includes("getFullYear"); return {ok,msg:ok?"Perfekt! Das aktuelle Jahr wird dynamisch eingesetzt.":"sectionUeber.innerHTML mit Template Literal und getFullYear()."}; },
+  accumulated:"sectionUeber.innerHTML = `<h2>Über mich</h2><p>Hallo! Ich habe \${new Date().getFullYear()} alle 120 Übungen gemeistert und kenne jetzt HTML, CSS und JavaScript.</p>`;\n"
+},
+{
+  tag:"JS – Arrays", title:"Skills-Array erstellen",
+  desc:`Erstelle ein Array <code>skills</code> mit den Strings <code>"HTML"</code>, <code>"CSS"</code>, <code>"JavaScript"</code> und <code>"DOM"</code>.`,
+  hint:`<code>const skills = ["HTML", "CSS", "JavaScript", "DOM"];</code>`,
+  placeholder:`const skills = ["HTML", "CSS", "JavaScript", "DOM"];`,
+  check(v){ const ok=v.includes("const skills")&&v.includes("HTML")&&v.includes("CSS")&&v.includes("JavaScript")&&v.includes("DOM"); return {ok,msg:ok?"Richtig! Arrays sind ideal für Listen gleichartiger Daten.":"const skills = [\"HTML\", \"CSS\", \"JavaScript\", \"DOM\"];"}; },
+  accumulated:`const skills = ["HTML", "CSS", "JavaScript", "DOM"];\n`
+},
+{
+  tag:"JS – Schleifen", title:"Skills per forEach rendern",
+  desc:`Mit <code>forEach</code> iterierst du über ein Array. Finde das Element <code>#skills</code>, setze zunächst seinen innerHTML auf <code>&lt;h2&gt;Meine Skills&lt;/h2&gt;&lt;ul id="skill-liste"&gt;&lt;/ul&gt;</code>, dann füge per forEach für jeden skill ein <code>&lt;li&gt;</code> in <code>#skill-liste</code> ein.`,
+  hint:`<code>skills.forEach(s => { document.getElementById("skill-liste").innerHTML += \`&lt;li&gt;✅ ${"{"}s{"}"}&lt;/li&gt;\`; });</code>`,
+  placeholder:`document.getElementById("skills").innerHTML = "<h2>Meine Skills</h2><ul id='skill-liste'></ul>";\nskills.forEach(s => {\n  document.getElementById("skill-liste").innerHTML += \`<li>✅ \${s}</li>\`;\n});`,
+  check(v){ const ok=v.includes("forEach")&&v.includes("skills")&&v.includes("skill-liste")&&v.includes("innerHTML"); return {ok,msg:ok?"Super! forEach ist die sauberste Art über Arrays zu iterieren.":"forEach über skills mit innerHTML += li-Element."}; },
+  accumulated:`document.getElementById("skills").innerHTML = "<h2>Meine Skills</h2><ul id='skill-liste'></ul>";\nskills.forEach(s => { document.getElementById("skill-liste").innerHTML += \`<li>✅ \${s}</li>\`; });\n`
+},
+{
+  tag:"JS – Bedingungen", title:"Tageszeit-Begrüßung (if/else)",
+  desc:`Erstelle eine Variable <code>stunde</code> mit <code>new Date().getHours()</code>. Prüfe: wenn stunde < 12, dann <code>gruss = "Guten Morgen"</code>, sonst wenn < 18 <code>"Guten Tag"</code>, sonst <code>"Guten Abend"</code>.`,
+  hint:`<code>let gruss; if (stunde &lt; 12) { gruss="Guten Morgen"; } else if (stunde &lt; 18) { gruss="Guten Tag"; } else { gruss="Guten Abend"; }</code>`,
+  placeholder:`const stunde = new Date().getHours();\nlet gruss;\nif (stunde < 12) {\n  gruss = "Guten Morgen";\n} else if (stunde < 18) {\n  gruss = "Guten Tag";\n} else {\n  gruss = "Guten Abend";\n}`,
+  check(v){ const ok=v.includes("getHours")&&v.includes("if")&&v.includes("else")&&v.includes("gruss"); return {ok,msg:ok?"Korrekt! if/else if/else deckt alle drei Fälle ab.":"getHours() + if/else if/else für gruss."}; },
+  accumulated:`const stunde = new Date().getHours();\nlet gruss;\nif (stunde < 12) { gruss = "Guten Morgen"; } else if (stunde < 18) { gruss = "Guten Tag"; } else { gruss = "Guten Abend"; }\n`
+},
+{
+  tag:"JS – DOM", title:"Begrüßung im Header anzeigen",
+  desc:`Finde das <code>&lt;h1&gt;</code>-Element im Header und ändere seinen <code>textContent</code> auf den <code>gruss</code> + <code>" – Meine Webseite"</code>.`,
+  hint:`<code>document.querySelector("header h1").textContent = gruss + " – Meine Webseite";</code>`,
+  placeholder:`document.querySelector("header h1").textContent = gruss + " – Meine Webseite";`,
+  check(v){ const ok=v.includes("querySelector")&&v.includes("h1")&&v.includes("textContent")&&v.includes("gruss"); return {ok,msg:ok?"Perfekt! querySelector ist flexibler als getElementById.":"querySelector(\"header h1\").textContent = gruss + ..."}; },
+  accumulated:`document.querySelector("header h1").textContent = gruss + " – Meine Webseite";\n`
+},
+{
+  tag:"JS – Funktionen", title:"Funktion: Skill hinzufügen",
+  desc:`Schreibe eine Funktion <code>skillHinzufuegen(text)</code>, die einen neuen <code>&lt;li&gt;</code>-Eintrag mit dem Parameter <code>text</code> an <code>#skill-liste</code> anhängt.`,
+  hint:`<code>function skillHinzufuegen(text) { document.getElementById("skill-liste").innerHTML += \`&lt;li&gt;✅ ${"{"}text{"}"}&lt;/li&gt;\`; }</code>`,
+  placeholder:"function skillHinzufuegen(text) {\n  document.getElementById(\"skill-liste\").innerHTML += `<li>✅ ${text}</li>`;\n}",
+  check(v){ const ok=v.includes("function skillHinzufuegen")&&v.includes("text")&&v.includes("skill-liste"); return {ok,msg:ok?"Richtig! Funktionen machen Code wiederverwendbar.":"function skillHinzufuegen(text) mit innerHTML +="}; },
+  accumulated:"function skillHinzufuegen(text) {\n  document.getElementById(\"skill-liste\").innerHTML += `<li>✅ \${text}</li>`;\n}\n"
+},
+{
+  tag:"JS – Funktionen", title:"Funktion aufrufen",
+  desc:`Rufe <code>skillHinzufuegen</code> zweimal auf: einmal mit <code>"Responsive Design"</code> und einmal mit <code>"Git"</code>.`,
+  hint:`<code>skillHinzufuegen("Responsive Design"); skillHinzufuegen("Git");</code>`,
+  placeholder:`skillHinzufuegen("Responsive Design");\nskillHinzufuegen("Git");`,
+  check(v){ const ok=v.includes("skillHinzufuegen")&&v.includes("Responsive Design")&&v.includes("Git"); return {ok,msg:ok?"Super! Jetzt wächst die Skills-Liste dynamisch.":"Zwei Aufrufe: skillHinzufuegen(\"Responsive Design\") und skillHinzufuegen(\"Git\")"}; },
+  accumulated:`skillHinzufuegen("Responsive Design");\nskillHinzufuegen("Git");\n`
+},
+{
+  tag:"JS – Events", title:"Kontaktformular: Event Listener",
+  desc:`Finde das Formular in <code>#kontakt</code> mit <code>querySelector</code> und setze einen <code>submit</code>-Listener. Im Handler: <code>e.preventDefault()</code> und dann <code>alert("Nachricht gesendet! Vielen Dank.")</code>.`,
+  hint:`<code>document.querySelector("#kontakt form").addEventListener("submit", function(e) { e.preventDefault(); alert("..."); });</code>`,
+  placeholder:`document.querySelector("#kontakt form").addEventListener("submit", function(e) {\n  e.preventDefault();\n  alert("Nachricht gesendet! Vielen Dank.");\n});`,
+  check(v){ const ok=v.includes("addEventListener")&&v.includes("submit")&&v.includes("preventDefault")&&v.includes("alert"); return {ok,msg:ok?"Korrekt! preventDefault() verhindert das Neuladen der Seite.":"submit-Listener mit preventDefault() und alert()."}; },
+  accumulated:`document.querySelector("#kontakt form").addEventListener("submit", function(e) {\n  e.preventDefault();\n  alert("Nachricht gesendet! Vielen Dank.");\n});\n`
+},
+{
+  tag:"JS – Events", title:"Dark-Mode-Button erstellen",
+  desc:`Füge per JS einen Button mit dem Text <code>"🌙 Dark Mode"</code> und der ID <code>"dark-btn"</code> in den <code>&lt;header&gt;</code> ein. Nutze <code>innerHTML +=</code>.`,
+  hint:`<code>document.querySelector("header").innerHTML += '&lt;button id="dark-btn"&gt;🌙 Dark Mode&lt;/button&gt;';</code>`,
+  placeholder:`document.querySelector("header").innerHTML += '<button id="dark-btn" style="float:right;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;">🌙 Dark Mode</button>';`,
+  check(v){ const ok=v.includes("dark-btn")&&v.includes("innerHTML")&&v.includes("Dark Mode"); return {ok,msg:ok?"Super! Elemente lassen sich auch per JS ins DOM einfügen.":"innerHTML += mit button#dark-btn und Text Dark Mode."}; },
+  accumulated:`document.querySelector("header").innerHTML += '<button id="dark-btn" style="float:right;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;background:#f0c040;font-weight:bold;">🌙 Dark Mode</button>';\n`
+},
+{
+  tag:"JS – Events", title:"Dark Mode umschalten",
+  desc:`Setze einen <code>click</code>-Listener auf <code>#dark-btn</code>. Beim Klick: Wenn <code>document.body.style.background</code> bereits <code>"#1a1a2e"</code> ist, setze background auf <code>"#f4f4f4"</code> und color auf <code>"#333"</code>, sonst umgekehrt.`,
+  hint:`if/else auf body.style.background.`,
+  placeholder:`document.getElementById("dark-btn").addEventListener("click", function() {\n  if (document.body.style.background === "#1a1a2e") {\n    document.body.style.background = "#f4f4f4";\n    document.body.style.color = "#333";\n  } else {\n    document.body.style.background = "#1a1a2e";\n    document.body.style.color = "#e8e8f0";\n  }\n});`,
+  check(v){ const ok=v.includes("dark-btn")&&v.includes("click")&&v.includes("1a1a2e")&&v.includes("body.style"); return {ok,msg:ok?"Klasse! Dark Mode per JS – Event + DOM + Bedingung in einem.":"click-Listener auf dark-btn, if/else auf body.style.background."}; },
+  accumulated:`document.getElementById("dark-btn").addEventListener("click", function() {\n  if (document.body.style.background === "#1a1a2e") {\n    document.body.style.background = "#f4f4f4";\n    document.body.style.color = "#333";\n  } else {\n    document.body.style.background = "#1a1a2e";\n    document.body.style.color = "#e8e8f0";\n  }\n});\n`
+},
+{
+  tag:"JS – DOM", title:"Besuchszähler mit localStorage",
+  desc:`Lese <code>localStorage.getItem("besuche")</code> in eine Variable <code>besuche</code>, erhöhe sie um 1 (oder starte bei 1), speichere zurück und gib in der Konsole aus: <code>"Besuch Nr. X"</code>.`,
+  hint:`<code>let besuche = parseInt(localStorage.getItem("besuche")||0)+1; localStorage.setItem("besuche",besuche); console.log(\`Besuch Nr. ${"{"}besuche{"}"}\`);</code>`,
+  placeholder:`let besuche = parseInt(localStorage.getItem("besuche") || 0) + 1;\nlocalStorage.setItem("besuche", besuche);\nconsole.log(\`Besuch Nr. \${besuche}\`);`,
+  check(v){ const ok=v.includes("localStorage")&&v.includes("besuche")&&v.includes("console.log"); return {ok,msg:ok?"Richtig! localStorage speichert Daten auch nach dem Schließen des Tabs.":"localStorage.getItem/setItem + console.log"}; },
+  accumulated:`let besuche = parseInt(localStorage.getItem("besuche") || 0) + 1;\nlocalStorage.setItem("besuche", besuche);\nconsole.log(\`Besuch Nr. \${besuche}\`);\n`
+},
+{
+  tag:"JS – DOM", title:"Besuchszähler im Footer anzeigen",
+  desc:`Finde den <code>&lt;footer&gt;</code> und hänge per <code>innerHTML +=</code> einen Absatz an: <code>&lt;p&gt;Du besuchst diese Seite zum X. Mal.&lt;/p&gt;</code> (nutze Template Literal mit <code>besuche</code>).`,
+  hint:"<code>document.querySelector(\"footer\").innerHTML += `&lt;p&gt;Du besuchst diese Seite zum ${\"{\"}besuche{\"}\"} Mal.&lt;/p&gt;`;</code>",
+  placeholder:"document.querySelector(\"footer\").innerHTML += `<p>Du besuchst diese Seite zum ${besuche}. Mal.</p>`;",
+  check(v){ const ok=v.includes("footer")&&v.includes("innerHTML")&&v.includes("besuche"); return {ok,msg:ok?"Super! Der Footer zeigt jetzt dynamische Daten.":"querySelector(\"footer\").innerHTML += Template Literal mit besuche."}; },
+  accumulated:"document.querySelector(\"footer\").innerHTML += `<p style='margin-top:8px;font-size:0.85em;'>Du besuchst diese Seite zum \${besuche}. Mal.</p>`;\n"
+},
+{
+  tag:"JS – DOM", title:"Smooth Scroll für Navigation",
+  desc:`Selektiere alle Links in <code>nav a</code> mit <code>querySelectorAll</code> und setze per <code>forEach</code> einen click-Listener: <code>e.preventDefault()</code>, dann <code>document.querySelector(link.getAttribute("href")).scrollIntoView({"{"}behavior:"smooth"{"}"});</code>`,
+  hint:`querySelectorAll("nav a").forEach(link => { link.addEventListener("click", e => { e.preventDefault(); document.querySelector(link.getAttribute("href")).scrollIntoView({behavior:"smooth"}); }); });`,
+  placeholder:`document.querySelectorAll("nav a").forEach(link => {\n  link.addEventListener("click", e => {\n    e.preventDefault();\n    document.querySelector(link.getAttribute("href")).scrollIntoView({ behavior: "smooth" });\n  });\n});`,
+  check(v){ const ok=v.includes("querySelectorAll")&&v.includes("nav a")&&v.includes("scrollIntoView")&&v.includes("smooth"); return {ok,msg:ok?"Korrekt! Smooth Scroll ist ein elegantes UX-Detail.":"querySelectorAll + forEach + scrollIntoView({behavior:\"smooth\"})."}; },
+  accumulated:`document.querySelectorAll("nav a").forEach(link => {\n  link.addEventListener("click", e => {\n    e.preventDefault();\n    const ziel = document.querySelector(link.getAttribute("href"));\n    if (ziel) ziel.scrollIntoView({ behavior: "smooth" });\n  });\n});\n`
+},
+{
+  tag:"JS – DOM", title:"Aktuelles Jahr im Footer setzen",
+  desc:`Finde alle Elemente mit <code>querySelectorAll("footer p")</code> und hänge per <code>innerHTML +=</code> einen Span mit dem aktuellen Jahr an: <code>&lt;span id="jahr"&gt;</code> + <code>new Date().getFullYear()</code> + <code>&lt;/span&gt;</code>.`,
+  hint:`<code>document.querySelector("footer p").innerHTML += \`&lt;span id="jahr"&gt;\${new Date().getFullYear()}&lt;/span&gt;\`;</code>`,
+  placeholder:`document.querySelector("footer p").innerHTML += \`<span id="jahr">\${new Date().getFullYear()}</span>\`;`,
+  check(v){ const ok=v.includes("footer")&&v.includes("getFullYear")&&v.includes("innerHTML"); return {ok,msg:ok?"Super! Das Jahr wird jetzt automatisch aktuell gehalten.":"querySelector(\"footer p\").innerHTML += mit getFullYear()"}; },
+  accumulated:`document.querySelector("footer p").innerHTML += \` – \${new Date().getFullYear()}\`;\n`
+},
+{
+  tag:"JS – Events", title:"Letztes Script-Tag schließen",
+  desc:`Schließe das <code>&lt;script&gt;</code>-Tag mit <code>&lt;/script&gt;</code> – damit ist deine Webseite mit JavaScript komplett!`,
+  hint:`<code>&lt;/script&gt;</code>`,
+  placeholder:`<\/script>`,
+  check(v){ const ok=v.trim()==="<\/script>"; return {ok,msg:ok?"🎉 Herzlichen Glückwunsch! Du hast alle 120 Übungen abgeschlossen – HTML, CSS und JavaScript auf einer echten Webseite!":"Schreibe genau: <\/script>"}; },
+  accumulated:`<\/script>\n`
+}
+];
+
+// =====================================================================
+// STATE
+// =====================================================================
+let state = {
+  current: 0,
+  solved: new Array(120).fill(false),
+};
+
+try {
+  const saved = JSON.parse(localStorage.getItem("html_kurs_state")||"null");
+  if (saved && saved.solved && saved.solved.length===120) state = saved;
+} catch(e){}
+
+function saveState() {
+  try { localStorage.setItem("html_kurs_state", JSON.stringify(state)); } catch(e){}
+}
+
+// =====================================================================
+// BUILD SIDEBAR
+// =====================================================================
+function buildSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = "";
+  CHAPTERS.forEach(ch => {
+    const h = document.createElement("div");
+    h.className = "chapter-title";
+    h.textContent = ch.title;
+    sb.appendChild(h);
+    for (let i = ch.range[0]; i <= ch.range[1]; i++) {
+      const ex = EXERCISES[i];
+      const div = document.createElement("div");
+      const isLocked = !isUnlocked(i);
+      const isDone = state.solved[i];
+      div.className = "sb-item" + (i===state.current?" active":"") + (isDone?" done":"") + (isLocked?" locked":"");
+      div.innerHTML = `<span class="sb-num">${String(i+1).padStart(2,"0")}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ex.title}</span><span class="sb-check">${isDone?"✓":isLocked?"🔒":""}</span>`;
+      if (!isLocked) div.onclick = () => goTo(i);
+      sb.appendChild(div);
+    }
+  });
+}
+
+function isUnlocked(i) {
+  if (i===0) return true;
+  return state.solved[i-1];
+}
+
+// =====================================================================
+// BUILD EXERCISE
+// =====================================================================
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getAccumulatedSoFar(upToIndex) {
+  let parts = [];
+  for (let j = 0; j < upToIndex; j++) {
+    if (EXERCISES[j].accumulated) parts.push(EXERCISES[j].accumulated);
+  }
+  return parts.join('');
+}
+
+function buildExercise(i) {
+  const ex = EXERCISES[i];
+  const area = document.getElementById("exercise-area");
+  if (!isUnlocked(i)) {
+    area.innerHTML = `<div class="locked-overlay"><div class="lock-icon">🔒</div><p>Diese Übung ist noch gesperrt.<br>Löse zuerst Übung ${i} um fortzufahren.</p></div>`;
+    return;
+  }
+  const totalEx = EXERCISES.length;
+  const prevDisabled = i===0?"disabled":"";
+  const nextDisabled = (!state.solved[i]||i===totalEx-1)?"disabled":"";
+
+  // Build accumulated code context
+  const accumulated = getAccumulatedSoFar(i);
+  const hasAccumulated = accumulated.trim().length > 0;
+  const isJS = ex.tag && (ex.tag.startsWith('JS') || ex.tag === 'JavaScript');
+  const filename = isJS ? 'script.js' : 'code-editor.html';
+  const contextHtml = hasAccumulated ? `
+    <div class="code-context-wrap">
+      <div class="code-context-header">
+        <span>📄 Dein Code bisher</span>
+        <span class="code-context-badge">✏️ dein Code kommt hier unten hin</span>
+      </div>
+      <pre class="code-context-pre"><span class="code-context-done">${escapeHtml(accumulated)}</span><span class="code-context-cursor">▌ &lt;!-- ✏️ Hier kommt deine Lösung für Übung ${i+1} --&gt;</span></pre>
+    </div>
+  ` : '';
+
+  area.innerHTML = `
+    <div class="ex-header">
+      <div class="ex-tag">Übung ${i+1} / ${totalEx} – ${escapeHtml(ex.tag)}</div>
+      <div class="ex-title" id="ex-title-${i}"></div>
+      <div class="ex-desc">${ex.desc}</div>
+    </div>
+    <div class="ex-hint">${ex.hint}</div>
+    ${contextHtml}
+    <div class="editor-wrap">
+      <div class="editor-toolbar">
+        <span>${escapeHtml(filename)}</span>
+        <button class="btn-check" onclick="checkAnswer(${i})">▶ Prüfen</button>
+      </div>
+      <textarea class="code-input" id="code-input-${i}" spellcheck="false"></textarea>
+    </div>
+    <div class="feedback" id="feedback-${i}"></div>
+    <div class="ex-nav">
+      <button class="btn-nav" onclick="goTo(${i-1})" ${prevDisabled}>← Zurück</button>
+      <button class="btn-nav primary" id="next-btn-${i}" onclick="goTo(${i+1})" ${nextDisabled}>Weiter →</button>
+    </div>
+  `;
+  // Set title as text (not HTML) to avoid tag injection
+  document.getElementById(`ex-title-${i}`).textContent = ex.title;
+  // Set textarea placeholder and value safely via DOM
+  const ta = document.getElementById(`code-input-${i}`);
+  if (ta) {
+    ta.placeholder = ex.placeholder;
+    ta.value = state.solved[i] ? ex.placeholder : "";
+  }
+  if (state.solved[i]) {
+    showFeedback(i, true, "Bereits gelöst ✓");
+    document.getElementById(`next-btn-${i}`).disabled = false;
+  }
+}
+
+// =====================================================================
+// CHECK ANSWER
+// =====================================================================
+function checkAnswer(i) {
+  const ta = document.getElementById(`code-input-${i}`);
+  if (!ta) return;
+  const val = ta.value;
+  const ex = EXERCISES[i];
+  const result = ex.check(val);
+  showFeedback(i, result.ok, result.msg);
+  if (result.ok && !state.solved[i]) {
+    state.solved[i] = true;
+    saveState();
+    updateProgress();
+    buildSidebar();
+    const nextBtn = document.getElementById(`next-btn-${i}`);
+    if (nextBtn) nextBtn.disabled = false;
+    updatePreview();
+    if (i===EXERCISES.length-1) {
+      setTimeout(()=>{ document.getElementById("finish-screen").classList.add("show"); }, 800);
+    }
+  }
+}
+
+function showFeedback(i, ok, msg) {
+  const fb = document.getElementById(`feedback-${i}`);
+  if (!fb) return;
+  fb.className = "feedback show " + (ok?"ok":"err");
+  fb.textContent = msg;
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function goTo(i) {
+  if (i<0||i>=EXERCISES.length) return;
+  if (!isUnlocked(i)) return;
+  state.current = i;
+  saveState();
+  buildSidebar();
+  buildExercise(i);
+  updateProgress();
+  document.getElementById("exercise-area").scrollTop = 0;
+}
+
+// =====================================================================
+// PROGRESS
+// =====================================================================
+function updateProgress() {
+  const count = state.solved.filter(Boolean).length;
+  document.getElementById("progress-bar").style.width = (count/120*100)+"%";
+  document.getElementById("progress-label").textContent = `${count} / 120 gelöst`;
+}
+
+// =====================================================================
+// PREVIEW
+// =====================================================================
+function buildFinalHTML() {
+  let html = '<!DOCTYPE html>\n<html lang="de">\n<head>\n<meta charset="UTF-8">\n<title>Meine Webseite</title>\n<style>\nbody { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; color: #333; }\nh1, h2 { color: #0056b3; }\nsection { padding: 20px; margin-bottom: 20px; background: white; border-radius: 8px; }\na { color: #0056b3; }\n</style>\n</head>\n<body>\n';
+  // Include all accumulated parts from solved exercises
+  for (let i = 0; i < EXERCISES.length; i++) {
+    if (state.solved[i] && EXERCISES[i].accumulated) {
+      html += EXERCISES[i].accumulated;
+    }
+  }
+  html += '\n</body>\n</html>';
+  return html;
+}
+
+function updatePreview() {
+  const html = buildFinalHTML();
+  const iframe = document.getElementById("result-preview");
+  try {
+    iframe.srcdoc = html;
+  } catch(e) {}
+  document.getElementById("accumulated-code-display").textContent = html.slice(0,600)+(html.length>600?"…":"");
+}
+
+function downloadWebsite() {
+  const html = buildFinalHTML();
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "meine-webseite.html";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+function printCertificate() {
+  const name = document.getElementById("cert-name-input").value.trim() || "–";
+  const d = new Date();
+  const date = "Nordhorn, " + d.toLocaleDateString("de-DE", {day:"2-digit",month:"long",year:"numeric"});
+  const win = window.open("", "_blank");
+  win.document.write(`<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8">
+<title>Zertifikat – ${name}</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fffdf5; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: Georgia, serif; }
+  .cert {
+    width: 90vw; max-width: 900px;
+    padding: 60px 80px;
+    text-align: center;
+    border: 10px solid #f0c040;
+    box-shadow: inset 0 0 0 4px #fffdf5, inset 0 0 0 8px #f0c040;
+    color: #1a1a2e;
+  }
+  .emoji { font-size: 4rem; margin-bottom: 10px; }
+  .top { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: #888; margin-bottom: 6px; font-family: monospace; }
+  .title { font-size: 2.8rem; font-weight: bold; color: #0d0d2e; margin-bottom: 4px; }
+  .sub { font-size: 0.85rem; color: #666; margin-bottom: 32px; font-family: monospace; }
+  .label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: #888; margin-bottom: 6px; font-family: monospace; }
+  .name { font-size: 3rem; color: #0d0d2e; border-bottom: 2px solid #f0c040; display: inline-block; padding: 4px 24px 8px; min-width: 300px; margin-bottom: 28px; }
+  .txt { font-size: 0.9rem; color: #444; line-height: 1.9; margin-bottom: 8px; font-family: monospace; }
+  .badge { font-size: 1rem; font-weight: bold; color: #0056b3; letter-spacing: 0.05em; margin-bottom: 28px; }
+  hr { border: none; border-top: 1px solid #e0c060; margin: 24px 0; }
+  .date { font-size: 0.75rem; color: #aaa; font-family: monospace; }
+</style></head><body>
+<div class="cert">
+  <div class="emoji">🏆</div>
+  <div class="top">Zertifikat der Teilnahme</div>
+  <div class="title">HTML, CSS &amp; JavaScript</div>
+  <div class="sub">Grundkurs · 120 Übungen</div>
+  <div class="label">Ausgestellt für</div>
+  <div class="name">${name}</div>
+  <div class="txt">hat den kompletten Grundkurs erfolgreich absolviert<br>und dabei HTML-Struktur, CSS-Styling sowie<br>die Grundlagen von JavaScript gemeistert.</div>
+  <div class="badge">✦ 120 / 120 Übungen gelöst ✦</div>
+  <hr>
+  <div class="date">${date}</div>
+</div>
+<script>window.onload=()=>{ window.print(); }<\/script>
+</body></html>`);
+  win.document.close();
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+buildSidebar();
+buildExercise(state.current);
+updateProgress();
+updatePreview();
+</script>
+</body>
+</html>
