@@ -315,6 +315,7 @@
     <a href="#kurse">Kurse</a>
     <a href="#lernpfad">Lernpfad</a>
     <a href="#features">Funktionen</a>
+    <a href="/projekte" style="color:var(--green)">Projekte</a>
   </nav>
 </header>
 
@@ -333,13 +334,13 @@
   </h1>
 
   <p class="hero-sub">
-    230 praktische Übungen in drei aufbauenden Kursen –
+    235 praktische Übungen in drei aufbauenden Kursen –
     von deiner ersten HTML-Zeile bis zu einem vollständigen Browser-Spiel.
     Alles direkt im Browser, kein Account, kein Server.
   </p>
 
   <div class="hero-actions">
-    <a href="/course/" class="btn-primary">
+    <a href="/course" class="btn-primary">
       <span>Mit Grundkurs starten</span>
       <span>→</span>
     </a>
@@ -348,7 +349,7 @@
 
   <div class="hero-stats">
     <div class="stat-item">
-      <span class="stat-num">230</span>
+      <span class="stat-num">235</span>
       <span class="stat-label">Übungen</span>
     </div>
     <div class="stat-item">
@@ -402,7 +403,7 @@
     <!-- GRUNDKURS -->
     <div class="course-card reveal"
          style="--card-accent:#f0c040;--card-glow:rgba(240,192,64,0.06);"
-         onclick="window.location='/course/'">
+         onclick="window.location='/course'">
       <div class="course-badge" style="--badge-bg:rgba(240,192,64,0.12);--badge-color:#f0c040;">
         <span>●</span> Grundkurs · Einsteiger
       </div>
@@ -445,14 +446,14 @@
         <span class="topic-tag">localStorage</span>
       </div>
 
-      <a href="/course/" class="course-cta" style="background:#f0c040;" onclick="event.stopPropagation()">
+      <a href="/course" class="course-cta" style="background:#f0c040;" onclick="event.stopPropagation()">
         Kurs starten →
       </a>
     </div>
 
     <!-- PRO KURS -->
     <div class="course-card reveal" style="transition-delay:0.1s;--card-accent:#a78bfa;--card-glow:rgba(167,139,250,0.06);"
-         onclick="window.location='/course-2/'">
+         onclick="window.location='/course-2'">
       <div class="course-badge" style="--badge-bg:rgba(167,139,250,0.12);--badge-color:#a78bfa;">
         <span>●</span> Pro-Kurs · Fortgeschritten
       </div>
@@ -496,14 +497,14 @@
         <span class="topic-tag">Todo-App Projekt</span>
       </div>
 
-      <a href="/course-2/" class="course-cta" style="background:#a78bfa;" onclick="event.stopPropagation()">
+      <a href="/course-2" class="course-cta" style="background:#a78bfa;" onclick="event.stopPropagation()">
         Pro-Kurs starten →
       </a>
     </div>
 
     <!-- GAME KURS -->
     <div class="course-card reveal" style="transition-delay:0.2s;--card-accent:#ff6b35;--card-glow:rgba(255,107,53,0.06);"
-         onclick="window.location='/course-3/'">
+         onclick="window.location='/course-3'">
       <div class="course-badge" style="--badge-bg:rgba(255,107,53,0.12);--badge-color:#ff6b35;">
         <span>●</span> Game Kurs · Fortgeschritten
       </div>
@@ -514,7 +515,7 @@
 
       <div class="course-stats">
         <div class="course-stat" style="--stat-color:#ff6b35;">
-          <strong>45</strong>
+          <strong>50</strong>
           <span>Übungen</span>
         </div>
         <div class="course-stat" style="--stat-color:#ff6b35;">
@@ -530,7 +531,7 @@
       <div class="course-progress-wrap">
         <div class="course-progress-label">
           <span>Dein Fortschritt</span>
-          <span id="gamekurs-progress-text">0 / 45</span>
+          <span id="gamekurs-progress-text">0 / 50</span>
         </div>
         <div class="course-progress-bar">
           <div class="course-progress-fill" id="gamekurs-progress-fill" style="width:0%;background:#ff6b35;"></div>
@@ -547,7 +548,7 @@
         <span class="topic-tag">Web Audio API</span>
       </div>
 
-      <a href="/course-3/" class="course-cta" style="background:#ff6b35;" onclick="event.stopPropagation()">
+      <a href="/course-3" class="course-cta" style="background:#ff6b35;" onclick="event.stopPropagation()">
         Game-Kurs starten →
       </a>
     </div>
@@ -574,13 +575,13 @@
       <div class="path-num" style="--step-color:#a78bfa;">02</div>
       <div class="path-title">Pro-Kurs oder Game-Kurs</div>
       <p class="path-desc">Wähle deinen Schwerpunkt: Fortgeschrittenes JavaScript & CSS für Web-Apps, oder Canvas-Programmierung für Spiele.</p>
-      <span class="path-tag" style="--tag-bg:rgba(167,139,250,0.1);--tag-color:#a78bfa;">65 oder 45 Übungen · ~8–10h</span>
+      <span class="path-tag" style="--tag-bg:rgba(167,139,250,0.1);--tag-color:#a78bfa;">65 oder 50 Übungen · ~8–10h</span>
     </div>
     <div class="path-step reveal" style="transition-delay:0.2s">
       <div class="path-num" style="--step-color:#ff6b35;">03</div>
       <div class="path-title">Beide abschließen</div>
       <p class="path-desc">Schließe beide Aufbaukurse ab – dann hast du das komplette Webdev-Fundament und 3 Zertifikate in der Tasche.</p>
-      <span class="path-tag" style="--tag-bg:rgba(255,107,53,0.1);--tag-color:#ff6b35;">230 Übungen · 3 Zertifikate</span>
+      <span class="path-tag" style="--tag-bg:rgba(255,107,53,0.1);--tag-color:#ff6b35;">235 Übungen · 3 Zertifikate</span>
     </div>
   </div>
 </section>
@@ -617,12 +618,87 @@
   </div>
 </section>
 
+<!-- ── PROJEKTE TEASER ── -->
+<section class="section" style="padding-top:0;padding-bottom:80px;" id="projekte-teaser">
+  <div class="section-label reveal">Neu · Praxis-Projekte</div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;overflow:hidden;position:relative;" class="reveal">
+    <!-- left: glow + text -->
+    <div style="padding:56px 52px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(62,207,142,0.06),transparent 70%);pointer-events:none;"></div>
+      <div style="font-family:var(--mono);font-size:0.65rem;color:var(--green);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:20px;">Jetzt verfügbar</div>
+      <div style="font-family:var(--display);font-size:clamp(2.8rem,5vw,5rem);line-height:0.95;margin-bottom:20px;">
+        Echte <em style="font-style:normal;color:var(--green)">Apps</em><br>bauen.
+      </div>
+      <p style="font-size:0.88rem;color:var(--ink2);line-height:1.7;max-width:380px;margin-bottom:36px;">
+        5 Mini-App Projekte – Todo, Kalender, Rechner, Wetter-App und Quiz.
+        Geführte Übungen, echte Ergebnisse, die du wirklich benutzen kannst.
+      </p>
+      <div style="display:flex;gap:28px;margin-bottom:36px;">
+        <div>
+          <div style="font-family:var(--display);font-size:2.5rem;line-height:1;color:var(--green);">5</div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink2);text-transform:uppercase;letter-spacing:0.1em;">Projekte</div>
+        </div>
+        <div>
+          <div style="font-family:var(--display);font-size:2.5rem;line-height:1;color:var(--ink);">85</div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink2);text-transform:uppercase;letter-spacing:0.1em;">Übungen</div>
+        </div>
+        <div>
+          <div style="font-family:var(--display);font-size:2.5rem;line-height:1;color:var(--ink);">0€</div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink2);text-transform:uppercase;letter-spacing:0.1em;">Kosten</div>
+        </div>
+      </div>
+      <a href="/projekte" style="display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#0a0a0a;padding:14px 28px;border-radius:8px;font-size:0.9rem;font-weight:500;text-decoration:none;transition:opacity 0.2s,transform 0.15s;" onmouseover="this.style.opacity='0.85';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform=''">
+        Alle Projekte ansehen →
+      </a>
+    </div>
+
+    <!-- right: mini-preview grid -->
+    <div style="border-left:1px solid var(--border);padding:40px 36px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:center;">
+      <div style="background:#060f0a;border:1px solid rgba(62,207,142,0.15);border-radius:8px;padding:16px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#3ecf8e;"></div>
+        <div style="font-size:1.4rem;margin-bottom:8px;">✅</div>
+        <div style="font-family:var(--display);font-size:1.3rem;color:var(--ink);margin-bottom:4px;">Todo App</div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--ink2);">18 Übungen · Anfänger</div>
+      </div>
+      <div style="background:#060810;border:1px solid rgba(61,111,255,0.15);border-radius:8px;padding:16px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#3d6fff;"></div>
+        <div style="font-size:1.4rem;margin-bottom:8px;">📅</div>
+        <div style="font-family:var(--display);font-size:1.3rem;color:var(--ink);margin-bottom:4px;">Kalender</div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--ink2);">20 Übungen · Mittel</div>
+      </div>
+      <div style="background:#100e00;border:1px solid rgba(240,192,64,0.15);border-radius:8px;padding:16px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#f0c040;"></div>
+        <div style="font-size:1.4rem;margin-bottom:8px;">🧮</div>
+        <div style="font-family:var(--display);font-size:1.3rem;color:var(--ink);margin-bottom:4px;">Rechner</div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--ink2);">15 Übungen · Anfänger</div>
+      </div>
+      <div style="background:#0f0800;border:1px solid rgba(255,107,53,0.15);border-radius:8px;padding:16px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#ff6b35;"></div>
+        <div style="font-size:1.4rem;margin-bottom:8px;">🌤️</div>
+        <div style="font-family:var(--display);font-size:1.3rem;color:var(--ink);margin-bottom:4px;">Wetter</div>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--ink2);">17 Übungen · Fetch API</div>
+      </div>
+      <div style="background:#0c0814;border:1px solid rgba(167,139,250,0.15);border-radius:8px;padding:16px;position:relative;overflow:hidden;grid-column:span 2;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:#a78bfa;"></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🧠</span>
+          <div>
+            <div style="font-family:var(--display);font-size:1.3rem;color:var(--ink);">Quiz App</div>
+            <div style="font-family:var(--mono);font-size:0.6rem;color:var(--ink2);">15 Übungen · Mittel · Timer + Highscore</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── CTA ── -->
 <section class="cta-section">
   <p class="cta-eyebrow reveal">Bereit loszulegen?</p>
   <h2 class="cta-headline reveal">Dein erstes<br><em style="font-style:normal;color:var(--yellow)">Spiel wartet.</em></h2>
   <p class="cta-sub reveal">Starte kostenlos mit dem Grundkurs. Kein Account, kein Download – direkt im Browser.</p>
-  <a href="/course/" class="btn-primary reveal" style="font-size:1.1rem;padding:18px 48px;display:inline-flex;margin:0 auto">
+  <a href="/course" class="btn-primary reveal" style="font-size:1.1rem;padding:18px 48px;display:inline-flex;margin:0 auto">
     <span>Jetzt starten</span>
     <span>→</span>
   </a>
@@ -630,11 +706,12 @@
 
 <!-- ── FOOTER ── -->
 <footer>
-  <span class="footer-text">⟨WebDev⟩ Kurse · 230 Übungen · Kostenlos · Keine Anmeldung</span>
+  <span class="footer-text">⟨WebDev⟩ Kurse · 320 Übungen · Kostenlos · Keine Anmeldung</span>
   <div class="footer-links">
-    <a href="/course/" class="footer-link">Grundkurs →</a>
-    <a href="/course-2/" class="footer-link">Pro-Kurs →</a>
-    <a href="/course-3/" class="footer-link">Game-Kurs →</a>
+    <a href="/course" class="footer-link">Grundkurs →</a>
+    <a href="/course-2" class="footer-link">Pro-Kurs →</a>
+    <a href="/course-3" class="footer-link">Game-Kurs →</a>
+    <a href="/projekte" class="footer-link" style="color:var(--green)">Projekte →</a>
   </div>
 </footer>
 
@@ -672,13 +749,13 @@
       }
     } catch(e) {}
 
-    // Game-Kurs (45 Übungen)
+    // Game-Kurs (50 Übungen)
     try {
       const gks = JSON.parse(localStorage.getItem("game_kurs_state") || "null");
       if (gks && gks.solved) {
         const count = gks.solved.filter(Boolean).length;
-        document.getElementById("gamekurs-progress-text").textContent = count + " / 45";
-        document.getElementById("gamekurs-progress-fill").style.width = (count / 45 * 100) + "%";
+        document.getElementById("gamekurs-progress-text").textContent = count + " / 50";
+        document.getElementById("gamekurs-progress-fill").style.width = (count / 50 * 100) + "%";
       }
     } catch(e) {}
   }
