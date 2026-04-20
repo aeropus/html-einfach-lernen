@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projekte – Mini-Apps bauen</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:#0a0a0a; --ink:#f0ece4; --ink2:#9a9488;
+  --yellow:#f0c040; --blue:#3d6fff; --green:#3ecf8e;
+  --orange:#ff6b35; --purple:#a78bfa;
+  --surface:#111113; --surface2:#18181c; --border:rgba(240,236,228,0.08);
+  --display:'Bebas Neue',sans-serif; --body:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  --accent:#3ecf8e; --accent-bg:rgba(62,207,142,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:300;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6}
+
+/* ── HEADER ── */
+header{position:fixed;top:0;left:0;right:0;z-index:200;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);backdrop-filter:blur(14px);background:rgba(10,10,10,.8)}
+.logo{font-family:var(--mono);font-size:.78rem;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+.header-nav{display:flex;gap:22px;align-items:center}
+.header-nav a{font-size:.8rem;color:var(--ink2);text-decoration:none;transition:color .2s;font-family:var(--mono)}
+.header-nav a:hover,.header-nav a.active{color:var(--green)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── HERO ── */
+.hero{min-height:70vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 72px;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(240,236,228,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(240,236,228,.025) 1px,transparent 1px);background-size:60px 60px;mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;opacity:0;animation:fadeIn 2s ease forwards}
+.hero-tag{font-family:var(--mono);font-size:.72rem;color:var(--green);letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fadeUp .7s .1s ease forwards}
+.hero-title{font-family:var(--display);font-size:clamp(3.8rem,9vw,9rem);line-height:.92;letter-spacing:.01em;margin-bottom:26px;opacity:0;animation:fadeUp .7s .2s ease forwards}
+.hero-title em{font-style:normal;color:var(--green)}
+.hero-title .dim{color:var(--ink2)}
+.hero-sub{max-width:520px;font-size:1rem;color:var(--ink2);line-height:1.75;opacity:0;animation:fadeUp .7s .35s ease forwards}
+.hero-meta{position:absolute;right:48px;bottom:72px;display:flex;flex-direction:column;gap:22px;align-items:flex-end;opacity:0;animation:fadeIn 1s .7s ease forwards}
+.meta-num{font-family:var(--display);font-size:3rem;line-height:1;color:var(--ink);display:block}
+.meta-label{font-family:var(--mono);font-size:.62rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.12em}
+
+/* ── TICKER ── */
+.ticker-wrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;height:46px;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:48px;animation:ticker 22s linear infinite;white-space:nowrap;align-items:center;padding:0 24px}
+.ticker-item{font-family:var(--mono);font-size:.74rem;color:var(--ink2);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--dc,var(--border));flex-shrink:0}
+
+/* ── LANDING SECTION ── */
+.section{padding:80px 48px}
+.section-label{font-family:var(--mono);font-size:.7rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.15em;margin-bottom:48px;display:flex;align-items:center;gap:14px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);max-width:120px}
+.divider{height:1px;background:var(--border);margin:0 48px}
+
+/* ── PROJECT GRID (landing) ── */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:2px}
+.proj-card{background:var(--surface);border:1px solid var(--border);display:flex;flex-direction:column;position:relative;overflow:hidden;cursor:pointer;transition:background .2s}
+.proj-card:hover{background:#14141a}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,var(--border));transform:scaleX(0);transform-origin:left;transition:transform .35s ease}
+.proj-card:hover::before{transform:scaleX(1)}
+.proj-preview{height:155px;background:var(--prev-bg,#0d0d12);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.proj-preview-inner{transform:scale(.54);transform-origin:center;pointer-events:none;filter:brightness(.85);transition:transform .4s,filter .3s}
+.proj-card:hover .proj-preview-inner{transform:scale(.57);filter:brightness(1)}
+.proj-body{padding:24px 24px 20px;flex:1;display:flex;flex-direction:column}
+.proj-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.proj-tag{font-family:var(--mono);font-size:.59rem;padding:2px 7px;border-radius:4px;background:rgba(240,236,228,.05);color:var(--ink2);border:1px solid var(--border)}
+.proj-tag.hl{background:var(--tag-bg);color:var(--tag-c);border-color:transparent}
+.proj-title{font-family:var(--display);font-size:2rem;line-height:.95;margin-bottom:7px}
+.proj-desc{font-size:.79rem;color:var(--ink2);line-height:1.65;flex:1;margin-bottom:16px}
+.proj-stats{display:flex;gap:16px;margin-bottom:14px}
+.proj-stat{font-family:var(--mono);font-size:.61rem;color:var(--ink2);display:flex;flex-direction:column;gap:2px}
+.proj-stat strong{font-family:var(--display);font-size:1.4rem;color:var(--ink);line-height:1}
+.diff{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.diff-lbl{font-family:var(--mono);font-size:.57rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+.diff-dots{display:flex;gap:3px}
+.dd{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.dd.on{background:var(--ca,var(--ink2))}
+.prog-wrap{margin-bottom:18px}
+.prog-lbl{font-family:var(--mono);font-size:.58rem;color:var(--ink2);display:flex;justify-content:space-between;margin-bottom:5px}
+.prog-bar{height:2px;background:rgba(240,236,228,.07);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width 1.2s ease;background:var(--ca,var(--ink2))}
+.proj-btn{display:inline-flex;align-items:center;gap:7px;background:var(--ca,var(--ink));color:#0a0a0a;padding:9px 18px;border-radius:6px;font-size:.8rem;font-weight:500;border:none;cursor:pointer;transition:opacity .2s,transform .15s;font-family:var(--body)}
+.proj-btn:hover{opacity:.85;transform:translateY(-1px)}
+
+/* ── COURSE VIEW (fullscreen overlay) ── */
+#cv{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);flex-direction:column}
+#cv.open{display:flex}
+
+/* cv header */
+#cv-hdr{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 22px;display:flex;align-items:center;gap:14px;flex-shrink:0;height:54px}
+#cv-back{background:none;border:1px solid var(--border);color:var(--ink2);padding:5px 13px;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:.7rem;transition:border-color .2s,color .2s;white-space:nowrap}
+#cv-back:hover{border-color:var(--ink);color:var(--ink)}
+#cv-title{font-family:var(--mono);font-size:.88rem;font-weight:700;color:var(--accent);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cv-pw{width:180px;background:var(--border);height:4px;border-radius:99px;overflow:hidden;flex-shrink:0}
+#cv-pb{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+#cv-pl{font-family:var(--mono);font-size:.68rem;color:var(--ink2);white-space:nowrap}
+
+/* cv body layout */
+#cv-body{flex:1;display:grid;grid-template-columns:210px 1fr 290px;min-height:0;overflow:hidden}
+
+/* sidebar */
+#cv-sb{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 7px}
+.cv-ch{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink2);padding:10px 7px 4px;font-family:var(--mono)}
+.cv-it{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;cursor:pointer;font-size:.72rem;color:var(--ink2);transition:background .15s,color .15s;font-family:var(--mono)}
+.cv-it.active{background:var(--accent-bg);color:var(--accent)}
+.cv-it.done{color:#4ade80}
+.cv-it.locked{opacity:.38;cursor:not-allowed}
+.cv-it:hover:not(.locked){background:rgba(240,236,228,.05);color:var(--ink)}
+.cv-it-num{font-size:.58rem;min-width:16px;opacity:.6}
+.cv-it-ck{font-size:.68rem}
+
+/* exercise panel */
+#cv-ex{padding:28px 32px;overflow-y:auto;display:flex;flex-direction:column}
+.ex-tag{display:inline-block;font-family:var(--mono);font-size:.63rem;background:var(--accent-bg);color:var(--accent);padding:3px 9px;border-radius:99px;margin-bottom:8px;letter-spacing:.06em}
+.ex-title{font-size:1.45rem;font-weight:600;line-height:1.2;margin-bottom:7px}
+.ex-desc{color:#b0b0c8;font-family:var(--mono);font-size:.76rem;line-height:1.7;margin-bottom:10px}
+.ex-desc code{background:var(--border);padding:1px 5px;border-radius:3px;color:var(--accent);font-size:.72rem}
+.ex-hint{background:var(--accent-bg);border-left:3px solid var(--accent);padding:9px 13px;border-radius:0 7px 7px 0;margin-bottom:12px;font-size:.73rem;font-family:var(--mono);color:var(--ink2);line-height:1.6;display:none}
+.ex-hint code{background:rgba(255,255,255,.07);padding:1px 4px;border-radius:3px;color:var(--ink)}
+.ex-hint.show{display:block}
+
+/* accumulated code preview */
+.acc-wrap{margin-bottom:12px}
+.acc-label{font-family:var(--mono);font-size:.58rem;color:var(--ink2);display:flex;justify-content:space-between;margin-bottom:4px}
+.acc-pre{background:#06060e;border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-family:var(--mono);font-size:.66rem;color:#4a6a4a;line-height:1.6;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin:0}
+.acc-cursor{color:var(--accent)}
+
+/* ── MINI EDITOR ── */
+.editor-wrap{background:#06060e;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.ed-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 11px;display:flex;align-items:center;justify-content:space-between}
+.ed-bar-l{display:flex;align-items:center;gap:8px}
+.ed-filename{font-family:var(--mono);font-size:.63rem;color:var(--ink2)}
+.ed-lang{font-family:var(--mono);font-size:.56rem;padding:1px 6px;border-radius:3px;background:var(--accent-bg);color:var(--accent)}
+.ed-inner{display:flex}
+.ed-lnums{padding:11px 7px 11px 11px;font-family:var(--mono);font-size:.72rem;line-height:1.7;color:#2e2e48;user-select:none;min-width:32px;text-align:right;flex-shrink:0;overflow:hidden;background:#06060e}
+.ed-ta{flex:1;background:transparent;border:none;color:#c8c8e0;font-family:var(--mono);font-size:.72rem;padding:11px 12px;resize:none;outline:none;line-height:1.7;tab-size:2;min-height:100px;max-height:200px}
+.ed-actions{display:flex;align-items:center;gap:7px;padding:6px 11px;border-top:1px solid var(--border);background:var(--surface2)}
+.btn-run{background:var(--accent);color:#0a0a0a;border:none;padding:5px 16px;border-radius:5px;font-family:var(--body);font-size:.76rem;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;gap:5px}
+.btn-run:hover{opacity:.85;transform:translateY(-1px)}
+.btn-hint-tog{background:none;border:1px solid var(--border);color:var(--ink2);padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:.62rem;cursor:pointer;transition:border-color .2s,color .2s}
+.btn-hint-tog:hover{border-color:var(--accent);color:var(--accent)}
+.ed-shortcut{font-family:var(--mono);font-size:.57rem;color:var(--ink2);opacity:.5;margin-left:auto}
+
+/* feedback */
+.fb{padding:9px 13px;border-radius:7px;font-family:var(--mono);font-size:.74rem;margin-bottom:9px;display:none;line-height:1.5}
+.fb.show{display:block}
+.fb.ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80}
+.fb.ok::before{content:"✓  "}
+.fb.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#f87171}
+.fb.err::before{content:"✗  "}
+
+/* nav */
+.ex-nav{display:flex;gap:9px;margin-top:6px}
+.btn-nav{padding:8px 18px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--ink);font-family:var(--body);font-size:.8rem;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
+.btn-nav:hover{background:rgba(240,236,228,.04);border-color:var(--accent);color:var(--accent)}
+.btn-nav.primary{background:var(--accent);border-color:var(--accent);color:#0a0a0a}
+.btn-nav.primary:hover{opacity:.85}
+.btn-nav:disabled{opacity:.28;cursor:not-allowed}
+
+/* preview panel */
+#cv-prev{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#cv-prev h3{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink2);padding:11px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);flex-shrink:0}
+#cv-iframe{flex:1;border:none;background:#fff;min-height:0}
+#cv-code-out{padding:11px;font-family:var(--mono);font-size:.63rem;color:var(--ink2);border-top:1px solid var(--border);overflow-y:auto;max-height:180px;white-space:pre-wrap;word-break:break-all;line-height:1.5;flex-shrink:0}
+
+/* locked */
+.locked-msg{text-align:center;padding:48px 20px;color:var(--ink2);font-family:var(--mono);font-size:.8rem}
+.locked-msg .lk{font-size:2.2rem;margin-bottom:12px}
+
+/* finish overlay */
+#finish{display:none;position:fixed;inset:0;z-index:500;background:rgba(10,10,10,.96);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+#finish.show{display:flex}
+#finish h2{font-family:var(--display);font-size:3.5rem;color:var(--accent);margin-bottom:10px}
+#finish p{color:var(--ink2);font-family:var(--mono);font-size:.82rem;max-width:400px;margin:0 auto 24px;line-height:1.7}
+
+/* ── CTA & FOOTER ── */
+.cta-section{padding:96px 48px;text-align:center;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:560px;height:560px;background:radial-gradient(circle,rgba(62,207,142,.05) 0%,transparent 70%);pointer-events:none}
+.cta-eyebrow{font-family:var(--mono);font-size:.7rem;color:var(--green);text-transform:uppercase;letter-spacing:.16em;margin-bottom:22px}
+.cta-headline{font-family:var(--display);font-size:clamp(2.8rem,7vw,6.5rem);line-height:.95;letter-spacing:.01em;margin-bottom:26px}
+.cta-sub{color:var(--ink2);font-size:.93rem;max-width:420px;margin:0 auto 40px;line-height:1.7}
+.btn-primary{display:inline-flex;align-items:center;gap:9px;background:var(--yellow);color:#0a0a0a;padding:13px 30px;border-radius:8px;font-size:.88rem;font-weight:500;text-decoration:none;transition:opacity .2s,transform .15s}
+.btn-primary:hover{opacity:.88;transform:translateY(-2px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);color:var(--ink2);padding:12px 24px;border-radius:8px;font-size:.84rem;text-decoration:none;transition:border-color .2s,color .2s;margin-left:9px}
+.btn-ghost:hover{border-color:var(--ink2);color:var(--ink)}
+footer{padding:26px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-text{font-family:var(--mono);font-size:.66rem;color:var(--ink2)}
+.footer-links{display:flex;gap:18px;flex-wrap:wrap}
+.footer-link{font-family:var(--mono);font-size:.66rem;color:var(--ink2);text-decoration:none;transition:color .2s}
+.footer-link:hover{color:var(--ink)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){#cv-body{grid-template-columns:180px 1fr 240px}}
+@media(max-width:860px){
+  #cv-body{grid-template-columns:1fr}
+  #cv-sb,#cv-prev{display:none}
+  .hero{padding:0 24px 56px;min-height:60vh}.hero-meta{display:none}
+  .section{padding:56px 24px}.divider{margin:0 24px}
+  header{padding:14px 24px}.header-nav{display:none}
+  .cta-section{padding:72px 24px}
+  footer{padding:20px 24px;flex-direction:column;text-align:center}
+}
+@media(max-width:560px){.projects-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">⟨WebDev⟩ Kurse</a>
+  <nav class="header-nav">
+    <a href="index.html">Startseite</a>
+    <a href="grundkurs.html">Grundkurs</a>
+    <a href="projekte.html" class="active">Projekte</a>
+  </nav>
+</header>
+
+<div id="landing">
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb" style="width:460px;height:460px;background:rgba(62,207,142,.05);top:5%;left:-8%;animation-delay:.1s"></div>
+  <div class="orb" style="width:340px;height:340px;background:rgba(61,111,255,.04);top:20%;right:-4%;animation-delay:.4s"></div>
+  <div class="hero-tag">Praxis-Projekte · Echte Mini-Apps bauen</div>
+  <h1 class="hero-title"><em>Apps</em> die<br><span class="dim">du wirklich nutzt.</span></h1>
+  <p class="hero-sub">5 geführte Projekte – Todo, Kalender, Rechner, Wetter-App, Quiz. Kein Demo-Code. Jede App kannst du direkt benutzen.</p>
+  <div class="hero-meta">
+    <div><span class="meta-num">5</span><span class="meta-label">Projekte</span></div>
+    <div><span class="meta-num">85</span><span class="meta-label">Übungen</span></div>
+    <div><span class="meta-num">0€</span><span class="meta-label">Kosten</span></div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-inner">
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3ecf8e"></span>Todo App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3d6fff"></span>Kalender</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#f0c040"></span>Rechner</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#ff6b35"></span>Wetter App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#a78bfa"></span>Quiz App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3ecf8e"></span>localStorage</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#ff6b35"></span>Fetch API</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3d6fff"></span>Date API</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#a78bfa"></span>Timer</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#f0c040"></span>DOM Events</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3ecf8e"></span>Todo App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3d6fff"></span>Kalender</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#f0c040"></span>Rechner</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#ff6b35"></span>Wetter App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#a78bfa"></span>Quiz App</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3ecf8e"></span>localStorage</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#ff6b35"></span>Fetch API</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#3d6fff"></span>Date API</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#a78bfa"></span>Timer</span>
+  <span class="ticker-item"><span class="ticker-dot" style="--dc:#f0c040"></span>DOM Events</span>
+</div></div>
+
+<section class="section" id="projekte-grid">
+  <div class="section-label reveal">5 Projekte · 85 Übungen</div>
+  <div class="projects-grid" id="pg"></div>
+</section>
+
+<div class="divider"></div>
+
+<section class="cta-section">
+  <p class="cta-eyebrow reveal">Noch kein Grundwissen?</p>
+  <h2 class="cta-headline reveal">Erst den<br><em style="font-style:normal;color:var(--yellow)">Grundkurs.</em></h2>
+  <p class="cta-sub reveal">Die Projekte bauen auf HTML, CSS &amp; JS Grundlagen auf. 120 geführte Übungen – kostenlos.</p>
+  <div class="reveal">
+    <a href="grundkurs.html" class="btn-primary">Grundkurs starten →</a>
+    <a href="index.html" class="btn-ghost">Alle Kurse</a>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-text">⟨WebDev⟩ Projekte · 85 Übungen · Kostenlos · Kein Account</span>
+  <div class="footer-links">
+    <a href="index.html" class="footer-link">Startseite</a>
+    <a href="grundkurs.html" class="footer-link">Grundkurs</a>
+    <a href="pro-kurs.html" class="footer-link">Pro-Kurs</a>
+    <a href="game-kurs.html" class="footer-link">Game-Kurs</a>
+  </div>
+</footer>
+</div>
+
+<!-- COURSE VIEW -->
+<div id="cv">
+  <div id="cv-hdr">
+    <button id="cv-back">← Zurück</button>
+    <span id="cv-title">Projekt</span>
+    <div id="cv-pw"><div id="cv-pb" style="width:0%"></div></div>
+    <span id="cv-pl">0 / 0</span>
+  </div>
+  <div id="cv-body">
+    <nav id="cv-sb"></nav>
+    <main id="cv-ex"></main>
+    <aside id="cv-prev">
+      <h3>👁 Live-Vorschau</h3>
+      <iframe id="cv-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+      <div id="cv-code-out"></div>
+    </aside>
+  </div>
+</div>
+
+<div id="finish">
+  <div style="font-size:3.5rem;margin-bottom:10px">🎉</div>
+  <h2 id="fin-title">Projekt fertig!</h2>
+  <p id="fin-msg">Alle Übungen abgeschlossen.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px">
+    <button class="btn-run" id="fin-dl" style="font-size:.88rem;padding:11px 24px">⬇ App herunterladen</button>
+    <button class="btn-nav" id="fin-back" style="padding:11px 22px">← Zurück zu Projekten</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+// Quiz-Fragen (vorab definiert, damit PROJECTS-Array sie referenzieren kann)
+const FRAGEN=[{frage:"Was ergibt typeof null?",antworten:["null","object","undefined","string"],richtig:1},{frage:"Kein JS-Datentyp?",antworten:["String","Integer","Boolean","Number"],richtig:1},{frage:"Array.push() macht?",antworten:["Löschen","Hinzufügen","Umkehren","Zählen"],richtig:1},{frage:"Template Literal?",antworten:["'text'",'"text"',"`text`","[text]"],richtig:2},{frage:"Was ist ein Closure?",antworten:["Array","Funktion mit äußerem Scope","HTML-Tag","Selektor"],richtig:1},{frage:"Array.filter() macht?",antworten:["Sortiert","Filtert","Summiert","Verdoppelt"],richtig:1},{frage:"Was ist NaN?",antworten:["Null","Undefiniert","Kein Zahlenwert","Funktion"],richtig:2},{frage:"Was macht ===?",antworten:["Zuweisung","Typ-unsicher","Strikter Vergleich","Bitoperator"],richtig:2}];
+
+// ═══════════════════════════════════════════
+// PROJECTS DATA
+// ═══════════════════════════════════════════
+const PROJECTS = [
+// ── TODO ──
+{id:'todo',title:'Todo App',icon:'✅',
+accent:'#3ecf8e',accentBg:'rgba(62,207,142,0.1)',
+desc:'Aufgaben anlegen, abhaken, filtern und dauerhaft per localStorage speichern.',
+tags:['Anfänger','localStorage','DOM Events','Filter'],tagHL:0,difficulty:2,
+previewBg:'#060f0a',
+previewHTML:`<div style="width:310px;background:#0f1f15;border-radius:10px;overflow:hidden;font-family:monospace;box-shadow:0 20px 60px #000a"><div style="background:#0a1a10;padding:12px 16px;border-bottom:1px solid #1a3a22;display:flex;justify-content:space-between"><span style="color:#3ecf8e;font-size:.8rem">✅ Todo-App</span><span style="color:#3ecf8e44;font-size:.6rem">3/5 erledigt</span></div><div style="padding:10px 16px;display:flex;gap:7px"><div style="flex:1;background:#0f1f15;border:1px solid #1a3a22;border-radius:6px;padding:7px 10px;color:#9a9488;font-size:.68rem">Neue Aufgabe…</div><div style="background:#3ecf8e;color:#060f0a;border-radius:6px;padding:7px 12px;font-weight:700">+</div></div><div style="padding:0 16px 10px"><div style="display:flex;gap:5px;margin-bottom:7px"><div style="padding:3px 8px;border-radius:99px;background:#3ecf8e22;color:#3ecf8e;font-size:.58rem">Alle</div><div style="padding:3px 8px;color:#9a9488;font-size:.58rem">Offen</div><div style="padding:3px 8px;color:#9a9488;font-size:.58rem">Erledigt</div></div><div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #0f1f15"><div style="width:14px;height:14px;border-radius:3px;background:#3ecf8e;display:flex;align-items:center;justify-content:center;font-size:8px;color:#060f0a">✓</div><span style="color:#9a9488;font-size:.68rem;text-decoration:line-through">Design fertig</span></div><div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #0f1f15"><div style="width:14px;height:14px;border-radius:3px;border:1.5px solid #1a3a22"></div><span style="color:#f0ece4;font-size:.68rem">Kurs abschließen</span><span style="margin-left:auto;font-size:.56rem;color:#3ecf8e88;background:#3ecf8e11;padding:1px 5px;border-radius:3px">heute</span></div><div style="display:flex;align-items:center;gap:8px;padding:8px 0"><div style="width:14px;height:14px;border-radius:3px;border:1.5px solid #1a3a22"></div><span style="color:#f0ece4;font-size:.68rem">Deployen</span></div></div></div>`,
+storageKey:'proj_todo_state',
+chapters:[{title:'Kap 1 – Struktur',range:[0,4]},{title:'Kap 2 – Kernlogik',range:[5,9]},{title:'Kap 3 – Filter & Extras',range:[10,14]}],
+exercises:[
+{tag:'HTML',title:'App-Container',
+desc:`Erstelle <code>div#app</code> mit: <code>h1</code> "Meine Todos", <code>div.input-bereich</code> (leer) und <code>ul#todo-liste</code>.`,
+hint:`<code>&lt;div id="app"&gt;&lt;h1&gt;Meine Todos&lt;/h1&gt;&lt;div class="input-bereich"&gt;&lt;/div&gt;&lt;ul id="todo-liste"&gt;&lt;/ul&gt;&lt;/div&gt;</code>`,
+placeholder:`<div id="app">\n  <h1>Meine Todos</h1>\n  <div class="input-bereich"></div>\n  <ul id="todo-liste"></ul>\n</div>`,
+check(v){const ok=v.includes('id="app"')&&v.includes('input-bereich')&&v.includes('id="todo-liste"');return{ok,msg:ok?'Perfekt! Container steht.':'app, input-bereich und todo-liste fehlen.'};},
+acc:`<div id="app" style="max-width:400px;margin:16px auto;padding:18px;font-family:system-ui,sans-serif;background:#0f1f15;border-radius:10px;color:#f0ece4">\n  <h1 style="color:#3ecf8e;margin-bottom:14px;font-size:1.3rem">✅ Meine Todos</h1>\n`},
+{tag:'HTML',title:'Input & Button',
+desc:`Füge in <code>.input-bereich</code> ein <code>input</code> (id="neues-todo", placeholder="Neue Aufgabe…") und einen <code>button</code> (id="add-btn", Text "+") ein.`,
+hint:`<code>&lt;input type="text" id="neues-todo" placeholder="Neue Aufgabe…"&gt;&lt;button id="add-btn"&gt;+&lt;/button&gt;</code>`,
+placeholder:`<input type="text" id="neues-todo" placeholder="Neue Aufgabe…">\n<button id="add-btn">+</button>`,
+check(v){const ok=v.includes('id="neues-todo"')&&v.includes('id="add-btn"');return{ok,msg:ok?'Super! Input und Button bereit.':'id="neues-todo" und id="add-btn" werden benötigt.'};},
+acc:`  <div class="input-bereich" style="display:flex;gap:7px;margin-bottom:12px"><input id="neues-todo" type="text" placeholder="Neue Aufgabe…" style="flex:1;padding:8px 11px;border-radius:6px;border:1px solid #1a3a22;background:#0a1a10;color:#f0ece4;font-size:.88rem"><button id="add-btn" style="background:#3ecf8e;color:#060f0a;border:none;border-radius:6px;padding:8px 14px;font-size:1rem;font-weight:700;cursor:pointer">+</button></div>\n  <ul id="todo-liste" style="list-style:none;padding:0;margin-bottom:12px"></ul>\n`},
+{tag:'JS',title:'Datenstruktur',
+desc:`Erstelle <code>let todos = []</code> und Funktion <code>todoErstellen(text)</code> → gibt <code>{ id: Date.now(), text, erledigt: false }</code> zurück. Logge einen Testaufruf.`,
+hint:`<code>function todoErstellen(text){ return { id: Date.now(), text, erledigt: false }; }</code>`,
+placeholder:`let todos = [];\nfunction todoErstellen(text) {\n  return { id: Date.now(), text, erledigt: false };\n}\nconsole.log(todoErstellen("Test"));`,
+check(v){const ok=v.includes('let todos')&&v.includes('todoErstellen')&&v.includes('erledigt: false');return{ok,msg:ok?'Perfekt! Datenstruktur klar.':'todos-Array + todoErstellen mit id, text, erledigt.'};},
+acc:`let todos = [];\nfunction todoErstellen(text){ return { id: Date.now(), text, erledigt: false }; }\n`},
+{tag:'JS',title:'Rendern',
+desc:`Schreibe <code>rendern()</code>: Setze <code>#todo-liste</code> innerHTML="". Iteriere todos per forEach, erstelle <code>li</code> mit textContent=todo.text und appendChild.`,
+hint:`<code>liste.innerHTML=""; todos.forEach(t=>{ const li=document.createElement("li"); li.textContent=t.text; liste.appendChild(li); });</code>`,
+placeholder:`function rendern() {\n  const liste = document.getElementById("todo-liste");\n  liste.innerHTML = "";\n  todos.forEach(t => {\n    const li = document.createElement("li");\n    li.textContent = t.text;\n    liste.appendChild(li);\n  });\n}`,
+check(v){const ok=v.includes('function rendern')&&v.includes('innerHTML = ""')&&v.includes('createElement("li")');return{ok,msg:ok?'Super! Renderfunktion steht.':'rendern mit innerHTML="" + forEach + li erstellen.'};},
+acc:`function rendern(){\n  const liste=document.getElementById("todo-liste");\n  liste.innerHTML="";\n  const sichtbar=todos.filter(t=>aktiverFilter==="alle"||(aktiverFilter==="offen"&&!t.erledigt)||(aktiverFilter==="erledigt"&&t.erledigt));\n  sichtbar.forEach(t=>{\n    const li=document.createElement("li");\n    li.style.cssText="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #1a3a22";\n    li.innerHTML=\`<input type="checkbox" \${t.erledigt?"checked":""} onchange="toggleTodo(\${t.id})" style="cursor:pointer;accent-color:#3ecf8e"> <span style="flex:1;\${t.erledigt?"text-decoration:line-through;color:#9a9488":""}">\${t.text}</span> <button onclick="loeschenTodo(\${t.id})" style="background:#ff5c5c22;color:#ff5c5c;border:none;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:.72rem">✕</button>\`;\n    liste.appendChild(li);\n  });\n  const z=document.getElementById("zaehler");\n  if(z)z.textContent=todos.filter(t=>t.erledigt).length+" / "+todos.length+" erledigt";\n}\n`},
+{tag:'JS',title:'Hinzufügen',
+desc:`click-Listener auf <code>#add-btn</code>: Lese input-Wert, wenn nicht leer: <code>todos.push(todoErstellen(val))</code>, <code>rendern()</code>, Input leeren.`,
+hint:`<code>btn.addEventListener("click",()=>{ const val=input.value.trim(); if(val){ todos.push(todoErstellen(val)); rendern(); input.value=""; } });</code>`,
+placeholder:`document.getElementById("add-btn").addEventListener("click", function() {\n  const input = document.getElementById("neues-todo");\n  const val = input.value.trim();\n  if (!val) return;\n  todos.push(todoErstellen(val));\n  rendern();\n  input.value = "";\n});`,
+check(v){const ok=v.includes('add-btn')&&v.includes('todos.push')&&v.includes('rendern()');return{ok,msg:ok?'Exzellent! Todos können hinzugefügt werden.':'click-Listener + push + rendern.'};},
+acc:`document.getElementById("add-btn").addEventListener("click",function(){const inp=document.getElementById("neues-todo");const val=inp.value.trim();if(!val)return;todos.push(todoErstellen(val));speichern();rendern();inp.value="";});\ndocument.getElementById("neues-todo").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("add-btn").click();});\n`},
+{tag:'JS',title:'Abhaken (toggle)',
+desc:`Schreibe <code>toggleTodo(id)</code>: Finde das Todo mit <code>todos.find(t=>t.id===id)</code> und toggle <code>.erledigt</code>. Rufe rendern() auf.`,
+hint:`<code>const t=todos.find(t=>t.id===id); if(t) t.erledigt=!t.erledigt; rendern();</code>`,
+placeholder:`function toggleTodo(id) {\n  const todo = todos.find(t => t.id === id);\n  if (todo) todo.erledigt = !todo.erledigt;\n  rendern();\n}`,
+check(v){const ok=v.includes('toggleTodo')&&(v.includes('erledigt = !todo.erledigt')||v.includes('erledigt=!t.erledigt'));return{ok,msg:ok?'Super! Abhaken funktioniert.':'todos.find + erledigt=!erledigt + rendern.'};},
+acc:`function toggleTodo(id){const t=todos.find(t=>t.id===id);if(t){t.erledigt=!t.erledigt;speichern();rendern();}}\n`},
+{tag:'JS',title:'Löschen',
+desc:`Schreibe <code>loeschenTodo(id)</code>: <code>todos = todos.filter(t => t.id !== id)</code> und rendern().`,
+hint:`<code>function loeschenTodo(id){ todos=todos.filter(t=>t.id!==id); rendern(); }</code>`,
+placeholder:`function loeschenTodo(id) {\n  todos = todos.filter(t => t.id !== id);\n  rendern();\n}`,
+check(v){const ok=v.includes('loeschenTodo')&&v.includes('todos.filter');return{ok,msg:ok?'Korrekt! filter entfernt ohne Indexprobleme.':'loeschenTodo mit todos.filter(t=>t.id!==id).'};},
+acc:`function loeschenTodo(id){todos=todos.filter(t=>t.id!==id);speichern();rendern();}\n`},
+{tag:'JS',title:'Alle Erledigten löschen',
+desc:`Schreibe <code>erledigteLoeschen()</code>: <code>todos = todos.filter(t => !t.erledigt)</code> und rendern(). Füge einen Button "Erledigte löschen" ein.`,
+hint:`<code>todos=todos.filter(t=>!t.erledigt); rendern();</code>`,
+placeholder:`function erledigteLoeschen() {\n  todos = todos.filter(t => !t.erledigt);\n  rendern();\n}`,
+check(v){const ok=v.includes('erledigteLoeschen')&&v.includes('!t.erledigt');return{ok,msg:ok?'Richtig! Alle Erledigten weg.':'erledigteLoeschen mit filter(!t.erledigt).'};},
+acc:`function erledigteLoeschen(){todos=todos.filter(t=>!t.erledigt);speichern();rendern();}\nconst clrBtn=document.createElement("button");clrBtn.textContent="Erledigte löschen";clrBtn.style.cssText="margin-top:5px;background:none;border:1px solid #1a3a22;color:#9a9488;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:.75rem";clrBtn.onclick=erledigteLoeschen;document.getElementById("app").appendChild(clrBtn);\n`},
+{tag:'JS',title:'Filter Alle/Offen/Erledigt',
+desc:`<code>let aktiverFilter = "alle"</code>. Erstelle 3 Buttons. Beim Klick setze aktiverFilter und rufe rendern() auf. In rendern(): Filtere todos nach aktiverFilter.`,
+hint:`todos.filter(t=>aktiverFilter==="alle"||(aktiverFilter==="offen"&&!t.erledigt)||(aktiverFilter==="erledigt"&&t.erledigt))`,
+placeholder:`let aktiverFilter = "alle";\n// Buttons erstellen:\n["alle","offen","erledigt"].forEach(f => {\n  const btn = document.createElement("button");\n  btn.textContent = f;\n  btn.onclick = () => { aktiverFilter = f; rendern(); };\n  document.getElementById("app").appendChild(btn);\n});`,
+check(v){const ok=v.includes('aktiverFilter')&&v.includes('"alle"')&&v.includes('todos.filter');return{ok,msg:ok?'Perfekt! Filterfunktion ist sehr praktisch.':'aktiverFilter + todos.filter mit allen drei Fällen.'};},
+acc:`let aktiverFilter="alle";\nconst fb2=document.createElement("div");fb2.style.cssText="display:flex;gap:5px;margin-bottom:10px";\n["alle","offen","erledigt"].forEach(f=>{const b=document.createElement("button");b.textContent=f.charAt(0).toUpperCase()+f.slice(1);b.style.cssText="padding:3px 9px;border-radius:99px;border:1px solid #1a3a22;background:none;color:#9a9488;cursor:pointer;font-size:.7rem";b.onclick=()=>{aktiverFilter=f;rendern();};fb2.appendChild(b);});\ndocument.getElementById("app").insertBefore(fb2,document.getElementById("todo-liste"));\n`},
+{tag:'JS',title:'localStorage speichern',
+desc:`Schreibe <code>speichern()</code>: <code>localStorage.setItem("meine-todos", JSON.stringify(todos))</code>.`,
+hint:`<code>localStorage.setItem("meine-todos", JSON.stringify(todos));</code>`,
+placeholder:`function speichern() {\n  localStorage.setItem("meine-todos", JSON.stringify(todos));\n}`,
+check(v){const ok=v.includes('speichern')&&v.includes('localStorage.setItem')&&v.includes('JSON.stringify(todos)');return{ok,msg:ok?'Korrekt! Daten persistent gespeichert.':'localStorage.setItem + JSON.stringify(todos).'};},
+acc:`function speichern(){localStorage.setItem("meine-todos",JSON.stringify(todos));}\n`},
+{tag:'JS',title:'localStorage laden',
+desc:`Schreibe <code>laden()</code>: <code>todos = JSON.parse(localStorage.getItem("meine-todos") || "[]")</code> und rendern(). Starte laden() sofort.`,
+hint:`<code>todos=JSON.parse(localStorage.getItem("meine-todos")||"[]"); rendern();</code>`,
+placeholder:`function laden() {\n  todos = JSON.parse(localStorage.getItem("meine-todos") || "[]");\n  rendern();\n}\nladen();`,
+check(v){const ok=v.includes('laden')&&v.includes('localStorage.getItem')&&v.includes('JSON.parse');return{ok,msg:ok?'Super! App lädt gespeicherte Todos.':'JSON.parse(localStorage.getItem("meine-todos")||"[]").'};},
+acc:`function laden(){todos=JSON.parse(localStorage.getItem("meine-todos")||"[]");rendern();}\nladen();\n`},
+{tag:'JS',title:'Zähler & Suchfeld',
+desc:`Zeige <code>div#zaehler</code> mit "X von Y erledigt". Füge auch <code>input#suche</code> hinzu: bei input-Event filtere todos nach text.toLowerCase().includes(suchtext).`,
+hint:`<code>const z=document.getElementById("zaehler"); z.textContent=erledigt+" von "+todos.length;</code>`,
+placeholder:`// Zähler in rendern() ergänzen:\nconst z = document.getElementById("zaehler");\nif(z) z.textContent = todos.filter(t=>t.erledigt).length + " von " + todos.length + " erledigt";\n\n// Suchfeld:\ndocument.getElementById("suche").addEventListener("input", rendern);`,
+check(v){const ok=v.includes('zaehler')&&(v.includes('.filter(t=>t.erledigt).length')||v.includes("filter(t => t.erledigt).length"));return{ok,msg:ok?'Perfekt! Zähler und Suche machen die App nützlicher.':'zaehler + erledigt-filter.length.'};},
+acc:`const zaehlerEl=document.createElement("div");zaehlerEl.id="zaehler";zaehlerEl.style.cssText="font-size:.72rem;color:#9a9488;margin-top:7px;font-family:monospace";document.getElementById("app").appendChild(zaehlerEl);\nconst sucheEl=document.createElement("input");sucheEl.id="suche";sucheEl.placeholder="Suchen…";sucheEl.style.cssText="width:100%;padding:6px 11px;border-radius:6px;border:1px solid #1a3a22;background:#0a1a10;color:#f0ece4;font-size:.82rem;margin-bottom:8px;box-sizing:border-box";sucheEl.addEventListener("input",rendern);document.getElementById("app").insertBefore(sucheEl,document.getElementById("todo-liste"));\n`},
+{tag:'JS',title:'Priorität',
+desc:`Erweitere <code>todoErstellen(text, prio="normal")</code>. Füge beim Rendern ein ⭐ für prio="hoch" hinzu. Ergänze ein Checkbox "Hohe Prio" neben dem Input.`,
+hint:`todoErstellen(text, prio="normal"){ return {..., prioritaet:prio}; }`,
+placeholder:`function todoErstellen(text, prioritaet = "normal") {\n  return { id: Date.now(), text, erledigt: false, prioritaet };\n}`,
+check(v){const ok=v.includes('prioritaet')&&v.includes('todoErstellen');return{ok,msg:ok?'Excellent! Prioritäten machen die App professioneller.':'prioritaet-Feld in todoErstellen ergänzen.'};},
+acc:`// Priorität-System aktiv\n`},
+{tag:'JS',title:'Drag & Drop',
+desc:`Mache li-Elemente draggable. Listener auf <code>#todo-liste</code>: dragstart speichert Element, dragover(preventDefault), drop(insertBefore).`,
+hint:`li.draggable=true; dragstart: gezogen=li; dragover: e.preventDefault(); drop: liste.insertBefore(gezogen,e.target)`,
+placeholder:`let gezogen = null;\ndocument.getElementById("todo-liste").addEventListener("dragover", e => e.preventDefault());\ndocument.getElementById("todo-liste").addEventListener("drop", e => {\n  if (gezogen && e.target.tagName === "LI")\n    e.target.before(gezogen);\n});`,
+check(v){const ok=v.includes('dragstart')&&v.includes('dragover')&&v.includes('drop');return{ok,msg:ok?'Klasse! Drag & Drop rundet die App ab.':'dragstart + dragover + drop mit insertBefore.'};},
+acc:`document.getElementById("todo-liste").addEventListener("dragover",e=>e.preventDefault());\ndocument.getElementById("todo-liste").addEventListener("drop",e=>{if(gezogen&&e.target.tagName==="LI")e.target.before(gezogen);});\n`},
+{tag:'JS',title:'App exportieren',
+desc:`Schreibe <code>exportieren()</code>: Erstelle String mit todos.map(t=>(t.erledigt?"✓ ":"○ ")+t.text).join("\\n") und kopiere per <code>navigator.clipboard.writeText()</code>.`,
+hint:`<code>navigator.clipboard.writeText(todos.map(t=>(t.erledigt?"✓ ":"○ ")+t.text).join("\\n"));</code>`,
+placeholder:`async function exportieren() {\n  const text = todos.map(t => (t.erledigt ? "✓ " : "○ ") + t.text).join("\\n");\n  await navigator.clipboard.writeText(text);\n  console.log("Kopiert!");\n}`,
+check(v){const ok=v.includes('exportieren')&&v.includes('clipboard')&&v.includes('.map(');return{ok,msg:ok?'🏆 Todo-App abgeschlossen! Vollständige App gebaut.':'exportieren + todos.map + clipboard.writeText.'};},
+acc:`async function exportieren(){const t=todos.map(t=>(t.erledigt?"✓ ":"○ ")+t.text).join("\\n");try{await navigator.clipboard.writeText(t);}catch(e){}}\nconst expBtn=document.createElement("button");expBtn.textContent="📋 Export";expBtn.onclick=exportieren;expBtn.style.cssText="margin-top:5px;margin-left:5px;background:none;border:1px solid #1a3a22;color:#9a9488;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:.72rem";document.getElementById("app").appendChild(expBtn);\n`}
+]},
+// ── RECHNER ──
+{id:'rechner',title:'Rechner',icon:'🧮',
+accent:'#f0c040',accentBg:'rgba(240,192,64,0.1)',
+desc:'Vollwertiger Taschenrechner mit Keyboard-Support, Verlauf und Prozent-Taste.',
+tags:['Anfänger','Keyboard','State','Math'],tagHL:0,difficulty:2,
+previewBg:'#100e00',
+previewHTML:`<div style="width:230px;background:#1a1600;border-radius:12px;overflow:hidden;font-family:monospace;box-shadow:0 20px 60px #000c"><div style="background:#0f0c00;padding:14px 16px;text-align:right;border-bottom:1px solid #2a2200"><div style="color:#9a9488;font-size:.62rem;margin-bottom:3px">3 × 7 =</div><div style="color:#f0c040;font-size:2rem;font-family:sans-serif;font-weight:700">21</div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2a2200;padding:1px"><div style="background:#1a1600;color:#9a9488;text-align:center;padding:10px 0;font-size:.72rem">C</div><div style="background:#1a1600;color:#9a9488;text-align:center;padding:10px 0;font-size:.72rem">±</div><div style="background:#1a1600;color:#9a9488;text-align:center;padding:10px 0;font-size:.72rem">%</div><div style="background:#2a1e00;color:#f0c040;text-align:center;padding:10px 0">÷</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">7</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">8</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">9</div><div style="background:#2a1e00;color:#f0c040;text-align:center;padding:10px 0">×</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">4</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">5</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">6</div><div style="background:#2a1e00;color:#f0c040;text-align:center;padding:10px 0">−</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">1</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">2</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">3</div><div style="background:#2a1e00;color:#f0c040;text-align:center;padding:10px 0">+</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem;grid-column:span 2">0</div><div style="background:#1a1600;color:#f0ece4;text-align:center;padding:10px 0;font-size:.72rem">.</div><div style="background:#f0c040;color:#0a0a0a;text-align:center;padding:10px 0;font-weight:700">=</div></div></div>`,
+storageKey:'proj_rechner_state',
+chapters:[{title:'Kap 1 – Layout',range:[0,3]},{title:'Kap 2 – Logik',range:[4,8]},{title:'Kap 3 – Extras',range:[9,10]}],
+exercises:[
+{tag:'HTML',title:'Rechner-Layout',
+desc:`Erstelle <code>div#rechner</code> mit <code>div#display</code> (enthält <code>div#verlauf</code> und <code>div#eingabe</code> mit "0") und <code>div#tasten</code>.`,
+hint:`div#rechner > div#display(div#verlauf + div#eingabe"0") + div#tasten`,
+placeholder:`<div id="rechner">\n  <div id="display">\n    <div id="verlauf"></div>\n    <div id="eingabe">0</div>\n  </div>\n  <div id="tasten"></div>\n</div>`,
+check(v){const ok=v.includes('id="rechner"')&&v.includes('id="eingabe"')&&v.includes('id="tasten"');return{ok,msg:ok?'Perfekt! Rechner-Layout steht.':'rechner, eingabe und tasten werden benötigt.'};},
+acc:`<div id="rechner" style="max-width:265px;margin:16px auto;background:#1a1600;border-radius:12px;overflow:hidden;font-family:monospace;box-shadow:0 20px 60px #000c"><div id="display" style="background:#0f0c00;padding:16px 16px 12px;text-align:right;border-bottom:1px solid #2a2200"><div id="verlauf" style="color:#9a9488;font-size:.65rem;min-height:1.1rem;margin-bottom:3px"></div><div id="eingabe" style="color:#f0c040;font-size:2rem;font-weight:700;min-height:2.4rem;word-break:break-all">0</div></div><div id="tasten" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2a2200;padding:1px"></div></div>\n`},
+{tag:'JS',title:'Tasten generieren',
+desc:`Definiere <code>const TASTEN = ["C","±","%","÷","7","8","9","×","4","5","6","−","1","2","3","+","0",".","="]</code> und generiere per forEach für jede Taste einen Button in <code>#tasten</code>. "0" bekommt grid-column span 2.`,
+hint:`TASTEN.forEach(t=>{ const b=document.createElement("button"); if(t==="0") b.style.gridColumn="span 2"; tasten.appendChild(b); });`,
+placeholder:`const TASTEN = ["C","±","%","÷","7","8","9","×","4","5","6","−","1","2","3","+","0",".","="];\nconst tasten = document.getElementById("tasten");\nTASTEN.forEach(t => {\n  const btn = document.createElement("button");\n  btn.textContent = t;\n  if (t === "0") btn.style.gridColumn = "span 2";\n  tasten.appendChild(btn);\n});`,
+check(v){const ok=v.includes('TASTEN')&&v.includes('createElement("button")')&&v.includes('span 2');return{ok,msg:ok?'Super! Alle Tasten generiert.':'TASTEN-Array + forEach + button + span 2 für "0".'};},
+acc:`const TASTEN=["C","±","%","÷","7","8","9","×","4","5","6","−","1","2","3","+","0",".","="];\nconst OPS=["÷","×","−","+"];\nconst tasten=document.getElementById("tasten");\nTASTEN.forEach(t=>{const b=document.createElement("button");b.textContent=t;b.dataset.t=t;const isOp=OPS.includes(t)||t==="=";b.style.cssText=\`background:\${t==="="?"#f0c040":isOp?"#2a1e00":"#1a1600"};color:\${t==="="?"#0a0a0a":isOp?"#f0c040":"#f0ece4"};border:none;padding:13px 0;font-size:\${isOp?"1rem":".82rem"};cursor:pointer;transition:filter .15s;\${t==="0"?"grid-column:span 2":""}\`;b.onmouseover=()=>b.style.filter="brightness(1.2)";b.onmouseout=()=>b.style.filter="";b.addEventListener("click",()=>tasteDruecken(t));tasten.appendChild(b);});\n`},
+{tag:'JS',title:'State & Display',
+desc:`Erstelle <code>let state = { eingabe:"0", gespeichert:null, operator:null, neueEingabe:true }</code>. Schreibe <code>displayAktualisieren()</code>: Setze #eingabe auf state.eingabe und #verlauf wenn operator gesetzt.`,
+hint:`<code>let state={eingabe:"0",gespeichert:null,operator:null,neueEingabe:true};</code>`,
+placeholder:`let state = { eingabe:"0", gespeichert:null, operator:null, neueEingabe:true };\nfunction displayAktualisieren() {\n  document.getElementById("eingabe").textContent = state.eingabe;\n  const v = document.getElementById("verlauf");\n  if(v) v.textContent = state.operator ? state.gespeichert + " " + state.operator : "";\n}`,
+check(v){const ok=v.includes('let state')&&v.includes('gespeichert')&&v.includes('displayAktualisieren');return{ok,msg:ok?'Perfekt! State-Pattern hält alles sauber.':'State-Objekt + displayAktualisieren.'};},
+acc:`let state={eingabe:"0",gespeichert:null,operator:null,neueEingabe:true};\nfunction displayAktualisieren(){document.getElementById("eingabe").textContent=state.eingabe;const v=document.getElementById("verlauf");if(v)v.textContent=state.operator?(state.gespeichert+" "+state.operator):""}\n`},
+{tag:'CSS',title:'Hover & Stil',
+desc:`Schreibe CSS für #rechner (max-width 265px, margin auto, border-radius 12px). Buttons erhalten bei :hover filter brightness(1.2) und transition .15s. #eingabe bekommt color #f0c040.`,
+hint:`#rechner{max-width:265px;margin:auto;} button:hover{filter:brightness(1.2);} #eingabe{color:#f0c040;}`,
+placeholder:`#rechner { max-width: 265px; margin: auto; border-radius: 12px; overflow: hidden; }\nbutton { transition: filter 0.15s; }\nbutton:hover { filter: brightness(1.2); }\n#eingabe { color: #f0c040; font-size: 2rem; font-weight: 700; }`,
+check(v){const ok=v.includes('#rechner')&&v.includes('brightness')&&v.includes('#eingabe');return{ok,msg:ok?'Korrekt! Hover-Feedback macht den Rechner professionell.':'#rechner + button:hover brightness + #eingabe.'};},
+acc:`/*css bereits inline*/\n`},
+{tag:'JS',title:'Ziffern eingeben',
+desc:`Schreibe <code>ziffer(z)</code>: Wenn neueEingabe, setze eingabe auf z und neueEingabe=false. Sonst: hänge z an (max 12 Zeichen, kein doppeltes Komma). Rufe displayAktualisieren() auf.`,
+hint:`if(state.neueEingabe){state.eingabe=z;state.neueEingabe=false;} else{if(z==="."&&state.eingabe.includes("."))return; state.eingabe+=z;}`,
+placeholder:`function ziffer(z) {\n  if (state.neueEingabe) {\n    state.eingabe = z === "." ? "0." : z;\n    state.neueEingabe = false;\n  } else {\n    if (z === "." && state.eingabe.includes(".")) return;\n    if (state.eingabe.length >= 12) return;\n    state.eingabe += z;\n  }\n  displayAktualisieren();\n}`,
+check(v){const ok=v.includes('function ziffer')&&v.includes('neueEingabe')&&v.includes('displayAktualisieren');return{ok,msg:ok?'Super! Zifferneingabe korrekt.':'ziffer mit neueEingabe-Check + displayAktualisieren.'};},
+acc:`function ziffer(z){if(state.neueEingabe){state.eingabe=(z==="."?"0.":z);state.neueEingabe=false;}else{if(z==="."&&state.eingabe.includes("."))return;if(state.eingabe.length>=12)return;state.eingabe+=z;}displayAktualisieren();}\n`},
+{tag:'JS',title:'Operator',
+desc:`Schreibe <code>operator(op)</code>: Wenn bereits Operator und neueEingabe false → berechnen(). Speichere parseFloat(eingabe) in gespeichert, setze operator=op, neueEingabe=true. displayAktualisieren().`,
+hint:`if(state.operator&&!state.neueEingabe)berechnen(); state.gespeichert=parseFloat(state.eingabe); state.operator=op; state.neueEingabe=true;`,
+placeholder:`function operator(op) {\n  if (state.operator && !state.neueEingabe) berechnen();\n  state.gespeichert = parseFloat(state.eingabe);\n  state.operator = op;\n  state.neueEingabe = true;\n  displayAktualisieren();\n}`,
+check(v){const ok=v.includes('function operator')&&v.includes('state.gespeichert')&&v.includes('state.operator');return{ok,msg:ok?'Richtig! Kettenrechnungen funktionieren.':'gespeichert=parseFloat + operator setzen + neueEingabe=true.'};},
+acc:`function operator(op){if(state.operator&&!state.neueEingabe)berechnen();state.gespeichert=parseFloat(state.eingabe);state.operator=op;state.neueEingabe=true;displayAktualisieren();}\n`},
+{tag:'JS',title:'Berechnen (=)',
+desc:`Schreibe <code>berechnen()</code>: a=gespeichert, b=parseFloat(eingabe). switch(operator): ÷×−+. Schreibe Ergebnis (gerundet auf 9 Stellen) in eingabe. Verhindere Division durch 0.`,
+hint:`switch(state.operator){case"÷":e=b!==0?a/b:"Fehler";break;...} state.eingabe=String(Math.round(e*1e9)/1e9);`,
+placeholder:`function berechnen() {\n  if (!state.operator) return;\n  const a = state.gespeichert, b = parseFloat(state.eingabe);\n  let e;\n  switch(state.operator) {\n    case "÷": e = b !== 0 ? a/b : "Fehler"; break;\n    case "×": e = a*b; break;\n    case "−": e = a-b; break;\n    case "+": e = a+b; break;\n  }\n  state.eingabe = typeof e==="number" ? String(Math.round(e*1e9)/1e9) : e;\n  state.operator=null; state.gespeichert=null; state.neueEingabe=true;\n  displayAktualisieren();\n}`,
+check(v){const ok=v.includes('function berechnen')&&v.includes('switch')&&v.includes('state.operator');return{ok,msg:ok?'Exzellent! Alle Grundrechenarten funktionieren.':'switch mit ÷×−+ + Division-durch-0-Check.'};},
+acc:`function berechnen(){if(!state.operator)return;const a=state.gespeichert,b=parseFloat(state.eingabe);let e;switch(state.operator){case"÷":e=b!==0?a/b:"Fehler";break;case"×":e=a*b;break;case"−":e=a-b;break;case"+":e=a+b;break;}state.eingabe=typeof e==="number"?String(Math.round(e*1e9)/1e9):e;state.operator=null;state.gespeichert=null;state.neueEingabe=true;displayAktualisieren();}\n`},
+{tag:'JS',title:'C, ±, %',
+desc:`Schreibe: <code>reset()</code> setzt State zurück. <code>vorzeichen()</code> multipliziert eingabe mit -1. <code>prozent()</code> teilt durch 100.`,
+hint:`reset:{eingabe:"0",gespeichert:null,...}. vorzeichen:*-1. prozent:/100.`,
+placeholder:`function reset(){state={eingabe:"0",gespeichert:null,operator:null,neueEingabe:true};displayAktualisieren();}\nfunction vorzeichen(){state.eingabe=String(parseFloat(state.eingabe)*-1);displayAktualisieren();}\nfunction prozent(){state.eingabe=String(parseFloat(state.eingabe)/100);displayAktualisieren();}`,
+check(v){const ok=v.includes('function reset')&&v.includes('function vorzeichen')&&v.includes('function prozent');return{ok,msg:ok?'Perfekt! C, ± und % vollständig.':'reset, vorzeichen und prozent alle implementieren.'};},
+acc:`function reset(){state={eingabe:"0",gespeichert:null,operator:null,neueEingabe:true};displayAktualisieren();}\nfunction vorzeichen(){state.eingabe=String(parseFloat(state.eingabe)*-1);displayAktualisieren();}\nfunction prozent(){state.eingabe=String(parseFloat(state.eingabe)/100);displayAktualisieren();}\n`},
+{tag:'JS',title:'Haupt-Handler',
+desc:`Schreibe <code>tasteDruecken(t)</code>: Ziffern/Punkt → ziffer(t). ÷×−+ → operator(t). = → berechnen(). C → reset(). ± → vorzeichen(). % → prozent().`,
+hint:`if("0123456789.".includes(t))ziffer(t); else if(["÷","×","−","+"].includes(t))operator(t); ...`,
+placeholder:`function tasteDruecken(t) {\n  if ("0123456789.".includes(t)) ziffer(t);\n  else if (["÷","×","−","+"].includes(t)) operator(t);\n  else if (t === "=") berechnen();\n  else if (t === "C") reset();\n  else if (t === "±") vorzeichen();\n  else if (t === "%") prozent();\n}`,
+check(v){const ok=v.includes('tasteDruecken')&&v.includes('ziffer')&&v.includes('berechnen');return{ok,msg:ok?'Super! Zentraler Handler verbindet alles.':'tasteDruecken mit allen Fällen.'};},
+acc:`function tasteDruecken(t){if("0123456789.".includes(t))ziffer(t);else if(["÷","×","−","+"].includes(t))operator(t);else if(t==="=")berechnen();else if(t==="C")reset();else if(t==="±")vorzeichen();else if(t==="%")prozent();}\n`},
+{tag:'JS',title:'Keyboard-Support',
+desc:`keydown-Listener auf window: Ziffern/Punkt → ziffer, Enter/= → berechnen, Escape → reset, Backspace → letztes Zeichen löschen, */÷ → operator("÷"), - → "−", + → "+".`,
+hint:`window.addEventListener("keydown",e=>{if("0123456789.".includes(e.key))ziffer(e.key);else if(e.key==="Enter")berechnen();...})`,
+placeholder:`window.addEventListener("keydown", function(e) {\n  if ("0123456789.".includes(e.key)) ziffer(e.key);\n  else if (e.key==="Enter"||e.key==="=") berechnen();\n  else if (e.key==="Escape") reset();\n  else if (e.key==="Backspace") {\n    state.eingabe = state.eingabe.length>1 ? state.eingabe.slice(0,-1) : "0";\n    displayAktualisieren();\n  }\n  else if (e.key==="+") operator("+");\n  else if (e.key==="-") operator("−");\n  else if (e.key==="*"||e.key==="/") operator(e.key==="*"?"×":"÷");\n});`,
+check(v){const ok=v.includes('keydown')&&v.includes('Backspace')&&v.includes('Escape');return{ok,msg:ok?'Klasse! Keyboard-Support macht den Rechner angenehm.':'keydown mit Backspace, Escape, Enter und Operatoren.'};},
+acc:`window.addEventListener("keydown",function(e){if("0123456789.".includes(e.key))ziffer(e.key);else if(e.key==="Enter"||e.key==="=")berechnen();else if(e.key==="Escape")reset();else if(e.key==="Backspace"){state.eingabe=state.eingabe.length>1?state.eingabe.slice(0,-1):"0";displayAktualisieren();}else if(e.key==="+")operator("+");else if(e.key==="-")operator("−");else if(e.key==="*"||e.key==="/")operator(e.key==="*"?"×":"÷");});\n`},
+{tag:'JS',title:'Verlauf & Uhr',
+desc:`Zeige die Uhrzeit oben im Display (<code>new Date().toLocaleTimeString("de-DE")</code>) aktualisiert per setInterval. Füge auch einen kleinen Rechnungs-Verlauf (letzten 3 Rechnungen) unter dem Rechner ein.`,
+hint:`setInterval(()=>uhrEl.textContent=new Date().toLocaleTimeString("de-DE"),1000);`,
+placeholder:`const uhrEl = document.createElement("div");\nuhrEl.style.cssText = "font-size:.58rem;color:#9a9488;text-align:right;margin-bottom:2px";\ndocument.getElementById("display").prepend(uhrEl);\nsetInterval(() => uhrEl.textContent = new Date().toLocaleTimeString("de-DE"), 1000);\nuhrEl.textContent = new Date().toLocaleTimeString("de-DE");`,
+check(v){const ok=v.includes('toLocaleTimeString')&&v.includes('setInterval');return{ok,msg:ok?'🏆 Rechner abgeschlossen! Vollwertiger Taschenrechner fertig.':'toLocaleTimeString + setInterval für die Uhr.'};},
+acc:`const uhrEl2=document.createElement("div");uhrEl2.style.cssText="font-size:.56rem;color:#9a9488;text-align:right;padding:4px 14px 0;background:#0f0c00";setInterval(()=>uhrEl2.textContent=new Date().toLocaleTimeString("de-DE"),1000);uhrEl2.textContent=new Date().toLocaleTimeString("de-DE");document.getElementById("rechner").prepend(uhrEl2);\n`}
+]},
+// ── KALENDER ──
+{id:'kalender',title:'Kalender',icon:'📅',
+accent:'#3d6fff',accentBg:'rgba(61,111,255,0.1)',
+desc:'Monatskalender mit Navigation, Termin-Eintragung und localStorage.',
+tags:['Mittel','Date API','localStorage','DOM Grid'],tagHL:0,difficulty:3,
+previewBg:'#060810',
+previewHTML:`<div style="width:290px;background:#0a0d1f;border-radius:10px;overflow:hidden;font-family:monospace;box-shadow:0 20px 60px #000a"><div style="background:#070916;padding:11px 15px;border-bottom:1px solid #1a2040;display:flex;justify-content:space-between;align-items:center"><span style="color:#9a9488">←</span><span style="color:#f0ece4;font-size:.82rem">Januar 2025</span><span style="color:#9a9488">→</span></div><div style="display:grid;grid-template-columns:repeat(7,1fr);padding:7px 9px 3px;gap:2px;font-size:.56rem;color:#9a9488;text-align:center"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span style="color:#ff5c5c88">Sa</span><span style="color:#ff5c5c88">So</span></div><div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 9px 9px;gap:2px"><span style="color:#2a3050;font-size:.6rem;text-align:center;padding:4px 0">30</span><span style="color:#2a3050;font-size:.6rem;text-align:center;padding:4px 0">31</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">1</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">2</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">3</span><span style="color:#ff5c5c66;font-size:.6rem;text-align:center;padding:4px 0">4</span><span style="color:#ff5c5c66;font-size:.6rem;text-align:center;padding:4px 0">5</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">6</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">7</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">8</span><span style="background:#3d6fff;color:#fff;font-size:.6rem;text-align:center;padding:4px 0;border-radius:50%">9</span><span style="color:#f0ece4;font-size:.6rem;text-align:center;padding:4px 0">10</span><span style="color:#ff5c5c66;font-size:.6rem;text-align:center;padding:4px 0">11</span><span style="color:#ff5c5c66;font-size:.6rem;text-align:center;padding:4px 0">12</span></div><div style="padding:7px 13px;border-top:1px solid #1a2040"><div style="display:flex;gap:6px;align-items:center;padding:4px 0"><div style="width:3px;height:22px;background:#3d6fff;border-radius:2px"></div><div><div style="color:#f0ece4;font-size:.6rem">Meeting</div><div style="color:#9a9488;font-size:.55rem">09:00</div></div></div></div></div>`,
+storageKey:'proj_kalender_state',
+chapters:[{title:'Kap 1 – Anzeige',range:[0,4]},{title:'Kap 2 – Navigation',range:[5,9]},{title:'Kap 3 – Termine',range:[10,13]}],
+exercises:[
+{tag:'HTML',title:'Kalender-Struktur',
+desc:`Erstelle <code>div#kalender</code> mit: <code>div#nav</code> (button#zurueck, h2#monat-titel, button#vorwaerts), <code>div#gitter</code> und <code>div#termine-anzeige</code>.`,
+hint:`div#kalender > div#nav(← + h2#monat-titel + →) + div#gitter + div#termine-anzeige`,
+placeholder:`<div id="kalender">\n  <div id="nav">\n    <button id="zurueck">←</button>\n    <h2 id="monat-titel"></h2>\n    <button id="vorwaerts">→</button>\n  </div>\n  <div id="gitter"></div>\n  <div id="termine-anzeige"></div>\n</div>`,
+check(v){const ok=v.includes('id="kalender"')&&v.includes('id="monat-titel"')&&v.includes('id="gitter"');return{ok,msg:ok?'Perfekt! Kalender-Struktur steht.':'kalender, monat-titel, gitter und termine-anzeige.'};},
+acc:`<div id="kalender" style="max-width:330px;margin:16px auto;background:#0a0d1f;border-radius:12px;overflow:hidden;font-family:monospace"><div id="nav" style="background:#070916;padding:12px 16px;border-bottom:1px solid #1a2040;display:flex;justify-content:space-between;align-items:center"><button id="zurueck" style="background:none;border:none;color:#9a9488;font-size:1.1rem;cursor:pointer;padding:3px 7px">←</button><h2 id="monat-titel" style="color:#f0ece4;font-size:.88rem;font-weight:500"></h2><button id="vorwaerts" style="background:none;border:none;color:#9a9488;font-size:1.1rem;cursor:pointer;padding:3px 7px">→</button></div><div id="gitter" style="display:grid;grid-template-columns:repeat(7,1fr);padding:9px 11px;gap:3px"></div><div id="termine-anzeige" style="padding:9px 13px;border-top:1px solid #1a2040;min-height:36px;font-size:.64rem;color:#f0ece4"></div></div>\n`},
+{tag:'JS',title:'Datum-State',
+desc:`Erstelle <code>let anzeigeJahr = new Date().getFullYear()</code>, <code>let anzeigeMonat = new Date().getMonth()</code>, <code>const MONATE = ["Januar",...,"Dezember"]</code>, <code>const WOCHENTAGE = ["Mo","Di","Mi","Do","Fr","Sa","So"]</code>.`,
+hint:`new Date().getFullYear() + getMonth() + Arrays für Monate und Wochentage.`,
+placeholder:`let anzeigeJahr = new Date().getFullYear();\nlet anzeigeMonat = new Date().getMonth();\nconst MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];\nconst WOCHENTAGE = ["Mo","Di","Mi","Do","Fr","Sa","So"];`,
+check(v){const ok=v.includes('anzeigeJahr')&&v.includes('MONATE')&&v.includes('WOCHENTAGE');return{ok,msg:ok?'Super! Datum-State definiert.':'anzeigeJahr + anzeigeMonat + MONATE + WOCHENTAGE.'};},
+acc:`let anzeigeJahr=new Date().getFullYear(),anzeigeMonat=new Date().getMonth();\nconst MONATE=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];\nconst WOCHENTAGE=["Mo","Di","Mi","Do","Fr","Sa","So"];\nlet termine={};\n`},
+{tag:'JS',title:'Hilfsfunktionen',
+desc:`Schreibe <code>ersterWochentag(j,m)</code>: <code>return (new Date(j,m,1).getDay()+6)%7</code>. Schreibe <code>tageImMonat(j,m)</code>: <code>return new Date(j,m+1,0).getDate()</code>.`,
+hint:`(getDay()+6)%7 konvertiert auf Mo=0. new Date(j,m+1,0) = letzter Tag des Monats.`,
+placeholder:`function ersterWochentag(j, m) {\n  return (new Date(j, m, 1).getDay() + 6) % 7;\n}\nfunction tageImMonat(j, m) {\n  return new Date(j, m + 1, 0).getDate();\n}\nconsole.log(tageImMonat(2024, 1)); // 29 (Schaltjahr)`,
+check(v){const ok=v.includes('ersterWochentag')&&v.includes('getDay()')&&v.includes('tageImMonat');return{ok,msg:ok?'Perfekt! (getDay()+6)%7 für Mo-basiert.':'ersterWochentag + tageImMonat beide implementiert.'};},
+acc:`function ersterWochentag(j,m){return(new Date(j,m,1).getDay()+6)%7;}\nfunction tageImMonat(j,m){return new Date(j,m+1,0).getDate();}\n`},
+{tag:'JS',title:'Wochentag-Kopfzeile',
+desc:`Schreibe <code>kopfzeileZeichnen()</code>: Setze <code>#gitter</code> innerHTML="". Füge für jeden WOCHENTAG ein div mit Text hinzu. Sa/So (Index ≥5) bekommen rote Farbe.`,
+hint:`WOCHENTAGE.forEach((t,i)=>{ const d=...; if(i>=5)d.style.color="#ff5c5c66"; gitter.appendChild(d); });`,
+placeholder:`function kopfzeileZeichnen() {\n  const g = document.getElementById("gitter");\n  g.innerHTML = "";\n  WOCHENTAGE.forEach((tag, i) => {\n    const d = document.createElement("div");\n    d.textContent = tag;\n    d.style.cssText = \`text-align:center;font-size:.58rem;padding:3px 0;color:\${i>=5?"#ff5c5c66":"#9a9488"}\`;\n    g.appendChild(d);\n  });\n}`,
+check(v){const ok=v.includes('kopfzeileZeichnen')&&v.includes('WOCHENTAGE')&&v.includes('i >= 5')||v.includes('i>=5');return{ok,msg:ok?'Korrekt! Wochentage werden angezeigt.':'forEach WOCHENTAGE + i>=5 Wochenende-Farbe.'};},
+acc:`function kopfzeileZeichnen(){const g=document.getElementById("gitter");g.innerHTML="";WOCHENTAGE.forEach((t,i)=>{const d=document.createElement("div");d.textContent=t;d.style.cssText=\`text-align:center;font-size:.58rem;padding:3px 0;color:\${i>=5?"#ff5c5c66":"#9a9488"}\`;g.appendChild(d);});}\n`},
+{tag:'JS',title:'Kalender rendern',
+desc:`Schreibe <code>kalenderRendern()</code>: kopfzeileZeichnen(). Leere Divs für Offset. Tages-Divs für 1..tageImMonat. Heute bekommt blauen Hintergrund. Aktualisiere monat-titel.`,
+hint:`kopfzeileZeichnen(); for i<offset: leeres div; for t 1..tage: div mit t + heute-Check.`,
+placeholder:`function kalenderRendern() {\n  kopfzeileZeichnen();\n  const g = document.getElementById("gitter");\n  const heute = new Date();\n  const offset = ersterWochentag(anzeigeJahr, anzeigeMonat);\n  for (let i=0; i<offset; i++) g.appendChild(document.createElement("div"));\n  const tage = tageImMonat(anzeigeJahr, anzeigeMonat);\n  for (let t=1; t<=tage; t++) {\n    const d = document.createElement("div");\n    const istH = t===heute.getDate()&&anzeigeMonat===heute.getMonth()&&anzeigeJahr===heute.getFullYear();\n    d.textContent = t;\n    d.style.cssText = \`text-align:center;padding:4px 2px;font-size:.62rem;cursor:pointer;border-radius:50%;\${istH?"background:#3d6fff;color:#fff":""}\`;\n    d.onclick = () => tagAnklicken(t);\n    g.appendChild(d);\n  }\n  document.getElementById("monat-titel").textContent = MONATE[anzeigeMonat]+" "+anzeigeJahr;\n}`,
+check(v){const ok=v.includes('kalenderRendern')&&v.includes('offset')&&v.includes('tageImMonat');return{ok,msg:ok?'Exzellent! Kalender wird korrekt aufgebaut.':'kopfzeileZeichnen + Offset-Divs + Tage-Schleife + heute.'};},
+acc:`function kalenderRendern(){kopfzeileZeichnen();const g=document.getElementById("gitter");const h=new Date();const offset=ersterWochentag(anzeigeJahr,anzeigeMonat);for(let i=0;i<offset;i++)g.appendChild(document.createElement("div"));const tage=tageImMonat(anzeigeJahr,anzeigeMonat);for(let t=1;t<=tage;t++){const d=document.createElement("div");const k=\`\${anzeigeJahr}-\${anzeigeMonat}-\${t}\`;const hat=termine[k]&&termine[k].length>0;const istH=t===h.getDate()&&anzeigeMonat===h.getMonth()&&anzeigeJahr===h.getFullYear();d.innerHTML=\`<span>\${t}</span>\${hat?'<span style="display:block;width:4px;height:4px;border-radius:50%;background:#3d6fff;margin:0 auto"></span>':''}\`;d.style.cssText=\`text-align:center;padding:4px 2px;font-size:.6rem;cursor:pointer;border-radius:50%;\${istH?"background:#3d6fff;color:#fff":""}\`;d.onmouseover=()=>{if(!istH)d.style.background="#1a2040";};d.onmouseout=()=>{if(!istH)d.style.background="";};d.onclick=()=>tagAnklicken(t);g.appendChild(d);}document.getElementById("monat-titel").textContent=MONATE[anzeigeMonat]+" "+anzeigeJahr;}\nkalenderRendern();\n`},
+{tag:'JS',title:'CSS Kalender-Styling',
+desc:`Schreibe CSS für #kalender (max-width 330px, margin auto, border-radius 12px). #nav soll display flex, justify-content space-between, align-items center haben. Buttons erhalten cursor pointer.`,
+hint:`#kalender{max-width:330px;margin:auto;} #nav{display:flex;justify-content:space-between;align-items:center;} #nav button{cursor:pointer;}`,
+placeholder:`#kalender { max-width: 330px; margin: auto; border-radius: 12px; overflow: hidden; }\n#nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }\n#nav button { background: none; border: none; cursor: pointer; font-size: 1.1rem; }`,
+check(v){const ok=v.includes('#kalender')&&v.includes('#nav')&&v.includes('cursor');return{ok,msg:ok?'Korrekt! Kalender sieht sauber aus.':'#kalender + #nav flexbox + button cursor pointer.'};},
+acc:`/* Styling inline bereits gesetzt */\n`},
+{tag:'JS',title:'Monat-Navigation',
+desc:`click-Listener auf #zurueck: anzeigeMonat--. Wenn <0: anzeigeMonat=11, anzeigeJahr--. click auf #vorwaerts: anzeigeMonat++. Wenn >11: anzeigeMonat=0, anzeigeJahr++. Beide rufen kalenderRendern() auf.`,
+hint:`zurueck.onclick=()=>{anzeigeMonat--;if(anzeigeMonat<0){anzeigeMonat=11;anzeigeJahr--;}kalenderRendern();};`,
+placeholder:`document.getElementById("zurueck").onclick = function() {\n  anzeigeMonat--;\n  if (anzeigeMonat < 0) { anzeigeMonat = 11; anzeigeJahr--; }\n  kalenderRendern();\n};\ndocument.getElementById("vorwaerts").onclick = function() {\n  anzeigeMonat++;\n  if (anzeigeMonat > 11) { anzeigeMonat = 0; anzeigeJahr++; }\n  kalenderRendern();\n};`,
+check(v){const ok=v.includes('zurueck')&&v.includes('vorwaerts')&&v.includes('kalenderRendern()');return{ok,msg:ok?'Perfekt! Monat-Navigation funktioniert.':'zurueck + vorwaerts mit Overflow-Logik + kalenderRendern.'};},
+acc:`document.getElementById("zurueck").onclick=()=>{anzeigeMonat--;if(anzeigeMonat<0){anzeigeMonat=11;anzeigeJahr--;}kalenderRendern();};\ndocument.getElementById("vorwaerts").onclick=()=>{anzeigeMonat++;if(anzeigeMonat>11){anzeigeMonat=0;anzeigeJahr++;}kalenderRendern();};\n`},
+{tag:'JS',title:'Heute-Button',
+desc:`Füge Button "Heute" in #nav ein: Klick setzt anzeigeJahr/Monat auf new Date()-Werte und ruft kalenderRendern() auf.`,
+hint:`const h=new Date(); anzeigeJahr=h.getFullYear(); anzeigeMonat=h.getMonth(); kalenderRendern();`,
+placeholder:`const hBtn = document.createElement("button");\nhBtn.textContent = "Heute";\nhBtn.style.cssText = "background:none;border:1px solid #1a2040;color:#9a9488;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:.62rem";\nhBtn.onclick = () => {\n  const h = new Date();\n  anzeigeJahr = h.getFullYear();\n  anzeigeMonat = h.getMonth();\n  kalenderRendern();\n};\ndocument.getElementById("nav").appendChild(hBtn);`,
+check(v){const ok=v.includes('getFullYear()')&&v.includes('getMonth()')&&v.includes('kalenderRendern');return{ok,msg:ok?'Klasse! Heute-Button ist sehr praktisch.':'getFullYear + getMonth + kalenderRendern.'};},
+acc:`const hBtnEl=document.createElement("button");hBtnEl.textContent="Heute";hBtnEl.style.cssText="background:none;border:1px solid #1a2040;color:#9a9488;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:.6rem";hBtnEl.onclick=()=>{const h=new Date();anzeigeJahr=h.getFullYear();anzeigeMonat=h.getMonth();kalenderRendern();};document.getElementById("nav").appendChild(hBtnEl);\n`},
+{tag:'JS',title:'Keyboard-Navigation',
+desc:`keydown auf window: ArrowLeft → #zurueck.click(). ArrowRight → #vorwaerts.click(). Taste "t" oder "h" → Heute.`,
+hint:`e.key==="ArrowLeft" → zurueck.click(); e.key==="t" → heute-Logik.`,
+placeholder:`window.addEventListener("keydown", function(e) {\n  if (e.key === "ArrowLeft") document.getElementById("zurueck").click();\n  else if (e.key === "ArrowRight") document.getElementById("vorwaerts").click();\n  else if (e.key === "t" || e.key === "h") {\n    const heute = new Date();\n    anzeigeJahr = heute.getFullYear();\n    anzeigeMonat = heute.getMonth();\n    kalenderRendern();\n  }\n});`,
+check(v){const ok=v.includes('ArrowLeft')&&v.includes('ArrowRight');return{ok,msg:ok?'Perfekt! Tastatur-Navigation ist ein Profi-Detail.':'ArrowLeft + ArrowRight + t/h für Heute.'};},
+acc:`window.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")document.getElementById("zurueck").click();else if(e.key==="ArrowRight")document.getElementById("vorwaerts").click();});\n`},
+{tag:'JS',title:'Tag anklicken & Panel',
+desc:`Schreibe <code>tagAnklicken(tag)</code>: Key=\`\${j}-\${m}-\${t}\`. Zeige in #termine-anzeige: Datum-Header + Termine des Tages + Input+Button zum Hinzufügen.`,
+hint:`Key bilden + termine[key]||[] anzeigen + Input+Button für neuen Termin.`,
+placeholder:`function tagAnklicken(tag) {\n  const key = \`\${anzeigeJahr}-\${anzeigeMonat}-\${tag}\`;\n  const panel = document.getElementById("termine-anzeige");\n  panel.innerHTML = \`<strong style="color:#3d6fff">\${tag}. \${MONATE[anzeigeMonat]}</strong>\`;\n  (termine[key]||[]).forEach(t => panel.innerHTML += \`<div>\${t}</div>\`);\n}`,
+check(v){const ok=v.includes('tagAnklicken')&&v.includes('termine[key]')&&v.includes('termine-anzeige');return{ok,msg:ok?'Super! Termin-Panel reagiert auf Klicks.':'tagAnklicken + Key + termine[key] anzeigen.'};},
+acc:`function tagAnklicken(tag){const key=\`\${anzeigeJahr}-\${anzeigeMonat}-\${tag}\`;if(!termine[key])termine[key]=[];const p=document.getElementById("termine-anzeige");p.innerHTML=\`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><strong style="font-size:.7rem;color:#3d6fff">\${tag}. \${MONATE[anzeigeMonat]}</strong></div>\`;if(termine[key].length===0)p.innerHTML+='<p style="color:#9a9488;font-size:.62rem;margin-bottom:6px">Keine Termine</p>';termine[key].forEach((t,i)=>p.innerHTML+=\`<div style="display:flex;gap:5px;align-items:center;padding:3px 0;border-bottom:1px solid #1a2040;font-size:.62rem"><span style="flex:1">\${t}</span><button onclick="terminLoeschen('\${key}',\${i})" style="background:none;border:none;color:#ff5c5c;cursor:pointer;font-size:.68rem">✕</button></div>\`);const inp=document.createElement("div");inp.style.cssText="display:flex;gap:5px;margin-top:6px";inp.innerHTML=\`<input id="neuer-termin" placeholder="Neuer Termin…" style="flex:1;background:#0a0d1f;border:1px solid #1a2040;border-radius:4px;padding:4px 8px;color:#f0ece4;font-size:.62rem"><button onclick="terminHinzufuegen('\${key}')" style="background:#3d6fff;color:#fff;border:none;border-radius:4px;padding:4px 9px;cursor:pointer;font-size:.68rem">+</button>\`;p.appendChild(inp);}\n`},
+{tag:'JS',title:'Termin hinzufügen',
+desc:`Schreibe <code>terminHinzufuegen(key)</code>: Lese #neuer-termin. Wenn nicht leer: termine[key].push(wert), speichern(), tagAnklicken(tag-aus-key), kalenderRendern().`,
+hint:`termine[key].push(wert); termineSpeichern(); tagAnklicken(parseInt(key.split("-")[2]));`,
+placeholder:`function terminHinzufuegen(key) {\n  const inp = document.getElementById("neuer-termin");\n  const w = inp.value.trim();\n  if (!w) return;\n  if (!termine[key]) termine[key] = [];\n  termine[key].push(w);\n  termineSpeichern();\n  tagAnklicken(parseInt(key.split("-")[2]));\n  kalenderRendern();\n}`,
+check(v){const ok=v.includes('terminHinzufuegen')&&v.includes('termine[key].push')&&v.includes('termineSpeichern');return{ok,msg:ok?'Perfekt! Termine werden hinzugefügt und gespeichert.':'push + termineSpeichern + tagAnklicken.'};},
+acc:`function terminHinzufuegen(key){const inp=document.getElementById("neuer-termin");const w=inp.value.trim();if(!w)return;if(!termine[key])termine[key]=[];termine[key].push(w);termineSpeichern();tagAnklicken(parseInt(key.split("-")[2]));kalenderRendern();}\nfunction terminLoeschen(key,i){termine[key].splice(i,1);termineSpeichern();tagAnklicken(parseInt(key.split("-")[2]));kalenderRendern();}\n`},
+{tag:'JS',title:'Termine speichern & laden',
+desc:`<code>termineSpeichern()</code>: localStorage.setItem("kalender-termine", JSON.stringify(termine)). <code>termineGeladen()</code>: lese und parse. Starte termineGeladen() sofort.`,
+hint:`localStorage.setItem + JSON.stringify / JSON.parse.`,
+placeholder:`function termineSpeichern() {\n  localStorage.setItem("kalender-termine", JSON.stringify(termine));\n}\nfunction termineGeladen() {\n  termine = JSON.parse(localStorage.getItem("kalender-termine") || "{}");\n}\ntermineGeladen();`,
+check(v){const ok=v.includes('termineSpeichern')&&v.includes('JSON.stringify(termine)')&&v.includes('termineGeladen');return{ok,msg:ok?'Super! Termine überleben den Browser-Neustart.':'termineSpeichern + termineGeladen + sofortiger Aufruf.'};},
+acc:`function termineSpeichern(){localStorage.setItem("kalender-termine",JSON.stringify(termine));}\nfunction termineGeladen(){termine=JSON.parse(localStorage.getItem("kalender-termine")||"{}");}\ntermineGeladen();\n`},
+{tag:'JS',title:'Heute-Erinnerung',
+desc:`Beim Start: Prüfe ob heute Termine vorliegen. Key = aktuelles Datum. Wenn ja, zeige kurz eine Info-Box über dem Kalender.`,
+hint:`const h=new Date(); const key=\`\${h.getFullYear()}-\${h.getMonth()}-\${h.getDate()}\`; if(termine[key]?.length>0) {...}`,
+placeholder:`const h2 = new Date();\nconst hKey = \`\${h2.getFullYear()}-\${h2.getMonth()}-\${h2.getDate()}\`;\nif (termine[hKey] && termine[hKey].length > 0) {\n  const hint = document.createElement("div");\n  hint.style.cssText = "background:#3d6fff22;border:1px solid #3d6fff44;padding:6px 12px;font-size:.62rem;color:#3d6fff";\n  hint.textContent = "📅 Heute: " + termine[hKey].join(", ");\n  document.getElementById("kalender").prepend(hint);\n  setTimeout(() => hint.remove(), 4000);\n}`,
+check(v){const ok=v.includes('hKey')||v.includes('h.getDate()');return{ok,msg:ok?'Super! Erinnerungen erhöhen den Nutzwert.':'hKey bilden + termine[hKey] prüfen + anzeigen.'};},
+acc:`{const hh=new Date();const hk=\`\${hh.getFullYear()}-\${hh.getMonth()}-\${hh.getDate()}\`;if(termine[hk]&&termine[hk].length>0){const hint=document.createElement("div");hint.style.cssText="background:#3d6fff22;border:1px solid #3d6fff44;padding:6px 12px;font-size:.62rem;color:#3d6fff";hint.textContent="📅 Heute: "+termine[hk].join(", ");document.getElementById("kalender").prepend(hint);setTimeout(()=>hint.remove(),4000);}}\n`},
+{tag:'JS',title:'iCal Export & Fertigstellen',
+desc:`Schreibe <code>exportiCal()</code>: Erstelle iCal-String (BEGIN:VCALENDAR...VEVENT...END) für alle Termine und triggere einen Download als .ics-Datei. Füge einen Export-Button hinzu.`,
+hint:`Blob mit type "text/calendar" + a.download="kalender.ics" + a.click().`,
+placeholder:`function exportiCal() {\n  let cal = "BEGIN:VCALENDAR\\nVERSION:2.0\\n";\n  Object.keys(termine).forEach(k => {\n    const [j,m,t] = k.split("-").map(Number);\n    (termine[k]||[]).forEach(tx => {\n      cal += \`BEGIN:VEVENT\\nSUMMARY:\${tx}\\nDTSTART:\${j}\${String(m+1).padStart(2,"0")}\${String(t).padStart(2,"0")}\\nEND:VEVENT\\n\`;\n    });\n  });\n  cal += "END:VCALENDAR";\n  const a = document.createElement("a");\n  a.href = URL.createObjectURL(new Blob([cal],{type:"text/calendar"}));\n  a.download = "kalender.ics";\n  a.click();\n}`,
+check(v){const ok=v.includes('exportiCal')&&v.includes('VCALENDAR')&&v.includes('Blob');return{ok,msg:ok?'🏆 Kalender abgeschlossen! Vollständiger Kalender mit iCal-Export gebaut.':'VCALENDAR + Blob + a.download="kalender.ics".'};},
+acc:`function exportiCal(){let c="BEGIN:VCALENDAR\\nVERSION:2.0\\n";Object.keys(termine).forEach(k=>{const[j,m,t]=k.split("-").map(Number);(termine[k]||[]).forEach(tx=>{c+=\`BEGIN:VEVENT\\nSUMMARY:\${tx}\\nDTSTART:\${j}\${String(m+1).padStart(2,"0")}\${String(t).padStart(2,"0")}\\nEND:VEVENT\\n\`;});});c+="END:VCALENDAR";const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/calendar"}));a.download="kalender.ics";a.click();}\nconst icsBtn=document.createElement("button");icsBtn.textContent="📥 .ics Export";icsBtn.style.cssText="margin:6px 13px;background:none;border:1px solid #1a2040;color:#9a9488;border-radius:4px;padding:3px 9px;cursor:pointer;font-size:.6rem";icsBtn.onclick=exportiCal;document.getElementById("kalender").appendChild(icsBtn);\n`}
+]},
+// ── WETTER ──
+{id:'wetter',title:'Wetter App',icon:'🌤️',
+accent:'#ff6b35',accentBg:'rgba(255,107,53,0.1)',
+desc:'Live-Wetterdaten per Open-Meteo API, Suchfunktion, 5-Tage-Vorschau.',
+tags:['Mittel','Fetch API','async/await','JSON'],tagHL:0,difficulty:4,
+previewBg:'#0f0800',
+previewHTML:`<div style="width:270px;background:linear-gradient(135deg,#1a0e00,#0f1520);border-radius:12px;padding:16px;font-family:sans-serif;box-shadow:0 20px 60px #000c"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="color:#9a9488;font-size:.6rem;font-family:monospace">NORDHORN, DE</div><div style="color:#ff6b35;font-family:sans-serif;font-weight:700;font-size:3.5rem;line-height:1">14°</div><div style="color:#9a9488;font-size:.68rem">Bewölkt · Gefühlt 11°</div></div><div style="font-size:2.4rem">⛅</div></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"><div style="background:rgba(255,107,53,.1);border-radius:6px;padding:5px 2px;text-align:center"><div style="font-size:.9rem">☀️</div><div style="color:#9a9488;font-size:.52rem">Mo</div><div style="color:#f0ece4;font-size:.6rem">18°</div></div><div style="background:rgba(255,107,53,.06);border-radius:6px;padding:5px 2px;text-align:center"><div style="font-size:.9rem">🌧️</div><div style="color:#9a9488;font-size:.52rem">Di</div><div style="color:#f0ece4;font-size:.6rem">12°</div></div><div style="background:rgba(255,107,53,.06);border-radius:6px;padding:5px 2px;text-align:center"><div style="font-size:.9rem">⛅</div><div style="color:#9a9488;font-size:.52rem">Mi</div><div style="color:#f0ece4;font-size:.6rem">15°</div></div><div style="background:rgba(255,107,53,.06);border-radius:6px;padding:5px 2px;text-align:center"><div style="font-size:.9rem">☀️</div><div style="color:#9a9488;font-size:.52rem">Do</div><div style="color:#f0ece4;font-size:.6rem">19°</div></div><div style="background:rgba(255,107,53,.06);border-radius:6px;padding:5px 2px;text-align:center"><div style="font-size:.9rem">🌤️</div><div style="color:#9a9488;font-size:.52rem">Fr</div><div style="color:#f0ece4;font-size:.6rem">16°</div></div></div></div>`,
+storageKey:'proj_wetter_state',
+chapters:[{title:'Kap 1 – Layout & Icons',range:[0,3]},{title:'Kap 2 – API & Daten',range:[4,7]},{title:'Kap 3 – Features',range:[8,10]}],
+exercises:[
+{tag:'HTML',title:'App-Layout',
+desc:`Erstelle <code>div#wetter-app</code> mit <code>div#suche</code> (input#stadt-input + button#suche-btn), <code>div#wetter-info</code> und <code>div#vorschau</code>.`,
+hint:`div#wetter-app > div#suche(input + button) + div#wetter-info + div#vorschau`,
+placeholder:`<div id="wetter-app">\n  <div id="suche">\n    <input id="stadt-input" placeholder="Stadt eingeben…" value="Nordhorn">\n    <button id="suche-btn">🔍</button>\n  </div>\n  <div id="wetter-info"></div>\n  <div id="vorschau"></div>\n</div>`,
+check(v){const ok=v.includes('id="wetter-app"')&&v.includes('id="stadt-input"')&&v.includes('id="wetter-info"');return{ok,msg:ok?'Perfekt! Layout steht.':'wetter-app, stadt-input, wetter-info, vorschau.'};},
+acc:`<div id="wetter-app" style="max-width:300px;margin:16px auto;font-family:sans-serif;color:#f0ece4"><div id="suche" style="display:flex;gap:7px;margin-bottom:14px"><input id="stadt-input" value="Nordhorn" placeholder="Stadt…" style="flex:1;background:#1a0e00;border:1px solid #2a1a00;border-radius:7px;padding:8px 12px;color:#f0ece4;font-size:.86rem"><button id="suche-btn" style="background:#ff6b35;border:none;border-radius:7px;padding:8px 14px;cursor:pointer;font-size:.88rem">🔍</button></div><div id="wetter-info"></div><div id="vorschau" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:10px"></div></div>\n`},
+{tag:'JS',title:'Wetter-Icon Funktion',
+desc:`Schreibe <code>wetterIcon(code)</code>: 0→"☀️", 1-3→"⛅", 4-48→"🌫️", 51-67→"🌧️", 71-77→"❄️", 80-82→"🌦️", 95-99→"⛈️", sonst "🌡️". Schreibe auch <code>wetterText(code)</code> analog.`,
+hint:`if(code===0)return"☀️"; if(code<=3)return"⛅"; ...`,
+placeholder:`function wetterIcon(c) {\n  if (c===0) return "☀️";\n  if (c<=3) return "⛅";\n  if (c<=48) return "🌫️";\n  if (c<=67) return "🌧️";\n  if (c<=77) return "❄️";\n  if (c<=82) return "🌦️";\n  if (c<=99) return "⛈️";\n  return "🌡️";\n}`,
+check(v){const ok=v.includes('wetterIcon')&&v.includes('code===0')&&v.includes('☀️');return{ok,msg:ok?'Super! Wettercodes werden zu Icons.':'if-Kette für alle Wettercodes.'};},
+acc:`function wetterIcon(c){if(c===0)return"☀️";if(c<=3)return"⛅";if(c<=48)return"🌫️";if(c<=67)return"🌧️";if(c<=77)return"❄️";if(c<=82)return"🌦️";if(c<=99)return"⛈️";return"🌡️";}\nfunction wetterText(c){if(c===0)return"Klar";if(c<=3)return"Bewölkt";if(c<=48)return"Nebelig";if(c<=67)return"Regen";if(c<=77)return"Schnee";if(c<=82)return"Schauer";return"Gewitter";}\n`},
+{tag:'JS',title:'Geocoding API',
+desc:`Async-Funktion <code>stadtSuchen(name)</code>: Fetch <code>https://geocoding-api.open-meteo.com/v1/search?name=\${name}&count=1&language=de</code>. Parse JSON. Gib data.results?.[0]||null zurück.`,
+hint:`await fetch(geocoding-url) + .json() + data.results?.[0]||null`,
+placeholder:`async function stadtSuchen(name) {\n  const url = \`https://geocoding-api.open-meteo.com/v1/search?name=\${encodeURIComponent(name)}&count=1&language=de\`;\n  const res = await fetch(url);\n  const data = await res.json();\n  return data.results?.[0] || null;\n}`,
+check(v){const ok=v.includes('stadtSuchen')&&v.includes('geocoding-api.open-meteo.com')&&v.includes('await fetch');return{ok,msg:ok?'Perfekt! Geocoding liefert Koordinaten für Städtenamen.':'async + await fetch + geocoding-api + results[0].'};},
+acc:`async function stadtSuchen(n){const r=await fetch(\`https://geocoding-api.open-meteo.com/v1/search?name=\${encodeURIComponent(n)}&count=1&language=de\`);const d=await r.json();return d.results?.[0]||null;}\n`},
+{tag:'JS',title:'Wetter laden',
+desc:`Async-Funktion <code>wetterLaden(lat,lon)</code>: Fetch <code>https://api.open-meteo.com/v1/forecast?latitude=\${lat}&longitude=\${lon}&current=temperature_2m,apparent_temperature,weathercode&daily=temperature_2m_max,weathercode&timezone=auto&forecast_days=5</code>. Gib JSON zurück.`,
+hint:`fetch mit lat/lon + current=temperature_2m,apparent_temperature,weathercode + daily=...`,
+placeholder:`async function wetterLaden(lat, lon) {\n  const url = \`https://api.open-meteo.com/v1/forecast?latitude=\${lat}&longitude=\${lon}&current=temperature_2m,apparent_temperature,weathercode&daily=temperature_2m_max,weathercode&timezone=auto&forecast_days=5\`;\n  const res = await fetch(url);\n  return await res.json();\n}`,
+check(v){const ok=v.includes('wetterLaden')&&v.includes('api.open-meteo.com')&&v.includes('temperature_2m');return{ok,msg:ok?'Super! Forecast-API liefert aktuelle und zukünftige Daten.':'api.open-meteo.com mit latitude, longitude, current, daily.'};},
+acc:`async function wetterLaden(lat,lon){const r=await fetch(\`https://api.open-meteo.com/v1/forecast?latitude=\${lat}&longitude=\${lon}&current=temperature_2m,apparent_temperature,weathercode&daily=temperature_2m_max,weathercode&timezone=auto&forecast_days=5\`);return await r.json();}\n`},
+{tag:'JS',title:'Lade-State',
+desc:`Schreibe <code>ladeAnzeige(zeigen)</code>: wenn true setze #wetter-info innerHTML auf "⏳ Lade Wetterdaten…" mit grauer Schrift.`,
+hint:`if(zeigen) el.innerHTML='<p style="color:#9a9488;...">⏳ Lade…</p>';`,
+placeholder:`function ladeAnzeige(zeigen) {\n  if (zeigen) {\n    document.getElementById("wetter-info").innerHTML = \`<p style="color:#9a9488;font-size:.82rem;padding:16px;text-align:center">⏳ Lade Wetterdaten…</p>\`;\n  }\n}`,
+check(v){const ok=v.includes('ladeAnzeige')&&v.includes('Lade');return{ok,msg:ok?'Korrekt! Lade-Feedback wichtig bei Netzwerk-Requests.':'ladeAnzeige mit innerHTML für Lade-Text.'};},
+acc:`function ladeAnzeige(z){if(z)document.getElementById("wetter-info").innerHTML='<p style="color:#9a9488;font-size:.82rem;padding:16px;text-align:center">⏳ Lade Wetterdaten…</p>';}\n`},
+{tag:'JS',title:'Haupt-Wetter rendern',
+desc:`<code>renderWetter(daten, stadtName)</code>: Setze #wetter-info innerHTML mit Stadtname, Temperatur (daten.current.temperature_2m gerundet), gefühlter Temperatur, Icon und Wettertext.`,
+hint:`const temp=Math.round(d.current.temperature_2m); const code=d.current.weathercode; ...innerHTML mit Stadtname + temp + wetterIcon(code).`,
+placeholder:`function renderWetter(daten, stadtName) {\n  const temp = Math.round(daten.current.temperature_2m);\n  const fuehlt = Math.round(daten.current.apparent_temperature);\n  const code = daten.current.weathercode;\n  document.getElementById("wetter-info").innerHTML = \`\n    <div style="display:flex;justify-content:space-between;align-items:flex-start">\n      <div>\n        <div style="font-size:.62rem;color:#9a9488">\${stadtName.toUpperCase()}</div>\n        <div style="font-size:3.5rem;color:#ff6b35;font-weight:700">\${temp}°</div>\n        <div style="font-size:.7rem;color:#9a9488">Gefühlt \${fuehlt}° · \${wetterText(code)}</div>\n      </div>\n      <div style="font-size:2.4rem">\${wetterIcon(code)}</div>\n    </div>\n  \`;\n}`,
+check(v){const ok=v.includes('renderWetter')&&v.includes('temperature_2m')&&v.includes('weathercode');return{ok,msg:ok?'Super! Hauptanzeige zeigt alle wichtigen Daten.':'renderWetter mit temp, fuehlt, icon, wetterText.'};},
+acc:`function renderWetter(d,name){const t=Math.round(d.current.temperature_2m);const f=Math.round(d.current.apparent_temperature);const c=d.current.weathercode;document.getElementById("wetter-info").innerHTML=\`<div style="background:linear-gradient(135deg,#1a0e00,#0f1520);border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><div><div style="color:#9a9488;font-size:.6rem">\${name.toUpperCase()}</div><div style="font-size:3.2rem;color:#ff6b35;font-weight:700;line-height:1">\${t}°</div><div style="color:#9a9488;font-size:.68rem">Gefühlt \${f}° · \${wetterText(c)}</div></div><div style="font-size:2.4rem">\${wetterIcon(c)}</div></div>\`;}\n`},
+{tag:'JS',title:'5-Tage-Vorschau',
+desc:`<code>renderVorschau(daten)</code>: Iteriere daten.daily.time.slice(0,5). Pro Tag: Wochentag mit toLocaleDateString("de-DE",{weekday:"short"}), Icon (daily.weathercode[i]), Maxtemp (daily.temperature_2m_max[i]). Div in #vorschau.`,
+hint:`d.daily.time.slice(0,5).forEach((ds,i)=>{ wt=new Date(ds).toLocaleDateString("de-DE",{weekday:"short"}); ...})`,
+placeholder:`function renderVorschau(daten) {\n  const v = document.getElementById("vorschau");\n  v.innerHTML = "";\n  daten.daily.time.slice(0, 5).forEach((ds, i) => {\n    const wt = new Date(ds).toLocaleDateString("de-DE", {weekday:"short"});\n    const temp = Math.round(daten.daily.temperature_2m_max[i]);\n    const icon = wetterIcon(daten.daily.weathercode[i]);\n    const d = document.createElement("div");\n    d.innerHTML = \`<div>\${icon}</div><div style="color:#9a9488;font-size:.52rem">\${wt}</div><div style="font-size:.62rem">\${temp}°</div>\`;\n    v.appendChild(d);\n  });\n}`,
+check(v){const ok=v.includes('renderVorschau')&&v.includes('daily.time')&&v.includes('toLocaleDateString');return{ok,msg:ok?'Perfekt! 5-Tage-Vorschau rundet die App ab.':'daily.time.slice(0,5) + toLocaleDateString + temperature_2m_max.'};},
+acc:`function renderVorschau(d){const el=document.getElementById("vorschau");el.innerHTML="";d.daily.time.slice(0,5).forEach((ds,i)=>{const wt=new Date(ds).toLocaleDateString("de-DE",{weekday:"short"});const tmp=Math.round(d.daily.temperature_2m_max[i]);const ic=wetterIcon(d.daily.weathercode[i]);const div=document.createElement("div");div.style.cssText="background:rgba(255,107,53,.08);border-radius:7px;padding:7px 3px;text-align:center;border:1px solid rgba(255,107,53,.15)";div.innerHTML=\`<div style="font-size:1rem">\${ic}</div><div style="color:#9a9488;font-size:.52rem;margin:2px 0">\${wt}</div><div style="color:#f0ece4;font-size:.6rem">\${tmp}°</div>\`;el.appendChild(div);});}\n`},
+{tag:'JS',title:'Haupt-Funktion verbinden',
+desc:`<code>async wetterAbrufen()</code>: ladeAnzeige(true). stadtSuchen(). Wenn nicht gefunden: Fehlermeldung. Sonst: wetterLaden() → renderWetter() + renderVorschau(). Verbinde Button und Enter.`,
+hint:`ladeAnzeige(true); const ort=await stadtSuchen(name); if(!ort)fehler; const d=await wetterLaden(...); renderWetter(d,ort.name); renderVorschau(d);`,
+placeholder:`async function wetterAbrufen() {\n  const name = document.getElementById("stadt-input").value.trim();\n  if (!name) return;\n  ladeAnzeige(true);\n  try {\n    const ort = await stadtSuchen(name);\n    if (!ort) { document.getElementById("wetter-info").innerHTML='<p style="color:#ff5c5c">Stadt nicht gefunden.</p>'; return; }\n    const daten = await wetterLaden(ort.latitude, ort.longitude);\n    renderWetter(daten, ort.name);\n    renderVorschau(daten);\n    localStorage.setItem("letzte-wetter-stadt", ort.name);\n  } catch(e) { document.getElementById("wetter-info").innerHTML='<p style="color:#ff5c5c">Fehler beim Laden.</p>'; }\n}\ndocument.getElementById("suche-btn").onclick = wetterAbrufen;\ndocument.getElementById("stadt-input").onkeydown = e => { if(e.key==="Enter") wetterAbrufen(); };`,
+check(v){const ok=v.includes('wetterAbrufen')&&v.includes('stadtSuchen')&&v.includes('wetterLaden');return{ok,msg:ok?'Exzellent! Komplette Wetter-App funktioniert.':'wetterAbrufen verbindet stadtSuchen + wetterLaden + render.'};},
+acc:`async function wetterAbrufen(){const n=document.getElementById("stadt-input").value.trim();if(!n)return;ladeAnzeige(true);try{const ort=await stadtSuchen(n);if(!ort){document.getElementById("wetter-info").innerHTML='<p style="color:#ff5c5c;font-size:.8rem;padding:12px">❌ Stadt nicht gefunden.</p>';return;}const d=await wetterLaden(ort.latitude,ort.longitude);renderWetter(d,ort.name);renderVorschau(d);localStorage.setItem("letzte-wetter-stadt",ort.name);}catch(e){document.getElementById("wetter-info").innerHTML='<p style="color:#ff5c5c;font-size:.8rem;padding:12px">❌ Fehler.</p>';}}\ndocument.getElementById("suche-btn").onclick=wetterAbrufen;\ndocument.getElementById("stadt-input").onkeydown=e=>{if(e.key==="Enter")wetterAbrufen();};\n`},
+{tag:'JS',title:'Letzte Stadt + Try/Catch',
+desc:`Beim Start: Lese "letzte-wetter-stadt" aus localStorage. Wenn vorhanden: setze als Input-Wert und rufe wetterAbrufen() auf. Ergänze außerdem vollständige try/catch-Fehlerbehandlung in wetterAbrufen().`,
+hint:`const ls=localStorage.getItem("letzte-wetter-stadt")||"Nordhorn"; input.value=ls; wetterAbrufen();`,
+placeholder:`const letzteStadt = localStorage.getItem("letzte-wetter-stadt") || "Nordhorn";\ndocument.getElementById("stadt-input").value = letzteStadt;\nwetterAbrufen();`,
+check(v){const ok=v.includes('letzte-wetter-stadt')&&v.includes('localStorage');return{ok,msg:ok?'Super! App merkt sich die letzte Stadt.':'localStorage.getItem + input.value setzen + wetterAbrufen.'};},
+acc:`{const ls=localStorage.getItem("letzte-wetter-stadt")||"Nordhorn";document.getElementById("stadt-input").value=ls;wetterAbrufen();}\n`},
+{tag:'JS',title:'°C / °F Umschalten',
+desc:`<code>let einheit = "C"</code>. Funktion <code>tempAnzeige(celsius)</code> konvertiert je nach einheit (°F = celsius*9/5+32). Füge Toggle-Button hinzu. Speichere Präferenz in localStorage.`,
+hint:`einheit==="F" ? Math.round(c*9/5+32)+"°F" : Math.round(c)+"°C"`,
+placeholder:`let einheit = localStorage.getItem("wetter-einheit") || "C";\nfunction tempAnzeige(c) {\n  return einheit === "F" ? Math.round(c * 9/5 + 32) + "°F" : Math.round(c) + "°C";\n}`,
+check(v){const ok=v.includes('einheit')&&(v.includes('9/5')||v.includes('°F'));return{ok,msg:ok?'Super! °C/°F macht die App international.':'einheit-Variable + 9/5+32 Konvertierung.'};},
+acc:`let einheit=localStorage.getItem("wetter-einheit")||"C";\nfunction tempAnzeige(c){return einheit==="F"?Math.round(c*9/5+32)+"°F":Math.round(c)+"°C";}\nconst eBtn=document.createElement("button");eBtn.style.cssText="margin-top:7px;background:none;border:1px solid #2a1a00;color:#9a9488;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:.7rem";eBtn.textContent=einheit==="C"?"Zu °F":"Zu °C";eBtn.onclick=()=>{einheit=einheit==="C"?"F":"C";localStorage.setItem("wetter-einheit",einheit);eBtn.textContent=einheit==="C"?"Zu °F":"Zu °C";wetterAbrufen();};document.getElementById("wetter-app").appendChild(eBtn);\n`},
+{tag:'JS',title:'Aktualisieren & fertigstellen',
+desc:`Füge einen 🔄-Button hinzu, der wetterAbrufen() aufruft. Zeige in renderWetter() auch das aktuelle Datum/Zeit (<code>new Date().toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long"})</code>) klein im Header.`,
+hint:`const rfBtn + onclick=wetterAbrufen. In renderWetter: new Date().toLocaleString("de-DE",...).`,
+placeholder:`const rfBtn = document.createElement("button");\nrfBtn.textContent = "🔄";\nrfBtn.onclick = wetterAbrufen;\nrfBtn.style.cssText = "background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.3);color:#ff6b35;border-radius:7px;padding:8px 12px;cursor:pointer";\ndocument.getElementById("suche").appendChild(rfBtn);`,
+check(v){const ok=v.includes('wetterAbrufen')&&(v.includes('toLocaleString')||v.includes('🔄'));return{ok,msg:ok?'🏆 Wetter-App abgeschlossen! Vollständige API-App gebaut.':'🔄-Button + wetterAbrufen + optionales Datum.'};},
+acc:`const rfBtn2=document.createElement("button");rfBtn2.textContent="🔄";rfBtn2.onclick=wetterAbrufen;rfBtn2.style.cssText="background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.3);color:#ff6b35;border-radius:7px;padding:8px 12px;cursor:pointer";document.getElementById("suche").appendChild(rfBtn2);\n`}
+]},
+// ── QUIZ ──
+{id:'quiz',title:'Quiz App',icon:'🧠',
+accent:'#a78bfa',accentBg:'rgba(167,139,250,0.1)',
+desc:'Fragen & Antworten mit Countdown-Timer, Highscore und Kategorien.',
+tags:['Mittel','localStorage','Arrays','Timer'],tagHL:0,difficulty:3,
+previewBg:'#0c0814',
+previewHTML:`<div style="width:290px;background:#0f0a1a;border-radius:12px;overflow:hidden;font-family:sans-serif;box-shadow:0 20px 60px #000c"><div style="background:#0a0614;padding:11px 16px;border-bottom:1px solid #1e1430;display:flex;justify-content:space-between;align-items:center"><span style="color:#a78bfa;font-size:.78rem">🧠 JS-Quiz</span><div style="display:flex;gap:7px"><span style="color:#9a9488;font-size:.6rem">3/8</span><span style="color:#f0c040;font-size:.6rem;background:#f0c04011;padding:1px 6px;border-radius:4px">⏱ 18</span></div></div><div style="height:3px;background:#1e1430"><div style="width:37%;height:100%;background:#a78bfa"></div></div><div style="padding:14px 16px"><div style="color:#f0ece4;font-size:.75rem;line-height:1.5;margin-bottom:12px">Was gibt typeof null zurück?</div><div style="display:flex;flex-direction:column;gap:5px"><div style="padding:7px 11px;border-radius:6px;border:1px solid #1e1430;color:#9a9488;font-size:.66rem">null</div><div style="padding:7px 11px;border-radius:6px;border:1px solid #3d6fff;background:#3d6fff11;color:#3d6fff;font-size:.66rem">object ✓</div><div style="padding:7px 11px;border-radius:6px;border:1px solid #1e1430;color:#9a9488;font-size:.66rem">undefined</div><div style="padding:7px 11px;border-radius:6px;border:1px solid #1e1430;color:#9a9488;font-size:.66rem">string</div></div></div><div style="padding:8px 16px;background:#0a0614;border-top:1px solid #1e1430;display:flex;justify-content:space-between;align-items:center"><span style="color:#3ecf8e;font-size:.6rem">✓ 2 richtig</span><div style="background:#a78bfa;color:#0a0a0a;padding:5px 14px;border-radius:5px;font-size:.68rem;font-weight:600">Weiter →</div></div></div>`,
+storageKey:'proj_quiz_state',
+chapters:[{title:'Kap 1 – Daten & Layout',range:[0,2]},{title:'Kap 2 – Spiellogik',range:[3,6]},{title:'Kap 3 – Timer & Score',range:[7,9]}],
+exercises:[
+{tag:'Daten',title:'Fragen-Array',
+desc:`Definiere <code>const FRAGEN</code> mit 8+ Fragen. Jede hat: <code>frage</code> (String), <code>antworten</code> (4er-Array), <code>richtig</code> (Index 0-3).`,
+hint:`[{frage:"Was ergibt typeof null?",antworten:["null","object","undefined","string"],richtig:1},...]`,
+placeholder:`const FRAGEN = [\n  { frage: "Was ergibt typeof null?", antworten: ["null","object","undefined","string"], richtig: 1 },\n  { frage: "Welches ist kein JS-Datentyp?", antworten: ["String","Integer","Boolean","Number"], richtig: 1 },\n  { frage: "Was macht Array.push()?", antworten: ["Löschen","Hinzufügen","Umkehren","Zählen"], richtig: 1 },\n  { frage: "Wie schreibt man ein Template Literal?", antworten: ["'text'",'"text"',"\`text\`","[text]"], richtig: 2 },\n  { frage: "Was ist ein Closure?", antworten: ["Array","Funktion mit äußerem Scope","Tag","Selektor"], richtig: 1 },\n  { frage: "Was macht filter()?", antworten: ["Sortiert","Filtert nach Bedingung","Summiert","Verdoppelt"], richtig: 1 },\n  { frage: "Was ist NaN?", antworten: ["Null","Undefiniert","Kein Zahlenwert","Funktion"], richtig: 2 },\n  { frage: "Was macht ===?", antworten: ["Zuweisung","Typ-unsicher","Strikter Vergleich","Bitoperator"], richtig: 2 }\n];`,
+check(v){const ok=v.includes('FRAGEN')&&v.includes('antworten')&&v.includes('richtig');return{ok,msg:ok?'Perfekt! Fragen-Datenstruktur klar.':'FRAGEN mit frage, antworten[] und richtig-Index.'};},
+acc:`const FRAGEN=[{frage:"Was ergibt typeof null?",antworten:["null","object","undefined","string"],richtig:1},{frage:"Kein JS-Datentyp?",antworten:["String","Integer","Boolean","Number"],richtig:1},{frage:"Array.push() macht?",antworten:["Löschen","Hinzufügen","Umkehren","Zählen"],richtig:1},{frage:"Template Literal?",antworten:["'text'",'"text"',"\`text\`","[text]"],richtig:2},{frage:"Was ist ein Closure?",antworten:["Array","Funktion mit äußerem Scope","HTML-Tag","Selektor"],richtig:1},{frage:"Array.filter() macht?",antworten:["Sortiert","Filtert","Summiert","Verdoppelt"],richtig:1},{frage:"Was ist NaN?",antworten:["Null","Undefiniert","Kein Zahlenwert","Funktion"],richtig:2},{frage:"Was macht ===?",antworten:["Zuweisung","Typ-unsicher","Strikter Vergleich","Bitoperator"],richtig:2}];\n`},
+{tag:'HTML',title:'Quiz-Layout',
+desc:`Erstelle <code>div#quiz</code> mit: <code>div#kopf</code> (span#fragen-zaehler + span#punkte-anzeige + span#timer-anzeige), Fortschrittsbalken (div#fort-fill), <code>div#frage-text</code>, <code>div#antworten</code>, <code>div#fb-quiz</code>.`,
+hint:`div#quiz > div#kopf + div(div#fort-fill) + div#frage-text + div#antworten + div#fb-quiz`,
+placeholder:`<div id="quiz">\n  <div id="kopf">\n    <span id="fragen-zaehler">1/8</span>\n    <span id="punkte-anzeige">0 Punkte</span>\n    <span id="timer-anzeige">⏱ 20</span>\n  </div>\n  <div style="height:3px;background:#1e1430"><div id="fort-fill" style="height:100%;background:#a78bfa;width:0%;transition:width .4s"></div></div>\n  <div id="frage-text"></div>\n  <div id="antworten"></div>\n  <div id="fb-quiz"></div>\n</div>`,
+check(v){const ok=v.includes('id="quiz"')&&v.includes('id="antworten"')&&v.includes('id="frage-text"');return{ok,msg:ok?'Perfekt! Quiz-Layout steht.':'quiz, frage-text, antworten, fb-quiz.'};},
+acc:`<div id="quiz" style="max-width:340px;margin:16px auto;background:#0f0a1a;border-radius:12px;overflow:hidden;font-family:sans-serif"><div id="kopf" style="background:#0a0614;padding:11px 15px;border-bottom:1px solid #1e1430;display:flex;justify-content:space-between;align-items:center"><span id="fragen-zaehler" style="color:#9a9488;font-size:.68rem;font-family:monospace">1/${FRAGEN.length}</span><span id="punkte-anzeige" style="color:#f0c040;font-size:.66rem;background:#f0c04011;padding:2px 7px;border-radius:4px">0 Punkte</span><span id="timer-anzeige" style="color:#f0c040;font-size:.66rem;background:#f0c04011;padding:2px 7px;border-radius:4px">⏱ 20</span></div><div style="height:3px;background:#1e1430"><div id="fort-fill" style="height:100%;background:#a78bfa;width:0%;transition:width .4s ease"></div></div><div style="padding:16px 15px"><div id="frage-text" style="color:#f0ece4;font-size:.8rem;line-height:1.55;margin-bottom:12px;min-height:2.5rem"></div><div id="antworten" style="display:flex;flex-direction:column;gap:6px"></div><div id="fb-quiz" style="margin-top:9px;font-size:.72rem;font-family:monospace;min-height:1.4rem"></div></div></div>\n`},
+{tag:'JS',title:'Quiz-State',
+desc:`Definiere <code>let qIdx=0, qPunkte=0, qBeantwortet=false</code>. Schreibe <code>fortschrittAkt()</code>: Setze fort-fill Breite, fragen-zaehler Text und punkte-anzeige Text.`,
+hint:`qIdx/FRAGEN.length*100 für Breite. \`Frage \${qIdx+1}/\${FRAGEN.length}\` für Zähler.`,
+placeholder:`let qIdx = 0, qPunkte = 0, qBeantwortet = false;\nfunction fortschrittAkt() {\n  document.getElementById("fort-fill").style.width = (qIdx/FRAGEN.length*100)+"%";\n  document.getElementById("fragen-zaehler").textContent = \`Frage \${qIdx+1}/\${FRAGEN.length}\`;\n  document.getElementById("punkte-anzeige").textContent = qPunkte+" Punkte";\n}`,
+check(v){const ok=v.includes('qIdx')&&v.includes('qPunkte')&&v.includes('fortschrittAkt');return{ok,msg:ok?'Super! State klar definiert.':'qIdx + qPunkte + qBeantwortet + fortschrittAkt.'};},
+acc:`let qIdx=0,qPunkte=0,qBeantwortet=false;\nfunction fortschrittAkt(){document.getElementById("fort-fill").style.width=(qIdx/FRAGEN.length*100)+"%";document.getElementById("fragen-zaehler").textContent=\`\${qIdx+1}/\${FRAGEN.length}\`;document.getElementById("punkte-anzeige").textContent=qPunkte+" Punkte";}\n`},
+{tag:'JS',title:'Frage anzeigen',
+desc:`<code>frageAnzeigen()</code>: Hole FRAGEN[qIdx]. Setze #frage-text. Leere #antworten. Für jede Antwort: Button mit onclick=antwortPruefen(i). Leere #fb-quiz. qBeantwortet=false. fortschrittAkt().`,
+hint:`FRAGEN[qIdx].antworten.forEach((text,i)=>{ const b=...; b.onclick=()=>antwortPruefen(i); ad.appendChild(b); });`,
+placeholder:`function frageAnzeigen() {\n  const f = FRAGEN[qIdx];\n  qBeantwortet = false;\n  document.getElementById("frage-text").textContent = f.frage;\n  document.getElementById("fb-quiz").textContent = "";\n  const ad = document.getElementById("antworten");\n  ad.innerHTML = "";\n  f.antworten.forEach((text, i) => {\n    const b = document.createElement("button");\n    b.textContent = text;\n    b.onclick = () => antwortPruefen(i);\n    ad.appendChild(b);\n  });\n  fortschrittAkt();\n}`,
+check(v){const ok=v.includes('frageAnzeigen')&&v.includes('FRAGEN[qIdx]')&&v.includes('antwortPruefen');return{ok,msg:ok?'Exzellent! Fragen werden dynamisch gerendert.':'frageAnzeigen + FRAGEN[qIdx] + forEach Buttons.'};},
+acc:`function frageAnzeigen(){const f=FRAGEN[qIdx];qBeantwortet=false;timerStarten();document.getElementById("frage-text").textContent=f.frage;document.getElementById("fb-quiz").textContent="";const ad=document.getElementById("antworten");ad.innerHTML="";f.antworten.forEach((text,i)=>{const b=document.createElement("button");b.textContent=text;b.style.cssText="padding:8px 12px;border-radius:6px;border:1px solid #1e1430;background:none;color:#f0ece4;font-size:.74rem;cursor:pointer;text-align:left;transition:border-color .15s";b.onmouseover=()=>b.style.borderColor="#a78bfa";b.onmouseout=()=>b.style.borderColor="#1e1430";b.onclick=()=>antwortPruefen(i,b);ad.appendChild(b);});fortschrittAkt();}\n`},
+{tag:'JS',title:'Antwort prüfen',
+desc:`<code>antwortPruefen(ausgewaehlt)</code>: Wenn qBeantwortet return. qBeantwortet=true. Vergleiche mit FRAGEN[qIdx].richtig. Wenn richtig: qPunkte++, grünes Feedback. Sonst rotes Feedback + richtige Antwort anzeigen.`,
+hint:`if(qBeantwortet)return; qBeantwortet=true; if(ausgewaehlt===f.richtig){qPunkte++; grün} else{rot + richtige Antwort}`,
+placeholder:`function antwortPruefen(ausgewaehlt) {\n  if (qBeantwortet) return;\n  qBeantwortet = true;\n  clearInterval(timerIv);\n  const f = FRAGEN[qIdx];\n  const fb = document.getElementById("fb-quiz");\n  if (ausgewaehlt === f.richtig) {\n    qPunkte++; fb.textContent = "✓ Richtig!"; fb.style.color = "#4ade80";\n  } else {\n    fb.textContent = "✗ Falsch. Richtig: " + f.antworten[f.richtig]; fb.style.color = "#f87171";\n  }\n  fortschrittAkt();\n}`,
+check(v){const ok=v.includes('antwortPruefen')&&v.includes('qBeantwortet')&&v.includes('f.richtig');return{ok,msg:ok?'Perfekt! Antworten korrekt ausgewertet.':'qBeantwortet-Check + f.richtig Vergleich + qPunkte++.'};},
+acc:`function antwortPruefen(idx,btn){if(qBeantwortet)return;qBeantwortet=true;clearInterval(timerIv);const f=FRAGEN[qIdx];const fb=document.getElementById("fb-quiz");document.querySelectorAll("#antworten button").forEach((b,i)=>{if(i===f.richtig)b.style.cssText+="border-color:#4ade80;color:#4ade80";else if(b===btn&&i!==f.richtig)b.style.cssText+="border-color:#f87171;color:#f87171";b.style.cursor="default";});if(idx===f.richtig){qPunkte++;fb.textContent="✓ Richtig!";fb.style.color="#4ade80";}else{fb.textContent="✗ Falsch. Richtig: "+f.antworten[f.richtig];fb.style.color="#f87171";}fortschrittAkt();}\n`},
+{tag:'JS',title:'Nächste Frage & Quiz-Ende',
+desc:`<code>naechsteFrage()</code>: Wenn !qBeantwortet Hinweis. qIdx++. Wenn >= FRAGEN.length: quizEnde(). Sonst frageAnzeigen(). Füge Weiter-Button ein.`,
+hint:`qIdx++; if(qIdx>=FRAGEN.length) quizEnde(); else frageAnzeigen();`,
+placeholder:`function naechsteFrage() {\n  if (!qBeantwortet) { document.getElementById("fb-quiz").textContent="Bitte erst antworten!"; return; }\n  qIdx++;\n  if (qIdx >= FRAGEN.length) quizEnde();\n  else frageAnzeigen();\n}`,
+check(v){const ok=v.includes('naechsteFrage')&&v.includes('qIdx++')&&v.includes('quizEnde');return{ok,msg:ok?'Super! Navigation zwischen Fragen funktioniert.':'qIdx++ + Grenzprüfung + quizEnde vs frageAnzeigen.'};},
+acc:`function naechsteFrage(){if(!qBeantwortet){document.getElementById("fb-quiz").textContent="Erst antworten!";return;}qIdx++;if(qIdx>=FRAGEN.length)quizEnde();else frageAnzeigen();}\nconst wBtn=document.createElement("button");wBtn.textContent="Weiter →";wBtn.style.cssText="margin-top:7px;background:#a78bfa;color:#0a0a0a;border:none;border-radius:6px;padding:7px 18px;cursor:pointer;font-size:.78rem;font-weight:600";wBtn.onclick=naechsteFrage;document.getElementById("quiz").querySelector("div:last-child").before(wBtn);\n`},
+{tag:'JS',title:'Quiz-Ende & Neustart',
+desc:`<code>quizEnde()</code>: Prozent berechnen, Bewertungs-Emoji, Ergebnis anzeigen, highscoreSpeichern(qPunkte). <code>quizNeustart()</code>: State zurücksetzen, FRAGEN mischen, frageAnzeigen().`,
+hint:`const p=Math.round(qPunkte/FRAGEN.length*100); quiz.innerHTML=\`...\`; highscoreSpeichern(qPunkte);`,
+placeholder:`function quizEnde() {\n  const p = Math.round(qPunkte/FRAGEN.length*100);\n  const b = p>=80?"🏆":p>=50?"👍":"📚";\n  document.getElementById("quiz").innerHTML = \`<div style="text-align:center;padding:28px 20px">\n    <div style="font-size:3rem">\${b}</div>\n    <div style="font-size:1.6rem;color:#a78bfa;font-weight:700">\${qPunkte}/\${FRAGEN.length}</div>\n    <div style="color:#9a9488;font-size:.76rem">\${p}% richtig</div>\n    <button onclick="quizNeustart()" style="margin-top:16px;background:#a78bfa;color:#0a0a0a;border:none;border-radius:7px;padding:9px 22px;cursor:pointer;font-size:.82rem;font-weight:700">Nochmal →</button>\n  </div>\`;\n  highscoreSpeichern(qPunkte);\n}\nfunction quizNeustart(){\n  qIdx=0;qPunkte=0;qBeantwortet=false;\n  FRAGEN.sort(()=>Math.random()-.5);\n  frageAnzeigen();\n}`,
+check(v){const ok=v.includes('quizEnde')&&v.includes('quizNeustart')&&v.includes('Math.random()');return{ok,msg:ok?'Exzellent! Ende-Screen und Neustart funktionieren.':'quizEnde + quizNeustart mit Math.random Sort.'};},
+acc:`function quizEnde(){const p=Math.round(qPunkte/FRAGEN.length*100);const b=p>=80?"🏆":p>=50?"👍":"📚";highscoreSpeichern(qPunkte);document.getElementById("quiz").innerHTML=\`<div style="text-align:center;padding:28px 20px"><div style="font-size:3rem;margin-bottom:8px">\${b}</div><div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#a78bfa">\${qPunkte}/\${FRAGEN.length}</div><div style="color:#9a9488;font-size:.72rem;margin-bottom:5px">\${p}% richtig</div><div style="color:#f0c040;font-size:.66rem;margin-bottom:16px">Highscore: \${localStorage.getItem("quiz-highscore")||0}</div><button onclick="quizNeustart()" style="background:#a78bfa;color:#0a0a0a;border:none;border-radius:7px;padding:9px 22px;cursor:pointer;font-size:.82rem;font-weight:700">Nochmal →</button></div>\`;}\nfunction quizNeustart(){qIdx=0;qPunkte=0;qBeantwortet=false;FRAGEN.sort(()=>Math.random()-.5);frageAnzeigen();}\n`},
+{tag:'JS',title:'Countdown-Timer',
+desc:`<code>let timerIv=null, timerSek=20</code>. <code>timerStarten()</code>: clearInterval. timerSek=20. setInterval jede Sekunde: timerSek--. Wenn 0: clearInterval, qBeantwortet=true, Feedback "⏱ Zeit!". Zeige in #timer-anzeige.`,
+hint:`clearInterval(timerIv); timerSek=20; timerIv=setInterval(()=>{ timerSek--; update; if(timerSek<=0){clear;timeout;} },1000);`,
+placeholder:`let timerIv = null, timerSek = 20;\nfunction timerStarten() {\n  clearInterval(timerIv);\n  timerSek = 20;\n  const tel = document.getElementById("timer-anzeige");\n  timerIv = setInterval(() => {\n    timerSek--;\n    if (tel) tel.textContent = "⏱ " + timerSek;\n    if (timerSek <= 0) {\n      clearInterval(timerIv);\n      qBeantwortet = true;\n      const fb = document.getElementById("fb-quiz");\n      if(fb) { fb.textContent="⏱ Zeit abgelaufen!"; fb.style.color="#f0c040"; }\n    }\n  }, 1000);\n}`,
+check(v){const ok=v.includes('timerIv')&&v.includes('setInterval')&&v.includes('clearInterval');return{ok,msg:ok?'Klasse! Timer erhöht den Spielspaß.':'setInterval + clearInterval + timerSek-- + Zeit-Feedback.'};},
+acc:`let timerIv=null,timerSek=20;\nfunction timerStarten(){clearInterval(timerIv);timerSek=20;const tel=document.getElementById("timer-anzeige");timerIv=setInterval(()=>{timerSek--;if(tel)tel.textContent="⏱ "+timerSek;if(timerSek<=0){clearInterval(timerIv);qBeantwortet=true;const fb=document.getElementById("fb-quiz");if(fb){fb.textContent="⏱ Zeit!";fb.style.color="#f0c040";}}},1000);}\n`},
+{tag:'JS',title:'Highscore',
+desc:`<code>highscoreSpeichern(score)</code>: Lies aus localStorage, wenn score>hs speichere. <code>highscoreAnzeigen()</code>: zeige im Kopf klein den aktuellen HS.`,
+hint:`const hs=parseInt(localStorage.getItem("quiz-highscore")||"0"); if(score>hs)localStorage.setItem("quiz-highscore",score);`,
+placeholder:`function highscoreSpeichern(score) {\n  const hs = parseInt(localStorage.getItem("quiz-highscore") || "0");\n  if (score > hs) localStorage.setItem("quiz-highscore", score);\n}`,
+check(v){const ok=v.includes('highscoreSpeichern')&&v.includes('quiz-highscore')&&v.includes('localStorage');return{ok,msg:ok?'Super! Highscore motiviert zum Wiederholungsspielen.':'localStorage.getItem + Vergleich + setItem.'};},
+acc:`function highscoreSpeichern(s){const hs=parseInt(localStorage.getItem("quiz-highscore")||"0");if(s>hs)localStorage.setItem("quiz-highscore",s);}\n`},
+{tag:'JS',title:'Keyboard 1-4 & Start-Screen',
+desc:`keydown: Tasten 1-4 wählen Antwort (antwortPruefen(parseInt(e.key)-1)), Enter → naechsteFrage(). Füge Start-Screen hinzu: Zeige Titel, HS, Start-Button. quizStarten() versteckt Screen und ruft quizNeustart() auf.`,
+hint:`window.addEventListener("keydown",e=>{ if("1234".includes(e.key))antwortPruefen(...); if(e.key==="Enter")naechsteFrage(); });`,
+placeholder:`window.addEventListener("keydown", e => {\n  if (!qBeantwortet && "1234".includes(e.key)) antwortPruefen(parseInt(e.key)-1);\n  else if (qBeantwortet && e.key==="Enter") naechsteFrage();\n});\n// Start-Screen:\nconst ss = document.createElement("div");\nss.innerHTML = \`<div style="text-align:center;padding:28px 20px"><div style="font-size:2.8rem;margin-bottom:8px">🧠</div><div style="color:#a78bfa;font-size:1.4rem;font-weight:700;margin-bottom:6px">Quiz App</div><div style="color:#9a9488;font-size:.72rem;margin-bottom:14px">\${FRAGEN.length} Fragen · 20s Timer</div><div style="color:#f0c040;font-size:.66rem;margin-bottom:16px">Highscore: \${localStorage.getItem("quiz-highscore")||0}</div><button onclick="quizStarten()" style="background:#a78bfa;color:#0a0a0a;border:none;border-radius:7px;padding:10px 24px;cursor:pointer;font-weight:700">Start →</button></div>\`;\ndocument.getElementById("quiz").innerHTML="";\ndocument.getElementById("quiz").appendChild(ss);\nfunction quizStarten(){ ss.remove(); quizNeustart(); }`,
+check(v){const ok=v.includes('quizStarten')||v.includes('"1234"');return{ok,msg:ok?'🏆 Quiz-App abgeschlossen! Vollständige Quiz-App gebaut.':'quizStarten + keydown 1234.'};},
+acc:`window.addEventListener("keydown",e=>{if(!qBeantwortet&&"1234".includes(e.key))antwortPruefen(parseInt(e.key)-1,document.querySelectorAll("#antworten button")[parseInt(e.key)-1]);else if(qBeantwortet&&(e.key==="Enter"||e.key===" "))naechsteFrage();});\nconst qss=document.createElement("div");qss.style.cssText="text-align:center;padding:28px 20px";qss.innerHTML=\`<div style="font-size:2.8rem;margin-bottom:8px">🧠</div><div style="color:#a78bfa;font-size:1.4rem;font-weight:700;margin-bottom:5px">Quiz App</div><div style="color:#9a9488;font-size:.7rem;margin-bottom:12px">\${FRAGEN.length} Fragen · 20s Timer</div><div style="color:#f0c040;font-size:.64rem;margin-bottom:14px">Highscore: \${localStorage.getItem("quiz-highscore")||0}</div><button onclick="quizStarten()" style="background:#a78bfa;color:#0a0a0a;border:none;border-radius:7px;padding:9px 22px;cursor:pointer;font-size:.82rem;font-weight:700">Starten →</button>\`;document.getElementById("quiz").innerHTML="";document.getElementById("quiz").appendChild(qss);\nfunction quizStarten(){qss.remove();quizNeustart();}\n`}
+]}
+]; // END PROJECTS
+
+// ═══════════════════════════════════════════
+// ENGINE
+// ═══════════════════════════════════════════
+let AP=null,AS=null; // active project, active state
+
+function jparse(s){try{return JSON.parse(s);}catch{return null;}}
+function getState(p){const s=jparse(localStorage.getItem(p.storageKey));return(s&&Array.isArray(s.solved)&&s.solved.length===p.exercises.length)?s:{current:0,solved:new Array(p.exercises.length).fill(false)};}
+function saveState(){try{localStorage.setItem(AP.storageKey,JSON.stringify(AS));}catch{}}
+function isUnlocked(i){return i===0||AS.solved[i-1];}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── LANDING ──
+function renderLanding(){
+  const pg=document.getElementById('pg');
+  PROJECTS.forEach(proj=>{
+    const s=jparse(localStorage.getItem(proj.storageKey));
+    const done=s?.solved?s.solved.filter(Boolean).length:0;
+    const total=proj.exercises.length;
+    const pct=total?Math.round(done/total*100):0;
+    const dots=Array.from({length:5},(_,i)=>`<div class="dd${i<proj.difficulty?' on':''}"></div>`).join('');
+    const tagHtml=proj.tags.map((t,i)=>i===proj.tagHL
+      ?`<span class="proj-tag hl" style="--tag-bg:${proj.accent}22;--tag-c:${proj.accent}">${t}</span>`
+      :`<span class="proj-tag">${t}</span>`).join('');
+    const c=document.createElement('div');
+    c.className='proj-card reveal';
+    c.style.setProperty('--ca',proj.accent);
+    c.style.setProperty('--prev-bg',proj.previewBg);
+    c.innerHTML=`<div class="proj-preview"><div class="proj-preview-inner">${proj.previewHTML}</div></div>
+<div class="proj-body">
+  <div class="proj-tags">${tagHtml}</div>
+  <div class="proj-title">${proj.icon} ${proj.title}</div>
+  <p class="proj-desc">${proj.desc}</p>
+  <div class="proj-stats"><div class="proj-stat"><strong>${total}</strong><span>Übungen</span></div><div class="proj-stat"><strong>~${Math.ceil(total/8)}h</strong><span>Dauer</span></div></div>
+  <div class="diff"><span class="diff-lbl">Schwierigkeit</span><div class="diff-dots">${dots}</div></div>
+  <div class="prog-wrap"><div class="prog-lbl"><span>Fortschritt</span><span>${done}/${total}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+  <button class="proj-btn" onclick="kursOeffnen('${proj.id}')">${done>0?'Weiter →':'Starten →'}</button>
+</div>`;
+    pg.appendChild(c);
+  });
+}
+
+// ── OPEN / CLOSE COURSE ──
+function kursOeffnen(id){
+  AP=PROJECTS.find(p=>p.id===id);
+  AS=getState(AP);
+  document.getElementById('landing').style.display='none';
+  const cv=document.getElementById('cv');
+  cv.classList.add('open');
+  cv.style.setProperty('--accent',AP.accent);
+  cv.style.setProperty('--accent-bg',AP.accentBg);
+  document.getElementById('cv-title').textContent=`${AP.icon} ${AP.title}`;
+  buildSb(); showEx(AS.current);
+}
+function kursSchliessen(){
+  document.getElementById('cv').classList.remove('open');
+  document.getElementById('landing').style.display='';
+  document.getElementById('finish').classList.remove('show');
+  AP=null;AS=null;
+  document.getElementById('pg').innerHTML='';
+  renderLanding(); initReveal();
+}
+document.getElementById('cv-back').onclick=kursSchliessen;
+
+// ── SIDEBAR ──
+function buildSb(){
+  const sb=document.getElementById('cv-sb');
+  sb.innerHTML='';
+  AP.chapters.forEach(ch=>{
+    const h=document.createElement('div');h.className='cv-ch';h.textContent=ch.title;sb.appendChild(h);
+    for(let i=ch.range[0];i<=ch.range[1];i++){
+      const ex=AP.exercises[i];
+      if(!ex) continue;
+      const locked=!isUnlocked(i),done=AS.solved[i];
+      const it=document.createElement('div');
+      it.className='cv-it'+(i===AS.current?' active':'')+(done?' done':'')+(locked?' locked':'');
+      it.innerHTML=`<span class="cv-it-num">${String(i+1).padStart(2,'0')}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ex.title}</span><span class="cv-it-ck">${done?'✓':locked?'🔒':''}</span>`;
+      if(!locked)it.onclick=()=>goTo(i);
+      sb.appendChild(it);
+    }
+  });
+}
+
+// ── SHOW EXERCISE ──
+function showEx(i){
+  if(i<0||i>=AP.exercises.length){return;}
+  if(!isUnlocked(i)){
+    document.getElementById('cv-ex').innerHTML=`<div class="locked-msg"><div class="lk">🔒</div><p>Löse erst Übung ${i}.</p></div>`;return;
+  }
+  AS.current=i;saveState();
+  const ex=AP.exercises[i];
+  const total=AP.exercises.length;
+  const prevD=i===0?'disabled':'';
+  const nextD=(!AS.solved[i]||i===total-1)?'disabled':'';
+
+  // accumulated
+  const acc=AP.exercises.slice(0,i).map(e=>e.acc||'').join('');
+  const accHtml=acc.trim()?`<div class="acc-wrap">
+    <div class="acc-label"><span>📄 Code bisher</span><span style="color:var(--accent)">✏️ dein Code unten</span></div>
+    <pre class="acc-pre">${escH(acc)}<span class="acc-cursor">▌ // Übung ${i+1}</span></pre></div>`:'';
+
+  const initVal=AS.solved[i]?ex.placeholder:'';
+
+  document.getElementById('cv-ex').innerHTML=`
+    <div class="ex-tag">Übung ${i+1}/${total} – ${escH(ex.tag)}</div>
+    <div class="ex-title">${escH(ex.title)}</div>
+    <div class="ex-desc">${ex.desc}</div>
+    <div class="ex-hint" id="hint-${i}">${ex.hint}</div>
+    ${accHtml}
+    <div class="editor-wrap">
+      <div class="ed-bar">
+        <div class="ed-bar-l">
+          <span class="ed-filename">code.js</span>
+          <span class="ed-lang">${escH(ex.tag)}</span>
+        </div>
+      </div>
+      <div class="ed-inner">
+        <div class="ed-lnums" id="lnums-${i}"></div>
+        <textarea class="ed-ta" id="ta-${i}" spellcheck="false" placeholder="${escH(ex.placeholder)}">${escH(initVal)}</textarea>
+      </div>
+      <div class="ed-actions">
+        <button class="btn-run" onclick="pruefen(${i})">▶ Prüfen</button>
+        <button class="btn-hint-tog" onclick="toggleHint(${i})">💡 Tipp</button>
+        <span class="ed-shortcut">Ctrl+Enter</span>
+      </div>
+    </div>
+    <div class="fb" id="fb-${i}"></div>
+    <div class="ex-nav">
+      <button class="btn-nav" onclick="goTo(${i-1})" ${prevD}>← Zurück</button>
+      <button class="btn-nav primary" id="nb-${i}" onclick="goTo(${i+1})" ${nextD}>Weiter →</button>
+    </div>`;
+
+  // line numbers
+  const ta=document.getElementById(`ta-${i}`);
+  const ln=document.getElementById(`lnums-${i}`);
+  const syncLn=()=>{const n=Math.max((ta.value||ta.placeholder||'').split('\n').length,6);ln.textContent=Array.from({length:n},(_,j)=>j+1).join('\n');};
+  syncLn();
+  ta.addEventListener('input',syncLn);
+  ta.addEventListener('scroll',()=>ln.scrollTop=ta.scrollTop);
+  ta.addEventListener('keydown',e=>{
+    if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();pruefen(i);}
+    if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart;ta.value=ta.value.slice(0,s)+'  '+ta.value.slice(ta.selectionEnd);ta.selectionStart=ta.selectionEnd=s+2;syncLn();}
+  });
+
+  if(AS.solved[i])showFb(i,true,'Bereits gelöst ✓');
+  updateProg();buildSb();
+  document.getElementById('cv-ex').scrollTop=0;
+}
+
+function toggleHint(i){const h=document.getElementById(`hint-${i}`);h.classList.toggle('show');}
+function goTo(i){if(i<0||i>=AP.exercises.length||!isUnlocked(i))return;showEx(i);}
+
+function pruefen(i){
+  const ta=document.getElementById(`ta-${i}`);
+  if(!ta)return;
+  const result=AP.exercises[i].check(ta.value);
+  showFb(i,result.ok,result.msg);
+  if(result.ok&&!AS.solved[i]){
+    AS.solved[i]=true;saveState();
+    updateProg();buildSb();
+    const nb=document.getElementById(`nb-${i}`);if(nb)nb.disabled=false;
+    updatePrev();
+    if(i===AP.exercises.length-1){
+      setTimeout(()=>{
+        document.getElementById('fin-title').textContent=`${AP.icon} ${AP.title} fertig!`;
+        document.getElementById('fin-msg').textContent=`Alle ${AP.exercises.length} Übungen gelöst!`;
+        document.getElementById('finish').classList.add('show');
+      },700);
+    }
+  }
+}
+function showFb(i,ok,msg){const fb=document.getElementById(`fb-${i}`);if(!fb)return;fb.className='fb show '+(ok?'ok':'err');fb.textContent=msg;}
+
+function updateProg(){
+  const done=AS.solved.filter(Boolean).length,total=AP.exercises.length;
+  document.getElementById('cv-pb').style.width=(done/total*100)+'%';
+  document.getElementById('cv-pl').textContent=`${done} / ${total}`;
+}
+
+// ── LIVE PREVIEW ──
+function buildCode(){return AP.exercises.filter((e,i)=>AS.solved[i]&&e.acc).map(e=>e.acc).join('');}
+function updatePrev(){
+  const code=buildCode();
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;padding:10px;background:#0a0a0a;font-family:system-ui,sans-serif;color:#f0ece4}*{box-sizing:border-box}</style></head><body>${code}</body></html>`;
+  try{document.getElementById('cv-iframe').srcdoc=html;}catch{}
+  document.getElementById('cv-code-out').textContent=code.slice(0,380)+(code.length>380?'…':'');
+}
+
+// ── FINISH ──
+document.getElementById('fin-dl').onclick=()=>{
+  if(!AP)return;
+  const code=buildCode();
+  const html=`<!DOCTYPE html>\n<html lang="de">\n<head><meta charset="UTF-8"><title>${AP.title}</title><style>body{margin:0;padding:16px;font-family:system-ui,sans-serif;background:#0a0a0a;color:#f0ece4}*{box-sizing:border-box}</style></head>\n<body>\n${code}\n</body>\n</html>`;
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([html],{type:'text/html'})),download:`${AP.id}-app.html`});
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+};
+document.getElementById('fin-back').onclick=kursSchliessen;
+
+// ── REVEAL ──
+function initReveal(){
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+
+// ── INIT ──
+renderLanding();
+initReveal();
+</script>
+</body>
+</html>
